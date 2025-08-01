@@ -1,0 +1,109 @@
+div.dimmer 
+{
+    visibility: hidden;
+    position:absolute;
+    left:0px;
+    top:0px;
+    font-family:verdana;
+    font-weight:bold;
+    padding:40px;
+
+    background-image:url(honey.png);
+    /* ieWin only stuff */
+        /* with this trick only IE 
+           manage the following 2 attributes */   
+    _background-image:none;
+    _filter:progid:DXImageTransform.Microsoft.AlphaImageLoader(enabled=true, sizingMethod=scale src='honey.png');
+}
+
+
+/* --------Popup window styles start here-------- */
+.msgRow2{
+	background-color:#ffffff; 
+	border:0; 
+	padding-bottom:2px;
+	padding-top:2px;
+}
+.msgRow1{
+	background-color:#ffffff; 
+	border:0; 
+	padding-bottom:1px;
+	padding-top:1px;
+}
+.msgtable { 
+	background-color:#ffffff; 
+	border:0; 
+	font-family: Verdana;
+	font-size: 11px; 
+}
+.msgtdbutton { 
+	background-color:#ffffff; 
+  border:0; 
+	padding-bottom:1px;
+	padding-top:1px;
+
+
+.host_detail 
+{ 
+    position:absolute; 
+    left: 0px; 
+    top: 250px; 
+    width: 35em; 
+    margin: 0 0.2em 0 0; 
+    padding: 0px 4px 4px 4px; 
+    background: #def; 
+    color: #333; 
+    z-index: 100; 
+} 
+
+div.dimmer 
+{
+	visibility: hidden;
+	position:absolute;
+	left:0px;
+	top:0px;
+	font-family:verdana;
+	font-weight:bold;
+	padding:40px;
+	background-image:url(resources/images/dimmer-marble.png);
+	/* ieWin only stuff */
+	_background-image:none;
+	_filter:progid:DXImageTransform.Microsoft.AlphaImageLoader(enabled=true, sizingMethod=scale src='resources/images/dimmer-marble.png');
+}
+
+
+div.dimming {
+	font-family: Verdana, Arial, Helvetica, sans-serif;
+	font-size: 11px;
+	font-style: normal;
+	background-color: #ffffff;
+	position:absolute;
+	/* set z-index higher than possible */
+	z-index:10000;
+	visibility: hidden;
+	
+	
+	border-color: #999999;
+	border-width: 0px;
+
+}
+
+table.floatingHeader
+{
+	background-color: #6699FF;
+	color:#6699FF;
+}
+/* --------Pop window styles end here-------- */
+
+
+.buttonGrey{
+	background-color:#e5e5e5;
+	cursor:pointer;
+	border: 1px solid #b2b2b2;
+	font-family: Verdana, arial;
+	font-size:11px;
+	font-weight:bold;
+	color: #000000;
+	margin-top:10px;
+	margin-bottom:10px;
+}

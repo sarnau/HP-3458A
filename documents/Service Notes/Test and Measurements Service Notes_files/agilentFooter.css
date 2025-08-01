@@ -1,0 +1,37 @@
+P {
+	 FONT-SIZE: 11px; FONT-FAMILY: Verdana, Arial, Helvetica, sans-serif; MARGIN: 0px 0px 0.25em; COLOR: #666666;
+}
+A:link {
+	color: #0085d5; 
+	text-decoration: none;
+}
+
+A:hover {
+	COLOR: #0085d5;
+	TEXT-DECORATION: none;
+}
+A:visited {
+	color: #0085d5; 
+	text-decoration: none;
+}
+A:active {
+	COLOR: #b3214f;
+	text-decoration: none;
+}
+div#footerblock {
+	
+	/*position:absolute;
+	bottom:0;
+	width:99%;
+	display:block;
+	vertical-align:baseline;
+	float:left;*/
+}
+div#footertext {
+	
+	padding-top:2px;
+	padding-left:4px;
+	padding-bottom:2px;
+	margin:0;
+	COLOR: #b3214f;
+}

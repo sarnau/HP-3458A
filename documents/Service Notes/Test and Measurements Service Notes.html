@@ -1,0 +1,1118 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD HTML 4.0 Transitional//EN">
+<html><head>
+<meta http-equiv="content-type" content="text/html; charset=UTF-8"><link href="Test%20and%20Measurements%20Service%20Notes_files/popup_add.css" type="text/css" rel="stylesheet">
+<script language="JavaScript" src="Test%20and%20Measurements%20Service%20Notes_files/dimmingdiv.js"></script></head><body style="margin: 0px;" topmargin="0" leftmargin="0" rightmargin="0" onload="loadSN(); narrowResults();" onkeypress="checkKey(event);" marginheight="0" marginwidth="0"><div id="dimmer" class="dimmer" style="width:100%; height:100%"></div>
+
+
+
+<link rel="stylesheet" href="Test%20and%20Measurements%20Service%20Notes_files/normal.html" type="text/css">
+<link href="Test%20and%20Measurements%20Service%20Notes_files/litappstylesheet.css" type="text/css" rel="stylesheet"> 
+<link href="Test%20and%20Measurements%20Service%20Notes_files/Master.html" rel="stylesheet" type="text/css">
+
+<script language="JavaScript" src="Test%20and%20Measurements%20Service%20Notes_files/Security.js"></script>
+<script language="JavaScript" src="Test%20and%20Measurements%20Service%20Notes_files/litappvalidator.js"></script>
+<title>Test and Measurements Service Notes</title>
+
+<script type="text/javascript">
+var btn_text = 'OK';
+var btn_text_yes = 'YES';
+var btn_text_no = 'NO';
+ var w, h, l, t;
+				w = 400;
+		        h = 100;
+		        l = screen.width/4;
+		        t = screen.height/4;
+// To display the help page for this screen	
+function showHelp(filename) {
+	
+	var language = "en";
+	displayHelp(filename,language);
+}
+
+//To check that the key pressed is the "Enter" Key
+//document.onkeypress =  
+//  function (evt) {
+// 		var c = document.layers ? evt.which : document.all ? event.keyCode: evt.keyCode;   
+//		if(c==13){
+//			 searchSN();
+//		     return false;
+//		} else {
+//		     return true;
+//		  }
+//  }
+// To Capture the Key Press Event in JS
+//function checkKey() { 
+//var key = event.keyCode; 
+if (key == 13) { event.returnValue=false; } 
+//}
+
+//Added by Rahul Prakash
+
+function checkKey(event) { 
+	
+	var keyPressed;
+
+keyPressed = event.keyCode ? event.keyCode : event.which ? event.which : event.charCode;
+
+if (keyPressed == 13) { event.returnValue=false; 
+ 
+ event.preventDefault();
+ 
+ return false;
+}	
+return false;
+}
+
+
+// To validate the fields   
+function searchSN() {
+	initializeErrorMsgs();
+	removeTextboxSpaceBeginEnd(document.forms[0].prodNumber);
+	if(document.forms[0].prodNumber.value=='%' 
+		||document.forms[0].prodNumber.value=='%%' ) {
+
+		if(document.forms[0].externalSNUser.value==null || document.forms[0].externalSNUser.value==""){
+			document.forms[0].action="/litapp/SearchSN.do?method=snSearch&snId="+document.forms[0].prodNumber.value;
+		}else{
+			document.forms[0].action="SearchSN.do?method=openExternalSNSearch&prodNum="+"xxx";
+		}
+		document.forms[0].submit();
+	} else if(document.forms[0].prodNumber.value.length<3) {
+		addErrorMsg('WN.022-The first three characters of the Product Number are mandatory', document.forms[0].prodNumber);
+		return checkDisplayErrors()
+	} else {
+	
+		if(document.forms[0].externalSNUser.value==null || document.forms[0].externalSNUser.value==""){
+			document.forms[0].action="/litapp/SearchSN.do?method=snSearch&snId="+document.forms[0].prodNumber.value;
+		}else{
+			document.forms[0].action="SearchSN.do?method=openExternalSNSearch&prodNum="+document.forms[0].prodNumber.value;
+		}
+		document.forms[0].submit();
+	}
+	
+}
+
+// To reset the fields and search results   	
+function resetSN() {
+	document.forms[0].prodNumber.value='';
+	if(document.forms[0].externalSNUser.value==null || document.forms[0].externalSNUser.value==""){
+               document.forms[0].action="/litapp/SearchSN.do?method=openSNSearch";
+       }else{
+               document.forms[0].action="SearchSN.do?method=openExternalSNSearch";
+       }
+	document.forms[0].submit();
+}	
+
+// To focus on the prodNumber field   
+function loadSN(){	
+	document.forms[0].prodNumber.focus();
+}
+
+// To open the publications in pdf format
+function  viewPdf(i) {
+	var pdfNum;
+	var secInd;
+	var msg;
+	
+	if(count==1) {
+		
+	  pdfNum= document.forms[0].snNum.value;
+	  secInd= document.forms[0].sec.value;
+	} else {
+		  pdfNum= document.forms[0].snNum[i].value;
+		  secInd= document.forms[0].sec[i].value;
+ 	  }
+	if(secInd=='I') {
+		msg="/litapp/Publication.do?method=openPdfPage&pubNum="+pdfNum;
+	}
+	if(secInd=='E') {
+		var msg='http://cp.literature.agilent.com/litweb/pdf/';
+		msg=msg+pdfNum; 
+		msg=msg+'.pdf';	
+	}
+	window.open(msg);
+}
+
+// To display the message if search results are more than 500
+function narrowResults() {
+	initializeErrorMsgs();
+	
+	if('0'=='1'){
+
+	displayFloatingDiv
+		('windowcontent','<B><font color="FFFFFF">Information/Errors/Warning Window</font></B>', w, h, l, t,'windowframe');
+		addErrorMsg('ER.006-Cannot return more than 500 results. Please narrow your search');
+		document.getElementById('dimmer').style.visibility = 'visible';
+	}
+	//return checkDisplayErrors();
+}
+
+</script>
+<!--Build Information Start 
+
+Name: R7.6
+Date: 06202007 (MMDDYYYY)
+Release/Build: 8
+Revision No.:        2
+CVS Tag Name: - R76_B08_06202007_PATCH_1
+
+Build Information End --><title>Agilent | Products &amp; Services</title>
+ <!-- Meta Tags -->
+   
+               <meta http-equiv="Pragma" content="no-cache"> 
+       
+               <meta http-equiv="Expires" content="-1"> 
+        
+                 <meta name="Agilent.Hierarchy" content="Worldwide Home/Products &amp; Services">
+         
+                 <meta name="DC.Publisher" content="None">
+         
+                 <meta name="Agilent.ProductLine" content="">
+         
+                 <meta name="ENPUT_ID" content="products">
+         
+                 <meta http-equiv="Content-Language" content="en-US">
+         
+         
+        
+                 <meta name="robots" content="noindex">
+         
+         
+       <link href="Test%20and%20Measurements%20Service%20Notes_files/master.css" type="text/css" rel="stylesheet">
+       <link href="Test%20and%20Measurements%20Service%20Notes_files/frame.css" type="text/css" rel="stylesheet">
+ <style type="text/css">
+<!--
+@import url(http://cp.home.agilent.com/agilent/css2/not_nn4.css);
+-->
+       </style>
+ <script type="text/javascript" src="Test%20and%20Measurements%20Service%20Notes_files/secURLRedirect.js"></script>
+                   
+                               
+
+ <script type="text/javascript" src="Test%20and%20Measurements%20Service%20Notes_files/webeffective_wrapper.js"></script>
+
+ <!-- Changes made to take care of bug# 458 - Srinivasan G Iyer -->
+ <script src="Test%20and%20Measurements%20Service%20Notes_files/agilentsurvey.js" type="text/javascript"></script>         
+ <script type="text/javascript"> agilentSurvey("en-US");</script>
+
+
+
+
+
+
+<a name="header"></a>
+&nbsp;&nbsp;&nbsp;&nbsp;
+<table><tbody><tr><td>&nbsp;&nbsp;<a href="http://www.home.agilent.com/agilent/home.jspx?cc=US&amp;lc=eng"><img alt="Agilent Technologies" src="Test%20and%20Measurements%20Service%20Notes_files/agilentlogo4.gif" border="0" width="227" height="45"></a> 
+<!-- logo --><!-- search area --></td></tr></tbody></table>
+<table id="navbar" border="0" cellpadding="0" cellspacing="0">
+	<tbody><tr>
+		<td valign="bottom">
+<div><span><a href="http://www.home.agilent.com/agilent/commonlanding.jspx?lc=eng&amp;cc=US">Products &amp; Services</a></span></div>
+<div><span><a href="http://www.home.agilent.com/agilent/facet.jspx?lc=eng&amp;cc=US&amp;t=80029.k.0">Technical Support</a></span></div>
+<div><span><a href="http://www.home.agilent.com/agilent/facet.jspx?lc=eng&amp;cc=US&amp;t=80237.c.0">Buy</a></span></div>
+<div><span><a href="http://www.home.agilent.com/agilent/commonlanding.jspx?mode=Industry&amp;lc=eng&amp;cc=US">Industries</a></span></div>
+<div><span><a href="http://www.agilent.com/go/about">About Agilent</a></span></div>
+		</td>
+		<td id="gnavright" align="center" valign="bottom">
+    	</td>
+	</tr>
+</tbody></table>
+<!-- navbar -->
+
+<div id="navbarCap"></div>
+<!-- END HEADER -->
+
+
+<form name="SNSearchForm" method="post" action="/litapp/SearchSN.do;jsessionid=4D6400C692B6F22038F9471E89C0658F">
+<input name="viewPdfInd" value="" type="hidden">
+<input name="externalSNUser" value="Present" type="hidden">
+
+
+<iframe id="windowframe" style="position:absolute;float:left;margin-top:7px;margin-left:0px; width: 520px; height: 130px;left: 257px;top: 195px;border:none;display:none;z-index:0" frameborder="no" scrolling="no"></iframe>
+
+<div style="position:absolute;float:left;margin-top:7px;margin-left:6px; width: 518px; height: 187px;border-width:1px;visibility:hidden" id="windowcontent">
+<table border="1"><tbody><tr><td>
+		<table class="msgtable" cellpadding="0" cellspacing="0">
+		<tbody><tr bgcolor="#6699FF" height="20px">
+		<td ondblclick="void(0);" onmouseover="over=true;" onmouseout="over=false;" style="cursor:move;height:10px" width="80%">
+			<b><font color="FFFFFF">Information/Errors/Warning Window</font></b>
+		</td>  
+	    <td style="width:20%" align="right">
+			<a href="javascript:hiddenFloatingDiv('windowcontent');"> 
+	        <img alt="Close..." title="Close..." src="Test%20and%20Measurements%20Service%20Notes_files/close.JPG" border="0"></a>
+		</td>
+	</tr>
+			<tr>
+				<td><img src="Test%20and%20Measurements%20Service%20Notes_files/warningicon_pagetitle1.jpg"></td>
+				<td align="right"><img src="Test%20and%20Measurements%20Service%20Notes_files/logo_popwindow.gif"></td>
+			</tr>
+		</tbody></table>
+		 <table class="normalTable" style="width: 518px" height="100%">
+	    <tbody><tr>
+	   </tr>
+		<tr class="msgRow2">
+			<td>
+			ER.006-Cannot return more than 500 results. Please narrow your search
+			</td>
+		 </tr>
+		 	<tr class="msgRow2">
+			 
+ <td align="Right"><input value="OK" onclick='hiddenFloatingDiv("windowcontent");' class="buttonGrey" type="button"></td>
+			</tr>
+			
+			</tbody></table>  
+	</td></tr>
+		
+		<tr>
+		<td> 
+			<img src="Test%20and%20Measurements%20Service%20Notes_files/popupfooter.JPG" border="0" width="528px">
+		</td>
+	</tr>
+	</tbody></table>
+</div>
+
+<table class="normalTable">
+	<tbody><tr align="right">
+		<td align="right">
+		<!-- LitProduction: Changes by Sachin 18 Aug PST starts-->
+				
+		<!-- LitProduction: Changes by Sachin 18 Aug PST ends-->
+		<img src="Test%20and%20Measurements%20Service%20Notes_files/resourcesimageshelp-icon.jpg" style="margin-right:0px; vertical-align:middle;">
+	    <a href="javascript:showHelp('ServiceNotesHelp');" class="logoff">Help</a>	
+		   
+		<!-- LitProduction: Changes by Sachin 18 Aug PST starts (remove contact us link)-->
+		
+		   <img src="Test%20and%20Measurements%20Service%20Notes_files/resourcesimagescontactus.jpg" style="margin-right:0px; vertical-align:middle;">
+	    	<a href="http://www.home.agilent.com/agilent/contactInformation.jspx?ct=AGILENT_COLLECTION&amp;id=worldwide_home&amp;cc=US&amp;lc=eng" target="_blank" class="logoff">Contact us</a>	 
+		
+		<!-- LitProduction: Changes by Sachin 18 Aug PST ends (remove contact us link)-->
+     		 
+		</td>
+	</tr>
+	<tr>
+ 		<td class="mainHeading">Test and Measurements Service Notes</td>
+	</tr>
+</tbody></table>	
+<br>
+<table class="datas">
+   <tbody><tr class="formBody1">
+		<td class="datasRightSN">Search for available service notes by Product Number<sup class="mandatorySign">*</sup>:&nbsp;</td>
+     	<td class="datasLeftSN"><input name="prodNumber" maxlength="20" size="20" value="3458A" class="textBox" alt="prodNumber" type="text"> </td>
+   </tr>
+  <tr class="formBody1">
+  		<td class="datasRight"><center>(enter at least first 3 characters)</center></td> 
+    	<td class="datasLeft"><sup class="mandatorySign">*</sup>required fields</td>	
+  </tr>
+</tbody></table>
+<table class="normalTable">
+	<tbody><tr styleclass="formBody1"> 
+		<td class="datasRightSN"></td>
+		<td class="datasLeftSN">
+  	          <input name="Search" value="Find" onclick="return searchSN()" class="buttonGrey" alt="Search" type="button">
+ 	          <input name="method" value="Reset" onclick=" resetSN()" class="buttonGrey" type="button">
+      	 </td>
+	</tr>
+</tbody></table>
+<br>
+ 
+<script>  	var count =0; </script>
+
+
+	
+		<table class="Form" cellpadding="0px" cellspacing="0px" width="100%">
+  				
+  				<tbody><tr class="FORM">
+	     		<td class="headerBold" style="border-bottom:1px solid #cbcf6c;">Search
+ Results
+	     		 &nbsp; 
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+
+	     		 
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+
+	     		 
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+
+	     		 &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;Number of 
+Records
+				 [17]</td>
+				<td class="headerBold" style="border-bottom:1px solid #cbcf6c;" width="100"> 2013-10-18
+				</td>
+			</tr>
+			<tr>
+			
+				 
+			
+			</tr>		
+		</tbody></table>
+		
+<table align="CENTER" border="0" cellpadding="0" cellspacing="0" width="100%">
+    
+
+		
+        
+        </table>
+
+		<table width="100%">
+	 
+       <tbody><tr style="rowHeader" width="100%">
+        
+        <th class="FORM" align="center" width="10%">Service Note Number</th>
+        <th class="FORM" align="center" width="65%">Service Note Abstract</th>
+        <th class="FORM" align="center" width="9%">Print Date</th>
+        
+		<th class="FORM" align="left" width="3%">SN Type</th>
+		<th class="FORM" align="center" width="10%">Pgs</th>
+		
+        </tr>
+
+	   
+	   
+	   
+	   
+        
+       
+		
+		      
+		<tr class="PAGE1">
+		
+		<td style="text-align:left;">
+		 
+						  
+						  <input name="sec" value="E" title="hidden" type="hidden">
+								<input name="snNum" value="3458A-12C" title="hidden" type="hidden">
+
+											    
+								  <!-- 	<a class="FORM" href="javascript:viewPdf(0)">
+								        3458A-12C
+								  	</a> -->
+								  	<!--Changes done on 18 Sep 2007 PDF issue -->
+									
+										<a class="FORM" target="_blank" href="http://cp.literature.agilent.com/litweb/pdf/3458A-12C.pdf">
+											3458A-12C
+										</a>
+									
+									
+									<!--Changes End on 18 Sep 2007 PDF issue -->
+								
+								
+							 <script>count++;</script>
+							
+		</td>
+		
+		<td style="text-align:left;">
+		Outguard Firmware Upgrade: Enhancements, Fixes, &amp; Changes (Rev. 9)</td>	
+		<td style="text-align:center;">
+		2010-12-13</td>	
+		  
+		<td style="text-align:center;">
+		MA</td>	
+		<td style="text-align:right;">
+		5</td>
+		</tr>
+		
+       
+		
+        <tr class="PAGE2">
+		
+		<td style="text-align:left;">
+		 
+						  
+						  <input name="sec" value="E" title="hidden" type="hidden">
+								<input name="snNum" value="3458A-15D" title="hidden" type="hidden">
+
+											    
+								  <!-- 	<a class="FORM" href="javascript:viewPdf(1)">
+								        3458A-15D
+								  	</a> -->
+								  	<!--Changes done on 18 Sep 2007 PDF issue -->
+									
+										<a class="FORM" target="_blank" href="http://cp.literature.agilent.com/litweb/pdf/3458A-15D.pdf">
+											3458A-15D
+										</a>
+									
+									
+									<!--Changes End on 18 Sep 2007 PDF issue -->
+								
+								
+							 <script>count++;</script>
+							
+		</td>
+		
+		<td style="text-align:left;">
+		CAL RAM Battery Preventative Maintenance for the Outguard Controller (A5) Assembly</td>	
+		<td style="text-align:center;">
+		2010-12-03</td>	
+		  
+		<td style="text-align:center;">
+		IO</td>	
+		<td style="text-align:right;">
+		3</td>
+		</tr>
+		
+       
+		
+		      
+		<tr class="PAGE1">
+		
+		<td style="text-align:left;">
+		 
+						  
+						  <input name="sec" value="E" title="hidden" type="hidden">
+								<input name="snNum" value="3458A-20" title="hidden" type="hidden">
+
+											    
+								  <!-- 	<a class="FORM" href="javascript:viewPdf(2)">
+								        3458A-20
+								  	</a> -->
+								  	<!--Changes done on 18 Sep 2007 PDF issue -->
+									
+										<a class="FORM" target="_blank" href="http://cp.literature.agilent.com/litweb/pdf/3458A-20.pdf">
+											3458A-20
+										</a>
+									
+									
+									<!--Changes End on 18 Sep 2007 PDF issue -->
+								
+								
+							 <script>count++;</script>
+							
+		</td>
+		
+		<td style="text-align:left;">
+		Bad SRAM causing Cal Ram batteries to fail prematurely</td>	
+		<td style="text-align:center;">
+		2008-12-04</td>	
+		  
+		<td style="text-align:center;">
+		MR</td>	
+		<td style="text-align:right;">
+		2</td>
+		</tr>
+		
+       
+		
+        <tr class="PAGE2">
+		
+		<td style="text-align:left;">
+		 
+						  
+						  <input name="sec" value="E" title="hidden" type="hidden">
+								<input name="snNum" value="3458A-19A" title="hidden" type="hidden">
+
+											    
+								  <!-- 	<a class="FORM" href="javascript:viewPdf(3)">
+								        3458A-19A
+								  	</a> -->
+								  	<!--Changes done on 18 Sep 2007 PDF issue -->
+									
+										<a class="FORM" target="_blank" href="http://cp.literature.agilent.com/litweb/pdf/3458A-19A.pdf">
+											3458A-19A
+										</a>
+									
+									
+									<!--Changes End on 18 Sep 2007 PDF issue -->
+								
+								
+							 <script>count++;</script>
+							
+		</td>
+		
+		<td style="text-align:left;">
+		The original 3458A A5 (PC Assy-Outgard Controller) is no longer available.
+The replacement kit consists of two unique parts and an installation note.</td>	
+		<td style="text-align:center;">
+		2007-04-10</td>	
+		  
+		<td style="text-align:center;">
+		IO</td>	
+		<td style="text-align:right;">
+		2</td>
+		</tr>
+		
+       
+		
+		      
+		<tr class="PAGE1">
+		
+		<td style="text-align:left;">
+		 
+						  
+						  <input name="sec" value="E" title="hidden" type="hidden">
+								<input name="snNum" value="3458A-18A" title="hidden" type="hidden">
+
+											    
+								  <!-- 	<a class="FORM" href="javascript:viewPdf(4)">
+								        3458A-18A
+								  	</a> -->
+								  	<!--Changes done on 18 Sep 2007 PDF issue -->
+									
+										<a class="FORM" target="_blank" href="http://cp.literature.agilent.com/litweb/pdf/3458A-18A.pdf">
+											3458A-18A
+										</a>
+									
+									
+									<!--Changes End on 18 Sep 2007 PDF issue -->
+								
+								
+							 <script>count++;</script>
+							
+		</td>
+		
+		<td style="text-align:left;">
+		Time Drift issues</td>	
+		<td style="text-align:center;">
+		2007-02-13</td>	
+		  
+		<td style="text-align:center;">
+		MR</td>	
+		<td style="text-align:right;">
+		4</td>
+		</tr>
+		
+       
+		
+        <tr class="PAGE2">
+		
+		<td style="text-align:left;">
+		 
+						  
+						  <input name="sec" value="E" title="hidden" type="hidden">
+								<input name="snNum" value="3458A-17" title="hidden" type="hidden">
+
+											    
+								  <!-- 	<a class="FORM" href="javascript:viewPdf(5)">
+								        3458A-17
+								  	</a> -->
+								  	<!--Changes done on 18 Sep 2007 PDF issue -->
+									
+										<a class="FORM" target="_blank" href="http://cp.literature.agilent.com/litweb/pdf/3458A-17.pdf">
+											3458A-17
+										</a>
+									
+									
+									<!--Changes End on 18 Sep 2007 PDF issue -->
+								
+								
+							 <script>count++;</script>
+							
+		</td>
+		
+		<td style="text-align:left;">
+		Errors may occur if ACAL AC is initiated from 4-wire Ohms function.</td>	
+		<td style="text-align:center;">
+		2004-11-17</td>	
+		  
+		<td style="text-align:center;">
+		IO</td>	
+		<td style="text-align:right;">
+		2</td>
+		</tr>
+		
+       
+		
+		      
+		<tr class="PAGE1">
+		
+		<td style="text-align:left;">
+		 
+						  
+						  <input name="sec" value="E" title="hidden" type="hidden">
+								<input name="snNum" value="3458A-16" title="hidden" type="hidden">
+
+											    
+								  <!-- 	<a class="FORM" href="javascript:viewPdf(6)">
+								        3458A-16
+								  	</a> -->
+								  	<!--Changes done on 18 Sep 2007 PDF issue -->
+									
+										<a class="FORM" target="_blank" href="http://cp.literature.agilent.com/litweb/pdf/3458A-16.pdf">
+											3458A-16
+										</a>
+									
+									
+									<!--Changes End on 18 Sep 2007 PDF issue -->
+								
+								
+							 <script>count++;</script>
+							
+		</td>
+		
+		<td style="text-align:left;">
+		New part numbers for the 3458A fan filter replacement</td>	
+		<td style="text-align:center;">
+		2002-11-07</td>	
+		  
+		<td style="text-align:center;">
+		IO</td>	
+		<td style="text-align:right;">
+		2</td>
+		</tr>
+		
+       
+		
+        <tr class="PAGE2">
+		
+		<td style="text-align:left;">
+		 
+						  
+						  <input name="sec" value="E" title="hidden" type="hidden">
+								<input name="snNum" value="3458A-14B" title="hidden" type="hidden">
+
+											    
+								  <!-- 	<a class="FORM" href="javascript:viewPdf(7)">
+								        3458A-14B
+								  	</a> -->
+								  	<!--Changes done on 18 Sep 2007 PDF issue -->
+									
+										<a class="FORM" target="_blank" href="http://cp.literature.agilent.com/litweb/pdf/3458A-14B.pdf">
+											3458A-14B
+										</a>
+									
+									
+									<!--Changes End on 18 Sep 2007 PDF issue -->
+								
+								
+							 <script>count++;</script>
+							
+		</td>
+		
+		<td style="text-align:left;">
+		Calibration error after power ""on"" or after an ""ACAL"".</td>	
+		<td style="text-align:center;">
+		2002-05-20</td>	
+		  
+		<td style="text-align:center;">
+		IO</td>	
+		<td style="text-align:right;">
+		2</td>
+		</tr>
+		
+       
+		
+		      
+		<tr class="PAGE1">
+		
+		<td style="text-align:left;">
+		 
+						  
+						  <input name="sec" value="E" title="hidden" type="hidden">
+								<input name="snNum" value="3458A-13A" title="hidden" type="hidden">
+
+											    
+								  <!-- 	<a class="FORM" href="javascript:viewPdf(8)">
+								        3458A-13A
+								  	</a> -->
+								  	<!--Changes done on 18 Sep 2007 PDF issue -->
+									
+										<a class="FORM" target="_blank" href="http://cp.literature.agilent.com/litweb/pdf/3458A-13A.pdf">
+											3458A-13A
+										</a>
+									
+									
+									<!--Changes End on 18 Sep 2007 PDF issue -->
+								
+								
+							 <script>count++;</script>
+							
+		</td>
+		
+		<td style="text-align:left;">
+		GPIB communication failures using the 3458A.</td>	
+		<td style="text-align:center;">
+		2002-04-11</td>	
+		  
+		<td style="text-align:center;">
+		MA</td>	
+		<td style="text-align:right;">
+		2</td>
+		</tr>
+		
+       
+		
+        <tr class="PAGE2">
+		
+		<td style="text-align:left;">
+		 
+						  
+						  <input name="sec" value="E" title="hidden" type="hidden">
+								<input name="snNum" value="3458A-12B" title="hidden" type="hidden">
+
+											    
+								  <!-- 	<a class="FORM" href="javascript:viewPdf(9)">
+								        3458A-12B
+								  	</a> -->
+								  	<!--Changes done on 18 Sep 2007 PDF issue -->
+									
+										<a class="FORM" target="_blank" href="http://cp.literature.agilent.com/litweb/pdf/3458A-12B.pdf">
+											3458A-12B
+										</a>
+									
+									
+									<!--Changes End on 18 Sep 2007 PDF issue -->
+								
+								
+							 <script>count++;</script>
+							
+		</td>
+		
+		<td style="text-align:left;">
+		Outgaurd firmware upgrade:enhancements, fixes &amp; changes (Rev. 8).</td>	
+		<td style="text-align:center;">
+		2002-04-11</td>	
+		  
+		<td style="text-align:center;">
+		MA</td>	
+		<td style="text-align:right;">
+		6</td>
+		</tr>
+		
+       
+		
+		      
+		<tr class="PAGE1">
+		
+		<td style="text-align:left;">
+		 
+						  
+						  <input name="sec" value="E" title="hidden" type="hidden">
+								<input name="snNum" value="3458A-11A" title="hidden" type="hidden">
+
+											    
+								  <!-- 	<a class="FORM" href="javascript:viewPdf(10)">
+								        3458A-11A
+								  	</a> -->
+								  	<!--Changes done on 18 Sep 2007 PDF issue -->
+									
+										<a class="FORM" target="_blank" href="http://cp.literature.agilent.com/litweb/pdf/3458A-11A.pdf">
+											3458A-11A
+										</a>
+									
+									
+									<!--Changes End on 18 Sep 2007 PDF issue -->
+								
+								
+							 <script>count++;</script>
+							
+		</td>
+		
+		<td style="text-align:left;">
+		Reduction of ac noise when measuring ACV and using twisted shielded pair cables.</td>	
+		<td style="text-align:center;">
+		2002-04-10</td>	
+		  
+		<td style="text-align:center;">
+		MA</td>	
+		<td style="text-align:right;">
+		2</td>
+		</tr>
+		
+       
+		
+        <tr class="PAGE2">
+		
+		<td style="text-align:left;">
+		 
+						  
+						  <input name="sec" value="E" title="hidden" type="hidden">
+								<input name="snNum" value="3458A-10A" title="hidden" type="hidden">
+
+											    
+								  <!-- 	<a class="FORM" href="javascript:viewPdf(11)">
+								        3458A-10A
+								  	</a> -->
+								  	<!--Changes done on 18 Sep 2007 PDF issue -->
+									
+										<a class="FORM" target="_blank" href="http://cp.literature.agilent.com/litweb/pdf/3458A-10A.pdf">
+											3458A-10A
+										</a>
+									
+									
+									<!--Changes End on 18 Sep 2007 PDF issue -->
+								
+								
+							 <script>count++;</script>
+							
+		</td>
+		
+		<td style="text-align:left;">
+		3458A documentation available as ""on-line"" files.</td>	
+		<td style="text-align:center;">
+		2002-04-10</td>	
+		  
+		<td style="text-align:center;">
+		IO</td>	
+		<td style="text-align:right;">
+		1</td>
+		</tr>
+		
+       
+		
+		      
+		<tr class="PAGE1">
+		
+		<td style="text-align:left;">
+		 
+						  
+						  <input name="sec" value="E" title="hidden" type="hidden">
+								<input name="snNum" value="3458A-08A" title="hidden" type="hidden">
+
+											    
+								  <!-- 	<a class="FORM" href="javascript:viewPdf(12)">
+								        3458A-08A
+								  	</a> -->
+								  	<!--Changes done on 18 Sep 2007 PDF issue -->
+									
+										<a class="FORM" target="_blank" href="http://cp.literature.agilent.com/litweb/pdf/3458A-08A.pdf">
+											3458A-08A
+										</a>
+									
+									
+									<!--Changes End on 18 Sep 2007 PDF issue -->
+								
+								
+							 <script>count++;</script>
+							
+		</td>
+		
+		<td style="text-align:left;">
+		Incorrectly labeled line voltage switches may cause switch setting confusion.</td>	
+		<td style="text-align:center;">
+		2002-04-10</td>	
+		  
+		<td style="text-align:center;">
+		IO</td>	
+		<td style="text-align:right;">
+		1</td>
+		</tr>
+		
+       
+		
+        <tr class="PAGE2">
+		
+		<td style="text-align:left;">
+		 
+						  
+						  <input name="sec" value="E" title="hidden" type="hidden">
+								<input name="snNum" value="3458A-07B" title="hidden" type="hidden">
+
+											    
+								  <!-- 	<a class="FORM" href="javascript:viewPdf(13)">
+								        3458A-07B
+								  	</a> -->
+								  	<!--Changes done on 18 Sep 2007 PDF issue -->
+									
+										<a class="FORM" target="_blank" href="http://cp.literature.agilent.com/litweb/pdf/3458A-07B.pdf">
+											3458A-07B
+										</a>
+									
+									
+									<!--Changes End on 18 Sep 2007 PDF issue -->
+								
+								
+							 <script>count++;</script>
+							
+		</td>
+		
+		<td style="text-align:left;">
+		Modification to fix intermittent error ""Multislope Rundown Conversion"".</td>	
+		<td style="text-align:center;">
+		2002-04-10</td>	
+		  
+		<td style="text-align:center;">
+		MR</td>	
+		<td style="text-align:right;">
+		1</td>
+		</tr>
+		
+       
+		
+		      
+		<tr class="PAGE1">
+		
+		<td style="text-align:left;">
+		 
+						  
+						  <input name="sec" value="E" title="hidden" type="hidden">
+								<input name="snNum" value="3458A-06A" title="hidden" type="hidden">
+
+											    
+								  <!-- 	<a class="FORM" href="javascript:viewPdf(14)">
+								        3458A-06A
+								  	</a> -->
+								  	<!--Changes done on 18 Sep 2007 PDF issue -->
+									
+										<a class="FORM" target="_blank" href="http://cp.literature.agilent.com/litweb/pdf/3458A-06A.pdf">
+											3458A-06A
+										</a>
+									
+									
+									<!--Changes End on 18 Sep 2007 PDF issue -->
+								
+								
+							 <script>count++;</script>
+							
+		</td>
+		
+		<td style="text-align:left;">
+		Modification to fix Hardware error ""ac offset dac 10mV invalid cal value: 184"".</td>	
+		<td style="text-align:center;">
+		2002-04-09</td>	
+		  
+		<td style="text-align:center;">
+		MR</td>	
+		<td style="text-align:right;">
+		2</td>
+		</tr>
+		
+       
+		
+        <tr class="PAGE2">
+		
+		<td style="text-align:left;">
+		 
+						  
+						  <input name="sec" value="E" title="hidden" type="hidden">
+								<input name="snNum" value="3458A-04A" title="hidden" type="hidden">
+
+											    
+								  <!-- 	<a class="FORM" href="javascript:viewPdf(15)">
+								        3458A-04A
+								  	</a> -->
+								  	<!--Changes done on 18 Sep 2007 PDF issue -->
+									
+										<a class="FORM" target="_blank" href="http://cp.literature.agilent.com/litweb/pdf/3458A-04A.pdf">
+											3458A-04A
+										</a>
+									
+									
+									<!--Changes End on 18 Sep 2007 PDF issue -->
+								
+								
+							 <script>count++;</script>
+							
+		</td>
+		
+		<td style="text-align:left;">
+		Apparent failure at turn-on or when given a ""RESET"" command.</td>	
+		<td style="text-align:center;">
+		2002-04-09</td>	
+		  
+		<td style="text-align:center;">
+		IO</td>	
+		<td style="text-align:right;">
+		2</td>
+		</tr>
+		
+       
+		
+		      
+		<tr class="PAGE1">
+		
+		<td style="text-align:left;">
+		 
+						  
+						  <input name="sec" value="E" title="hidden" type="hidden">
+								<input name="snNum" value="3458A-01C" title="hidden" type="hidden">
+
+											    
+								  <!-- 	<a class="FORM" href="javascript:viewPdf(16)">
+								        3458A-01C
+								  	</a> -->
+								  	<!--Changes done on 18 Sep 2007 PDF issue -->
+									
+										<a class="FORM" target="_blank" href="http://cp.literature.agilent.com/litweb/pdf/3458A-01C.pdf">
+											3458A-01C
+										</a>
+									
+									
+									<!--Changes End on 18 Sep 2007 PDF issue -->
+								
+								
+							 <script>count++;</script>
+							
+		</td>
+		
+		<td style="text-align:left;">
+		A/D linearity improvement.</td>	
+		<td style="text-align:center;">
+		2002-04-09</td>	
+		  
+		<td style="text-align:center;">
+		MR</td>	
+		<td style="text-align:right;">
+		2</td>
+		</tr>
+		
+		</tbody></table>	
+		
+<table align="CENTER" border="0" cellpadding="0" cellspacing="0" width="100%">
+    
+
+		
+        
+        </table>
+
+		<table class="normalTable" cellpadding="0" cellspacing="0">
+			<tbody><tr>
+				<td class="linedarkgreen" height="1px"></td>
+			</tr>
+		</tbody></table>
+		<br>
+		<table class="normalTable" cellpadding="0" cellspacing="0">
+			<tbody><tr><td align="left" height="1px">&nbsp;&nbsp;<b>Legend for SN Type</b></td></tr>
+			<tr><td align="left" height="2px"></td></tr>
+			<tr><td align="left" height="1px">&nbsp;&nbsp;IO-Information Only</td></tr>
+			
+			<tr><td align="left" height="1px">&nbsp;&nbsp;MA-Modification Available</td></tr>
+			<tr><td align="left" height="1px">&nbsp;&nbsp;MR-Modification Recommended</td></tr>
+			<tr><td align="left" height="1px">&nbsp;&nbsp;PS-Priority Safety</td></tr>
+			<!-- LitProduction: Changes 13 Sep (safety service notes) starts-->
+			<tr><td align="left" height="1px">&nbsp;&nbsp;SA-Safety</td></tr>
+			<!-- LitProduction: Changes 13 Sep (safety service notes) ends-->
+		</tbody></table>
+	
+	
+
+
+	
+
+</form>
+
+<table width="100%"> 
+	<tbody><tr>
+		<td height="330"> 	</td>   		 		
+	</tr>
+	<tr>
+		<td>
+			
+
+
+
+
+
+<link href="Test%20and%20Measurements%20Service%20Notes_files/agilentFooter.css" rel="stylesheet" type="text/css">
+
+
+
+<div style="margin: 0px; background-color:#f5fafc;" id="footerblock">
+<div>
+<table cellpadding="0" cellspacing="0" width="100%">
+	<tbody><tr>
+		<td style="background-color:#0085d5;" height="1"><img src="Test%20and%20Measurements%20Service%20Notes_files/spacer.gif" alt="" width="1" height="1"></td>
+	</tr>
+</tbody></table>
+</div>
+<div id="footertext"><!-- standard footer from CIA R5 12 Dec 2003, v2.0 kkh 12 Jul 2003 -->
+<p><a href="http://www.home.agilent.com/agilent/editorial.jspx?pmode=Privacy" target="_blank">Privacy Statement</a> | <a href="http://www.home.agilent.com/agilent/editorial.jspx?pmode=TermsOfUse" target="_blank">Terms of Statement</a> | <a href="http://www.home.agilent.com/agilent/siteAssistanceForm.jspx" target="_blank">Webmaster</a> | <a href="http://www.home.agilent.com/agilent/home.jspx" target="_blank">United States Home</a> | © Agilent 2000-2007</p>
+</div>
+</div>
+
+
+
+
+		</td>   		 		
+	</tr> 
+</tbody></table>
+
+</body></html>

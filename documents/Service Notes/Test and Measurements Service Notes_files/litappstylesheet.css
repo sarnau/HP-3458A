@@ -1,0 +1,481 @@
+/* --------Global css-------- */
+body {
+	font-size:11px; 
+	font-family: Verdana, arial, Helvetica;
+	color:#000000;
+	background: #ffffff;
+	background-image:none;
+	margin:0px;
+}
+td {
+	font-size:11px; 
+	font-family: Verdana, arial, Helvetica;
+	color: #000000;
+	background-image:none; 
+}
+h4 {
+	font-size:14px; 
+	font-family: arial, Helvetica;
+	color: #000000;
+	padding-left:30%;
+	padding-bottom:15px;
+}
+
+a {
+	font-size:11px; 
+	font-family: Verdana, arial, Helvetica;
+	color: #0085d5; 
+	text-decoration: underline;
+}
+a:link {
+	color: #0085d5; 
+	text-decoration: underline;
+}
+a:hover {
+	color: #b3214f;
+	text-decoration: underline;
+}
+a:visited {
+	color: #003972;
+	text-decoration: underline;
+}
+a:active {
+	color: #0085d5; 
+	text-decoration: underline;
+}
+/* --------Global css end here -------- */
+
+/* --------Calender Layout start here-------- */
+a.cal {
+	color: #ffffff; text-decoration: none
+}
+a.cal:hover {
+	color: #ffffff;
+}
+/* --------Calender Layout end here-------- */
+
+/* --------Popup window styles start here-------- */
+.msgRow2{
+	background-color:#f4f4f4; 
+	padding-bottom:2px;
+	padding-top:2px;
+}
+.msgRow1{
+	background-color:#ffffff; 
+	padding-bottom:1px;
+	padding-top:1px;
+}
+.msgtable { 
+	background-color:#ffffff; 
+	border:0; 
+	border-bottom:1px solid #666666;
+	font-family: Verdana;
+	font-size: 11px; 
+}
+.msgtdbutton { 
+	border-top:1px solid #eaecb7;
+	padding:4px;
+	padding-top:6px;
+}
+/* --------Pop window styles end here-------- */
+
+/* --------Headings all start here-------- */
+.headtwo {
+	font-size:14px;
+	font-weight: bold;
+	font-family: arial, Helvetica;
+	color: #616500;
+	padding-left:170px;
+	padding-bottom:15px;
+	text-align:left;
+	white-space: nowrap;
+	width:100%;
+}
+.headermiddle{
+	background-image:url(resources/images/spacer.gif);
+	background-attachment: fixed;
+	background-repeat: repeat-x;
+	background-position: center;
+	background-color: #000000;
+	display: block;
+	border:0;
+}
+.headerBold{/* for search results*/
+	 font-family:verdana; 
+	 font-size:11px;
+	 font-weight:bold;
+	 text-align:left; 
+	 color:black;
+	 height:20px;
+	 padding-left:5px;
+}
+
+.mainHeading{/* for publication search */
+	font-family:arial;
+	font-size:18px;
+	color:#777777;
+	text-align:left;
+	padding-left:10px;
+}
+.centerBold{/* for no result found */
+	font-weight:bold;
+	text-align: center;
+	color:#616500;
+	background-color:#f4f4e3;
+	padding:8px;
+	border:1px solid #e6e8bf;
+}
+.headerH1{  
+	font-weight: bold; font-size: 12px; color:#333333; font-family: Verdana, arial, Helvetica, sans-serif;
+}
+/* --------Headings all end here-------- */
+/* -------- Pager Row styles start here-------- */
+.rowheader{
+	font-weight: bold; font-size: 11px; color:black; font-family: Verdana, sans-serif; background-color:#e8eab2;
+}
+.rowheader a{
+	font-weight: bold; font-size: 11px; color:black; font-family: Verdana, sans-serif; background-color:#e8eab2;
+}
+.rowheader a:visited {
+ text-decoration:none; background-color:#e8eab2;
+}
+/* -------- Pager Row styles start here-------- */
+
+/* --------form styles start here-------- */
+select{ 
+	font-size: 11px;
+	border:1px solid #b2b2b2;
+	font-family: Verdana, arial, Helvetica;
+}
+select[name="select"] {
+	font-size: 11px;
+	border:1px solid #b2b2b2;
+	font-family: Verdana, arial, Helvetica;
+}
+select.option {
+	font-size: 11px;
+	border:1px solid #b2b2b2;
+	font-family: Verdana, arial, Helvetica;
+}
+input{  
+	font-size: 11px;
+	border:1px solid #b2b2b2;
+	font-family: Verdana, arial, Helvetica;
+}
+.checkboxradio{  
+	border:0;
+	vertical-align:top;
+	margin:0px;
+	padding:0px;
+}
+textarea{ 
+	font-size: 11px;
+	border:1px solid #b2b2b2;
+	font-family: Verdana, arial, Helvetica;
+}
+.textarea {
+	border:1px solid #b2b2b2;
+}
+.textBox {
+	border:1px solid #b2b2b2;
+}
+.comboBox{
+	border: 1px solid #b2b2b2;
+}
+.buttonGrey{
+	background-color:#e5e5e5;
+	cursor:pointer;
+	border: 1px solid #b2b2b2;
+	font-family: Verdana, arial;
+	font-size:11px;
+	font-weight:bold;
+	color: #000000;
+	margin-top:10px;
+	margin-bottom:10px;
+}
+.buttonDark {
+cursor:pointer; font:bold 11px verdana;color:#000;background:#ddd;MaRGIN-bottom: 10px;MaRGIN-right: 10px;
+}
+.buttonLight {
+cursor:pointer; font:bold 11px verdana;color:#000;background:#ddd;MaRGIN-bottom: 10px;MaRGIN-right: 10px;
+}
+.button60Enabled{
+	cursor:pointer; font:bold 11px verdana; color:#000; background:#ddd;
+}
+.datas{
+	font-size: 10px; 
+	font-family: Verdana, arial, Helvetica, sans-serif;
+	font-weight: bold; 
+	color: #000000;
+	background-color:#ffffff; 
+	width:100%;
+}
+.datasright {
+	font-weight: bold; font-size: 11px; text-align:right; color:#000000; width:22%; padding-left:8px;
+	font-family: Verdana, arial, Helvetica, sans-serif; background-color:#ffffff; vertical-align:top;
+}
+.datasleft {
+	font-weight: normal;  font-size: 11px; text-align:left; width:78%; color:#000000;
+	font-family: Verdana, arial, Helvetica, sans-serif; background-color:#ffffff; vertical-align:top;
+}
+.datasCenter {
+	font-weight: bold;  font-size: 11px;text-align:center; width:100%;color:#000000;
+	font-family: Verdana, arial, Helvetica, sans-serif; background-color:#ffffff;
+}
+
+.datasrightSN {
+	font-weight: bold; font-size: 11px; text-align:left; color:#000000; width:38%; padding-left:8px;
+	font-family: Verdana, arial, Helvetica, sans-serif; background-color:#ffffff; vertical-align:top;
+}
+
+.datasleftSN {
+	font-weight: normal;  font-size: 11px; text-align:left; width:80%; color:#000000;
+	font-family: Verdana, arial, Helvetica, sans-serif; background-color:#ffffff; vertical-align:top;
+}
+
+tr.even, tr.a {
+	background-color: #ECF5FF;text-align: center;	font-size:11px; color:#000000;
+}
+tr.odd, tr.b {
+	background-color:#FFFFFF; text-align: center; font-size: 11px; color:#002447; height:23px;
+}
+.normaltable{
+	text-align: center; width:100%; border: 0px; padding: 0px; margin:0px;
+}
+.mandatorySign{
+	color:#000000; font-family:Verdana, arial; font-size: 10px; font-weight:bold;
+}
+tr.row{   
+	 font-weight: bold;font-size: 11px; color: black ;font-family: Verdana, sans-serif; background-color:black; background-image:none;
+}
+.rowBody1{
+	background-color: #FFFFFF;    text-align: center;
+}
+.rowBody2{ 
+	text-align: center;
+}
+.formBody1{ 
+	text-align: center;
+}
+.formBody2{ 
+	text-align: center;
+}
+/* --------form styles end here-------- */
+
+/* --------Menu styles start here-------- */
+.menu-back{
+background-color:#b3bb00;
+}
+.menu-back-light{
+background-color:#339977;
+}
+.changewidth {
+width:50px;
+}
+/* --------Menu styles end here-------- */
+
+/* --------mixed styles start here-------- */
+.lineimage {
+	text-align:left;
+	white-space: nowrap;
+	width:100%;
+	background-image: url(resources/images/lineshadow.gif);
+	background-attachment: fixed;
+	background-repeat: no-repeat;
+	background-position: left top;
+	padding-left:53px;
+	padding-bottom:20px;
+	padding-top:8px;
+}
+.linedarkgreen { 
+	background-color:#b9bd52;
+	background-image:none;
+	height:1px;
+}
+.normaltext {
+	font-size:11px; 
+	font-family: Verdana, arial, Helvetica;
+	color: #000000;
+	font-stretch:normal;
+	font-style:normal;
+	font-variant:normal;
+	font-weight:normal;
+	background-image:none; 
+}
+.logoff{
+	font-weight: bold;
+	font-size: 11px;
+	font-family: verdana; 
+	text-decoration: underline;
+	color: #0085d5;
+}
+a.logoff{
+	color: #0085d5;
+	text-decoration: underline;
+}
+a.logoff:link {
+	color: #0085d5;
+	text-decoration: underline;
+}
+.logoff a:hover {
+	color: #b3214f;
+	text-decoration: underline;
+}
+a.logoff:visited {
+	color: #003972;
+	text-decoration: underline;
+}
+.logoff a:active {
+	color: #0085d5;
+	text-decoration: underline;
+}
+.messagetextarea {
+	border:1px solid #b2b2b2;
+	color:#636f71;
+	font-weight:bold;
+	padding:4px;
+}
+.helptable {
+	padding:11px;
+	width:100%
+	text-align:left;
+	border:0px;
+}
+/* --------mixed styles end here-------- */
+
+/* --------For Struts layout-------- */
+table.form {
+	background-color:#ffffff; text-align: center; font-size:11px; 
+	color:#000000; width:100%; border:0px; padding: 0px; /*changed one*/
+}
+tr.form {		
+	background-color:#d9dd7f; text-align:center; font-size: 11px; border:0px;
+}
+th.form {
+	background-color:#0085d5; vertical-align:middle; text-align:center; font-size:10px; color:#ffffff; font-weight: bold; height:24px; border:0px;		
+}
+td.form {
+	background-color:#e8eab2; text-align: center; height:24px;  font-size: 11px; color:#000000; padding:4px; border:0px;/*changed one*/
+}
+p.form {
+	text-align: center; border:0px;
+}
+a.form{
+    color: #0085d5; text-decoration: underline; font-weight:bold; font-size:10px;
+}
+	
+a.form:active {
+    color: #0085d5; text-decoration: underline; font-weight:bold; font-size:10px;
+}
+a.form:visited {
+    color: #0085d5; text-decoration: underline; font-weight:bold; font-size:10px;
+}
+a.form:link {
+    color: #0085d5; text-decoration: underline; font-weight:bold; font-size:10px;
+}
+a.form:link:visited {
+    color: #0085d5; text-decoration: underline; font-weight:bold; font-size:10px;
+}
+a.form:link:active {
+    color: #0085d5; text-decoration: underline; font-weight:bold; font-size:10px;
+}
+table.form2 {
+	background-color:#FFFFFF; vertical-align:middle; text-align: center; font-size: 11px;
+	width:100%; BORDER:0; padding: 0px; 
+}
+tr.form2 {		
+	background-color:#d9dd7f; text-align: center; font-size: 11px; vertical-align:middle; padding: 0px;width:100%;
+}
+
+tr.page {		
+	background-color:#FFFFFF; text-align: center; height:25px; font-size: 11px; color:#002447; padding: 4px;
+}
+tr.PAGE1 {		
+	background-color:#FFFFFF; text-align: center; height:25px; font-size: 11px; color:#002447; padding: 4px;
+}
+tr.PAGE2{		
+	background-color:#e8eab2; text-align: center; height:25px; font-size: 11px; color:#002447; padding: 4px;
+}
+tr.PAGE3{	
+background-color:#e8eab2; text-align: center; font-size:11px; 
+	color:#000000; width:100%; border:0px; padding: 0px;
+	
+}
+
+th.form2 {
+	background-color:#e8eab2;vertical-align:middle; text-align: center; font-size: 11px; color:#002447; height:27px;	padding: 0px; 
+}
+td.form2 {
+	background-color:#FFFFFF; text-align: center; height:25px; font-size: 11px; color:#002447; padding: 4px; 
+}
+a.form2{
+    color: #0085d5; text-decoration: underline; font-weight:bold; font-size:10px;
+}	
+a.form2:active {
+    color: #0085d5; text-decoration: underline; font-weight:bold; font-size:10px;
+}
+a.form2:visited {
+    color: #0085d5; text-decoration: underline; font-weight:bold; font-size:10px;
+}	
+a.form2:link {
+    color: #0085d5; text-decoration: underline; font-weight:bold; font-size:10px;
+}	
+table.form3 {		
+	background-color:#CCCCCC; text-align:center; font-size:11px; color:#000000; width:100%; BORDER:0; 
+	padding:0px; /*changed one*/
+}
+tr.form3 {		
+	background-color:#d9dd7f; text-align:center; font-size: 11px; 
+}
+th.form3 {
+	background-color:#0085d5; vertical-align:middle; text-align:center; font-size:11px;
+	color:#ffffff; font-weight: bold; height:27px;		
+}
+td.form3 {
+	background-color:#e8eab2; text-align: center; height:25px; font-size: 11px; color:#000000;/*changed one*/
+}
+P.form3 {
+	text-align: center;
+}
+a.form3{
+    color: #0085d5; text-decoration: underline; font-weight:bold; font-size:10px;
+}
+a.form3:link {
+    color: #0085d5; text-decoration: underline; font-weight:bold; font-size:10px;
+}
+a.form3:link:visited {
+    color: #0085d5; text-decoration: underline; font-weight:bold; font-size:10px;
+}
+a.form3:link:active {
+    color: #0085d5; text-decoration: underline; font-weight:bold; font-size:10px;
+}
+/* --------Ends here for st12/20/2006ruts layout-------- */
+
+a.pageLink{
+	color: #0085d5;
+	text-decoration: none;
+	border-width:0px;
+	font-weight:bold;
+}
+a.pageLink:link {
+	color: #0085d5;
+	text-decoration: none;
+	border-width:0px;
+}
+a.pageLink:visited {
+	color: #0085d5;
+	text-decoration: none;
+	border-width:0px;
+}
+a.pageLink:hover {
+	color: #b3214f;
+	text-decoration: underline;
+	border-width:0px;
+}
+a.pageLink:active {
+	color: #0085d5;
+	text-decoration: none;
+	border-width:0px;
+}
+
+

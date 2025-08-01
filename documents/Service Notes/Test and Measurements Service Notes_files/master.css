@@ -1,0 +1,160 @@
+/* master.css   v8  R7.9  kkh 19 Aug 2007 */
+
+/* set the default font face and size for everything.   */
+/* should set default colors, too, but NN4 doesn't like */
+/* that very much...                                    */
+
+BODY, LI, P, TABLE, TD, TH, UL, OL, 
+.buy, .buyLinks, .breadcrumb, .bvfunction, .cart, .contactAbstract,
+.contactAddress, .contactEmail, .contactHotline, .contactHours,
+.contactName, .contactPhone, .contactPhoneType, .contactURI,
+div.contactus, .csearch, .csearchContext, .csearchResults,
+.csearchResultsHelp, .csearchResultsParam, .csearchResultsScope,
+.dateline, .edevAudience, .edevGlance, .faqA, .faqQ, .feature,
+.fileSize, .fileType, .filter, .formAccept, .formData, .formHdg,
+.formRequired, .formText, .genTableHdg, .genTableText, .go, .hdg1,
+.hdg2, .hdg3, .hdgContext, .hdgKeyPage, .hdgLanding, .hdgNonavPage,
+.hdgPage, .help, .highlightName, .highlightText, .jumpto,
+blockquote.keymore, .lifecycle, .lifecycleState, .listAbstract,
+.listDate, .listDateTime, .listDocType, .listHdg, .listHdgMain,
+.listHelp, .listLocus, .listName, .listOrder, .listPaging,
+input.popup, .listProduct, .listSearchLink, .listSubject, .listText,
+.loginpromo, .more, .msgError, .navbuyheading, .navbuy, .navheading,
+.navplain, .navplainheading, .navprime, .pageImage, .pcHdg,
+.pcProduct, .pcRotHdg, .pcText, .priceCustomer, .priceDescription,
+.priceDisclaimer, .priceList, .productbar, .shipDescription,
+.shipTime, .text, .textName, .textNav, .webmaster, div.scrollTo td,
+div.library .wtyText, .wtyCovered, .wtyExpired, .wtyFuture, .dot,
+.wsaServices, .libBrowse, div.eduHelpLinks, div.SQO, p.ppwelcome,
+div.prodfinder, div.portal1, div.portal2, div.repcal, div.downloads,
+div.custform, div.popup, .navabout, div.navabout, div.navabout ul,
+div.navabout ul li, div.pimBlock, div.homeTab h3, div#pfEntry input,
+p.sitemsg, .footerNonav
+ { font-family : Verdana,Arial,Helvetica,sans-serif; font-size : 12px; }
+
+/* font sizes */
+.hdgKeyPage, .hdgNonavPage, .hdgPage
+ { font-size : 18px; }
+.hdg1, .listHdgMain, .hdgLanding, div.abouthistory h2
+ { font-size : 15px; }
+.csearchResults, .csearchResultsParam, .csearchResultsScope, .faqQ,
+div.portal1 h2, div.portal2 h2, div.abouthistory h3, div.about h3,
+div#homeBrand p strong, div.homePS p strong a, 
+div.homePS p strong span, div#pfResults p
+ { font-size : 14px; } 
+.hdg2, .navheading, .navbuyheading, 
+strong.wsaServices, p.ppwelcome, div.downloads h2, div.custform p,
+div.navabout h3, div.aboutrelated h3, div#homeBrand p, 
+div#pfEntry strong
+ { font-size : 13px; }
+.bvfunction, .contactAbstract, .fileSize, .highlightText, .jumpto,
+.listAbstract, .listDate, .listDateTime, .listText,
+.pageImage, .pcText, .webmaster, input.cart, input.csearch,
+input.formText, input.go, input.text, select.formText, select.text,
+textarea.formText, a.homeMore, div.homeContactUs p, div.libBrowse span, 
+div.prodfinder p, td.navabout, td.navabout a.navabout, 
+div#homeProdFinder div strong, div#homeNews p, div#homeHL p, 
+div.contactus p, .productbar, .highlightName
+ { font-size : 11px; }
+
+.listOrder, .priceDisclaimer, .listHelp, td.listPaging, .listLocus
+ { font-size : 10px; }
+.spacer5
+  { font-size : 5px; }
+div.custform p.text, div.custform input.custform, div.custform textarea,
+div#pfEntry a
+  { font-size : 12px; }
+
+/* font weight */
+.buyLinks, .contactName, .contactURI, div.contactus, .csearchContext, .edevGlance, 
+.faqQ, .formData, .formRequired, .hdg1, .hdg2, .hdg3, .hdgContext, 
+.hdgKeyPage, .hdgLanding, .hdgNonavPage, .hdgPage, .highlightName, 
+.lifecycleState, .listHdg, .listHdgMain, .listName, 
+.listProduct, .listSearchLink, .more, .navheading, .navbuyheading, 
+.navbuy, .navplainheading, .navprime, .pcProduct, 
+.priceCustomer, .priceList, .productbar, .shipTime, .textName, 
+.textNav, a.lifecycle, .lifecycle a, input.cart, input.formAccept, input.go, 
+select.filter, .wtyCovered, .wtyExpired, .wtyFuture, 
+a.homeMore, div.homeContactUs p, div.SQO th, div.abouthistory h2, 
+div.abouthistory h3, div.portal1 h2, div.portal2 h2, 
+div.downloads h2, div.aboutrelated h3
+  { font-weight : bold; }
+strong.jumpto
+  { font-weight : normal; }
+
+
+/* colors */
+BODY 
+  { color: black; background-color: white; }
+.msgError
+  { color : #ff3333; }
+.hdgKeyPage, .hdgContext, .navheading, blockquote.keymore, .more, strong.dot,
+div.homePS p, div#homeSupport p, div#homeInd p, div#homeAbout p, p.buyLinks
+  { color : #ff6633; }
+.hdg2, .hdg3, .listLocus, .wtyFuture, 
+div.abouthistory h3, div.aboutrelated h3
+  { color : #333333; }
+.productbar, .navplainheading, .feature, .navprime, div.libBrowse
+  { color : #666666; }
+.jumpto, ul.textLanding, div.scrollTo td strong, .footerNonav
+  { color : #999999; }
+div#pfEntry input, input.go
+ { background-color : #dddddd; }
+.listHdgMain, .listHdg, div.SQO th
+  { color : #000000; }
+p.sitemsg 
+  { color : #b3214f; }
+.wtyCovered 
+  { color: #669933; }
+.wtyExpired
+  { color: #990000; }
+
+/* link colors, bgcolors & decoration */
+
+A:link    { color : #336699; }
+A:visited { color : #663366; }
+A:hover   { color : #ff6633; text-decoration : underline; }
+A:active  { color : #cc6699; }
+
+A:link { color: #0085d5; } 
+A:visited { color: #8d588f; }
+A:hover { color : #B3214F; text-decoration : underline; }
+A:active { color: #cc6699; }
+
+a.hdgContext, a.hdgContext:visited, .hdgContext a, .hdgContext a:visited
+  { color : #ff6633; text-decoration : none; }
+div.navabout h3 a, div.homeTab h2 a, div.homePS h3 a,
+div#homeNews p a, div#homeHL p a, .hdgLanding a
+  { text-decoration : none; }
+a.hdgContext:hover, .hdgContext a:hover, div.navabout h3 a:hover, 
+div.homeTab h2 a:hover, div.homePS h3 a:hover, div#homeNews p a:hover, 
+div#homeHL p a:hover, .hdgLanding a:hover,
+div#homeNews p.homeMore a, div#homeHL p.homeMore a
+  { text-decoration : underline; }
+a.hdgContext:active, .hdgContext a:active
+  { color : #cc6699; }
+.pcRotHdg, .pcHdg, .listHdgMain, .listHdg, div.SQO th
+  { background-color : #d4d4d4; }
+
+/* other */
+
+.pcHdg, div.libBrowse blockquote td.listLocus 
+  { text-align : left; }
+.genTableHdg, .pageImage
+  { text-align : center; }
+.listDate, .fileSize, p.homeMore
+  { text-align : right; }
+
+ /* *********Feedback Link ********** */
+ 
+ div#footer p#feedbackFooter {
+  float: right;
+  padding-left: 2em;
+  display: none;
+}
+div#feedbackContact a,
+div#footer p#feedbackFooter a {
+  font-weight: bold;
+  padding-left: 18px;
+  background: url() no-repeat 0 50%;
+}
