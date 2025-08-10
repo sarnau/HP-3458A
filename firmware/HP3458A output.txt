@@ -1,0 +1,1021 @@
+HP3458A
+=======
+HP3458A
+REV 4,1
+OPT 0,0
+"  .         V DC"
+CALNUM 2562
+9154, DESTRUCTIVE OVERLOADS valid 2941 
+0, DEFEATS valid 2437 
+ 40.0000000E+03, 40K reference initial value 1 
+ 39.9975524E+03, 40K reference valid cal value 1 
+ 40.0800000E+03, 40K reference upper limit 1 
+ 39.9200000E+03, 40K reference lower limit 1 
+ 7.20000000E+00, 7V reference initial value 2 
+ 7.14624294E+00, 7V reference valid cal value 2 
+ 7.50000000E+00, 7V reference upper limit 2 
+ 7.00000000E+00, 7V reference lower limit 2 
+ 0.0000000E+00, dcv zero front 100mV initial value 3 
+ 1.53091247E-06, dcv zero front 100mV valid cal value 3 
+ 15.0394468E-06, dcv zero front 100mV upper limit 3 
+-15.0394468E-06, dcv zero front 100mV lower limit 3 
+ 0.0000000E+00, dcv zero rear 100mV initial value 4 
+ 474.497496E-09, dcv zero rear 100mV valid cal value 4 
+ 15.0394468E-06, dcv zero rear 100mV upper limit 4 
+-15.0394468E-06, dcv zero rear 100mV lower limit 4 
+ 0.0000000E+00, dcv zero front 1V initial value 5 
+ 1.62299615E-06, dcv zero front 1V valid cal value 5 
+ 15.0575401E-06, dcv zero front 1V upper limit 5 
+-15.0575401E-06, dcv zero front 1V lower limit 5 
+ 0.0000000E+00, dcv zero rear 1V initial value 6 
+ 542.839082E-09, dcv zero rear 1V valid cal value 6 
+ 15.0575401E-06, dcv zero rear 1V upper limit 6 
+-15.0575401E-06, dcv zero rear 1V lower limit 6 
+ 0.0000000E+00, dcv zero front 10V initial value 7 
+ 2.37545990E-06, dcv zero front 10V valid cal value 7 
+ 15.0513672E-06, dcv zero front 10V upper limit 7 
+-15.0513672E-06, dcv zero front 10V lower limit 7 
+ 0.0000000E+00, dcv zero rear 10V initial value 8 
+ 922.265150E-09, dcv zero rear 10V valid cal value 8 
+ 15.0513672E-06, dcv zero rear 10V upper limit 8 
+-15.0513672E-06, dcv zero rear 10V lower limit 8 
+ 0.0000000E+00, dcv zero front 100V initial value 9 
+ 12.7709964E-06, dcv zero front 100V valid cal value 9 
+ 2.03839637E-03, dcv zero front 100V upper limit 9 
+-2.03839637E-03, dcv zero front 100V lower limit 9 
+ 0.0000000E+00, dcv zero rear 100V initial value 10 
+ 12.7709964E-06, dcv zero rear 100V valid cal value 10 
+ 2.03839637E-03, dcv zero rear 100V upper limit 10 
+-2.03839637E-03, dcv zero rear 100V lower limit 10 
+ 0.0000000E+00, dcv zero front 1KV initial value 11 
+ 16.5514897E-06, dcv zero front 1KV valid cal value 11 
+ 2.03756073E-03, dcv zero front 1KV upper limit 11 
+-2.03756073E-03, dcv zero front 1KV lower limit 11 
+ 0.0000000E+00, dcv zero rear 1KV initial value 12 
+ 16.5514897E-06, dcv zero rear 1KV valid cal value 12 
+ 2.03756073E-03, dcv zero rear 1KV upper limit 12 
+-2.03756073E-03, dcv zero rear 1KV lower limit 12 
+ 0.0000000E+00, ohm zero front 10 initial value 13 
+ 416.076944E-03, ohm zero front 10 valid cal value 13 
+ 1.01779036E+00, ohm zero front 10 upper limit 13 
+-1.01779036E+00, ohm zero front 10 lower limit 13 
+ 0.0000000E+00, ohm zero front 100 initial value 14 
+ 417.254394E-03, ohm zero front 100 valid cal value 14 
+ 1.01771043E+00, ohm zero front 100 upper limit 14 
+-1.01771043E+00, ohm zero front 100 lower limit 14 
+ 0.0000000E+00, ohm zero front 1K initial value 15 
+ 416.992157E-03, ohm zero front 1K valid cal value 15 
+ 1.01893480E+00, ohm zero front 1K upper limit 15 
+-1.01893480E+00, ohm zero front 1K lower limit 15 
+ 0.0000000E+00, ohm zero front 10K initial value 16 
+ 431.883922E-03, ohm zero front 10K valid cal value 16 
+ 1.01917671E+00, ohm zero front 10K upper limit 16 
+-1.01917671E+00, ohm zero front 10K lower limit 16 
+ 0.0000000E+00, ohm zero front 100K initial value 17 
+ 463.374448E-03, ohm zero front 100K valid cal value 17 
+ 2.03707412E+00, ohm zero front 100K upper limit 17 
+-2.03707412E+00, ohm zero front 100K lower limit 17 
+ 0.0000000E+00, ohm zero front 1M initial value 18 
+ 862.967065E-03, ohm zero front 1M valid cal value 18 
+ 5.15383108E+00, ohm zero front 1M upper limit 18 
+-5.15383108E+00, ohm zero front 1M lower limit 18 
+ 0.0000000E+00, ohm zero front 10M initial value 19 
+ 4.76405984E+00, ohm zero front 10M valid cal value 19 
+ 51.5357417E+00, ohm zero front 10M upper limit 19 
+-51.5357417E+00, ohm zero front 10M lower limit 19 
+ 0.0000000E+00, ohm zero front 100M initial value 20 
+ 4.19476967E+00, ohm zero front 100M valid cal value 20 
+ 515.357417E+00, ohm zero front 100M upper limit 20 
+-515.357417E+00, ohm zero front 100M lower limit 20 
+ 0.0000000E+00, ohm zero front 1G initial value 21 
+ 4.19476967E+00, ohm zero front 1G valid cal value 21 
+ 5.15357417E+03, ohm zero front 1G upper limit 21 
+-5.15357417E+03, ohm zero front 1G lower limit 21 
+ 0.0000000E+00, ohm zero rear 10 initial value 22 
+ 424.121690E-03, ohm zero rear 10 valid cal value 22 
+ 1.01779036E+00, ohm zero rear 10 upper limit 22 
+-1.01779036E+00, ohm zero rear 10 lower limit 22 
+ 0.0000000E+00, ohm zero rear 100 initial value 23 
+ 424.224437E-03, ohm zero rear 100 valid cal value 23 
+ 1.01771043E+00, ohm zero rear 100 upper limit 23 
+-1.01771043E+00, ohm zero rear 100 lower limit 23 
+ 0.0000000E+00, ohm zero rear 1K initial value 24 
+ 423.922172E-03, ohm zero rear 1K valid cal value 24 
+ 1.01893480E+00, ohm zero rear 1K upper limit 24 
+-1.01893480E+00, ohm zero rear 1K lower limit 24 
+ 0.0000000E+00, ohm zero rear 10K initial value 25 
+ 429.304806E-03, ohm zero rear 10K valid cal value 25 
+ 1.01917671E+00, ohm zero rear 10K upper limit 25 
+-1.01917671E+00, ohm zero rear 10K lower limit 25 
+ 0.0000000E+00, ohm zero rear 100K initial value 26 
+ 449.863854E-03, ohm zero rear 100K valid cal value 26 
+ 2.03707412E+00, ohm zero rear 100K upper limit 26 
+-2.03707412E+00, ohm zero rear 100K lower limit 26 
+ 0.0000000E+00, ohm zero rear 1M initial value 27 
+ 548.343656E-03, ohm zero rear 1M valid cal value 27 
+ 5.15383108E+00, ohm zero rear 1M upper limit 27 
+-5.15383108E+00, ohm zero rear 1M lower limit 27 
+ 0.0000000E+00, ohm zero rear 10M initial value 28 
+ 2.75656293E+00, ohm zero rear 10M valid cal value 28 
+ 51.5357417E+00, ohm zero rear 10M upper limit 28 
+-51.5357417E+00, ohm zero rear 10M lower limit 28 
+ 0.0000000E+00, ohm zero rear 100M initial value 29 
+ 2.30712332E+00, ohm zero rear 100M valid cal value 29 
+ 515.357417E+00, ohm zero rear 100M upper limit 29 
+-515.357417E+00, ohm zero rear 100M lower limit 29 
+ 0.0000000E+00, ohm zero rear 1G initial value 30 
+ 2.30712332E+00, ohm zero rear 1G valid cal value 30 
+ 5.15357417E+03, ohm zero rear 1G upper limit 30 
+-5.15357417E+03, ohm zero rear 1G lower limit 30 
+ 0.0000000E+00, ohmf zero front 10 initial value 31 
+-253.399566E-06, ohmf zero front 10 valid cal value 31 
+ 10.1779036E-03, ohmf zero front 10 upper limit 31 
+-10.1779036E-03, ohmf zero front 10 lower limit 31 
+ 0.0000000E+00, ohmf zero front 100 initial value 32 
+-2.58929481E-03, ohmf zero front 100 valid cal value 32 
+ 10.1771043E-03, ohmf zero front 100 upper limit 32 
+-10.1771043E-03, ohmf zero front 100 lower limit 32 
+ 0.0000000E+00, ohmf zero front 1K initial value 33 
+-2.50347784E-03, ohmf zero front 1K valid cal value 33 
+ 101.893480E-03, ohmf zero front 1K upper limit 33 
+-101.893480E-03, ohmf zero front 1K lower limit 33 
+ 0.0000000E+00, ohmf zero front 10K initial value 34 
+-25.0483658E-03, ohmf zero front 10K valid cal value 34 
+ 1.01917671E+00, ohmf zero front 10K upper limit 34 
+-1.01917671E+00, ohmf zero front 10K lower limit 34 
+ 0.0000000E+00, ohmf zero front 100K initial value 35 
+-30.9455524E-03, ohmf zero front 100K valid cal value 35 
+ 10.1853706E+00, ohmf zero front 100K upper limit 35 
+-10.1853706E+00, ohmf zero front 100K lower limit 35 
+ 0.0000000E+00, ohmf zero front 1M initial value 36 
+-353.576784E-03, ohmf zero front 1M valid cal value 36 
+ 101.878056E+00, ohmf zero front 1M upper limit 36 
+-101.878056E+00, ohmf zero front 1M lower limit 36 
+ 0.0000000E+00, ohmf zero front 10M initial value 37 
+-2.54682445E+00, ohmf zero front 10M valid cal value 37 
+ 1.01872978E+03, ohmf zero front 10M upper limit 37 
+-1.01872978E+03, ohmf zero front 10M lower limit 37 
+ 0.0000000E+00, ohmf zero front 100M initial value 38 
+-3.11611462E+00, ohmf zero front 100M valid cal value 38 
+ 10.1872978E+03, ohmf zero front 100M upper limit 38 
+-10.1872978E+03, ohmf zero front 100M lower limit 38 
+ 0.0000000E+00, ohmf zero front 1G initial value 39 
+-3.11611462E+00, ohmf zero front 1G valid cal value 39 
+ 101.872978E+03, ohmf zero front 1G upper limit 39 
+-101.872978E+03, ohmf zero front 1G lower limit 39 
+ 0.0000000E+00, ohmf zero rear 10 initial value 40 
+-232.371568E-06, ohmf zero rear 10 valid cal value 40 
+ 10.1779036E-03, ohmf zero rear 10 upper limit 40 
+-10.1779036E-03, ohmf zero rear 10 lower limit 40 
+ 0.0000000E+00, ohmf zero rear 100 initial value 41 
+-2.28656337E-03, ohmf zero rear 100 valid cal value 41 
+ 10.1771043E-03, ohmf zero rear 100 upper limit 41 
+-10.1771043E-03, ohmf zero rear 100 lower limit 41 
+ 0.0000000E+00, ohmf zero rear 1K initial value 42 
+-2.08910103E-03, ohmf zero rear 1K valid cal value 42 
+ 101.893480E-03, ohmf zero rear 1K upper limit 42 
+-101.893480E-03, ohmf zero rear 1K lower limit 42 
+ 0.0000000E+00, ohmf zero rear 10K initial value 43 
+-22.2339393E-03, ohmf zero rear 10K valid cal value 43 
+ 1.01917671E+00, ohmf zero rear 10K upper limit 43 
+-1.01917671E+00, ohmf zero rear 10K lower limit 43 
+ 0.0000000E+00, ohmf zero rear 100K initial value 44 
+-36.5175493E-03, ohmf zero rear 100K valid cal value 44 
+ 10.1853706E+00, ohmf zero rear 100K upper limit 44 
+-10.1853706E+00, ohmf zero rear 100K lower limit 44 
+ 0.0000000E+00, ohmf zero rear 1M initial value 45 
+-326.609063E-03, ohmf zero rear 1M valid cal value 45 
+ 101.878056E+00, ohmf zero rear 1M upper limit 45 
+-101.878056E+00, ohmf zero rear 1M lower limit 45 
+ 0.0000000E+00, ohmf zero rear 10M initial value 46 
+-3.50562894E+00, ohmf zero rear 10M valid cal value 46 
+ 1.01872978E+03, ohmf zero rear 10M upper limit 46 
+-1.01872978E+03, ohmf zero rear 10M lower limit 46 
+ 0.0000000E+00, ohmf zero rear 100M initial value 47 
+-3.77529271E+00, ohmf zero rear 100M valid cal value 47 
+ 10.1872978E+03, ohmf zero rear 100M upper limit 47 
+-10.1872978E+03, ohmf zero rear 100M lower limit 47 
+ 0.0000000E+00, ohmf zero rear 1G initial value 48 
+-3.77529271E+00, ohmf zero rear 1G valid cal value 48 
+ 101.872978E+03, ohmf zero rear 1G upper limit 48 
+-101.872978E+03, ohmf zero rear 1G lower limit 48 
+0, autorange offset ohm 10 initial value 49 
+416, autorange offset ohm 10 valid cal value 49 
+20000, autorange offset ohm 10 upper limit 49 
+-20000, autorange offset ohm 10 lower limit 49 
+0, autorange offset ohm 100 initial value 50 
+41, autorange offset ohm 100 valid cal value 50 
+20000, autorange offset ohm 100 upper limit 50 
+-20000, autorange offset ohm 100 lower limit 50 
+0, autorange offset ohm 1k initial value 51 
+4, autorange offset ohm 1k valid cal value 51 
+20000, autorange offset ohm 1k upper limit 51 
+-20000, autorange offset ohm 1k lower limit 51 
+0, autorange offset ohm 10k initial value 52 
+0, autorange offset ohm 10k valid cal value 52 
+20000, autorange offset ohm 10k upper limit 52 
+-20000, autorange offset ohm 10k lower limit 52 
+0, autorange offset ohm 100k initial value 53 
+0, autorange offset ohm 100k valid cal value 53 
+20000, autorange offset ohm 100k upper limit 53 
+-20000, autorange offset ohm 100k lower limit 53 
+0, autorange offset ohm 1M initial value 54 
+0, autorange offset ohm 1M valid cal value 54 
+20000, autorange offset ohm 1M upper limit 54 
+-20000, autorange offset ohm 1M lower limit 54 
+0, autorange offset ohm 10M initial value 55 
+0, autorange offset ohm 10M valid cal value 55 
+20000, autorange offset ohm 10M upper limit 55 
+-20000, autorange offset ohm 10M lower limit 55 
+0, autorange offset ohm 100M initial value 56 
+0, autorange offset ohm 100M valid cal value 56 
+20000, autorange offset ohm 100M upper limit 56 
+-20000, autorange offset ohm 100M lower limit 56 
+0, autorange offset ohm 1G initial value 57 
+0, autorange offset ohm 1G valid cal value 57 
+20000, autorange offset ohm 1G upper limit 57 
+-20000, autorange offset ohm 1G lower limit 57 
+ 32.0000000E+00, cal 0 temperature initial value 58 
+ 34.7521043E+00, cal 0 temperature valid cal value 58 
+ 100.000000E+00, cal 0 temperature upper limit 58 
+-20.0000000E+00, cal 0 temperature lower limit 58 
+ 32.0000000E+00, cal 10 temperature initial value 59 
+ 34.2893738E+00, cal 10 temperature valid cal value 59 
+ 100.000000E+00, cal 10 temperature upper limit 59 
+-20.0000000E+00, cal 10 temperature lower limit 59 
+ 32.0000000E+00, cal 10k temperature initial value 60 
+ 34.2256161E+00, cal 10k temperature valid cal value 60 
+ 100.000000E+00, cal 10k temperature upper limit 60 
+-20.0000000E+00, cal 10k temperature lower limit 60 
+128, vos dac initial value 61 
+181, vos dac valid cal value 61 
+253, vos dac upper limit 61 
+0, vos dac lower limit 61 
+ 0.0000000E+00, dci zero rear 100nA initial value 62 
+ 7.39163988E-12, dci zero rear 100nA valid cal value 62 
+ 10.0714975E-09, dci zero rear 100nA upper limit 62 
+-10.0714975E-09, dci zero rear 100nA lower limit 62 
+ 0.0000000E+00, dci zero rear 1uA initial value 63 
+-21.2388842E-12, dci zero rear 1uA valid cal value 63 
+ 1.00974991E-09, dci zero rear 1uA upper limit 63 
+-1.00974991E-09, dci zero rear 1uA lower limit 63 
+ 0.0000000E+00, dci zero rear 10uA initial value 64 
+-182.467131E-12, dci zero rear 10uA valid cal value 64 
+ 3.01650365E-09, dci zero rear 10uA upper limit 64 
+-3.01650365E-09, dci zero rear 10uA lower limit 64 
+ 0.0000000E+00, dci zero rear 100uA initial value 65 
+-1.27882832E-09, dci zero rear 100uA valid cal value 65 
+ 29.9633726E-09, dci zero rear 100uA upper limit 65 
+-29.9633726E-09, dci zero rear 100uA lower limit 65 
+ 0.0000000E+00, dci zero rear 1mA initial value 66 
+-9.54595299E-09, dci zero rear 1mA valid cal value 66 
+ 300.454902E-09, dci zero rear 1mA upper limit 66 
+-300.454902E-09, dci zero rear 1mA lower limit 66 
+ 0.0000000E+00, dci zero rear 10mA initial value 67 
+-90.9094681E-09, dci zero rear 10mA valid cal value 67 
+ 3.03593500E-06, dci zero rear 10mA upper limit 67 
+-3.03593500E-06, dci zero rear 10mA lower limit 67 
+ 0.0000000E+00, dci zero rear 100mA initial value 68 
+-774.046479E-09, dci zero rear 100mA valid cal value 68 
+ 30.4599440E-06, dci zero rear 100mA upper limit 68 
+-30.4599440E-06, dci zero rear 100mA lower limit 68 
+ 0.0000000E+00, dci zero rear 1A initial value 69 
+-10.8336944E-06, dci zero rear 1A valid cal value 69 
+ 3.29468346E-03, dci zero rear 1A upper limit 69 
+-3.29468346E-03, dci zero rear 1A lower limit 69 
+ 1.00000000E+00, dcv gain 100mV initial value 70 
+ 992.581645E-03, dcv gain 100mV valid cal value 70 
+ 1.06000000E+00, dcv gain 100mV upper limit 70 
+ 940.000000E-03, dcv gain 100mV lower limit 70 
+ 1.00000000E+00, dcv gain 1V initial value 71 
+ 993.775774E-03, dcv gain 1V valid cal value 71 
+ 1.06000000E+00, dcv gain 1V upper limit 71 
+ 940.000000E-03, dcv gain 1V lower limit 71 
+ 1.00000000E+00, dcv gain 10V initial value 72 
+ 993.368377E-03, dcv gain 10V valid cal value 72 
+ 1.04000000E+00, dcv gain 10V upper limit 72 
+ 960.000000E-03, dcv gain 10V lower limit 72 
+ 1.00000000E+00, dcv gain 100V initial value 73 
+ 994.361042E-03, dcv gain 100V valid cal value 73 
+ 1.06000000E+00, dcv gain 100V upper limit 73 
+ 940.000000E-03, dcv gain 100V lower limit 73 
+ 1.00000000E+00, dcv gain 1KV initial value 74 
+ 993.953405E-03, dcv gain 1KV valid cal value 74 
+ 1.06000000E+00, dcv gain 1KV upper limit 74 
+ 940.000000E-03, dcv gain 1KV lower limit 74 
+ 1.00000000E+00, ohm gain 10 initial value 75 
+ 999.676183E-03, ohm gain 10 valid cal value 75 
+ 1.03017776E+00, ohm gain 10 upper limit 75 
+ 969.822241E-03, ohm gain 10 lower limit 75 
+ 1.00000000E+00, ohm gain 100 initial value 76 
+ 999.597677E-03, ohm gain 100 valid cal value 76 
+ 1.03017776E+00, ohm gain 100 upper limit 76 
+ 969.822241E-03, ohm gain 100 lower limit 76 
+ 1.00000000E+00, ohm gain 1K initial value 77 
+ 1.00080025E+00, ohm gain 1K valid cal value 77 
+ 1.03017776E+00, ohm gain 1K upper limit 77 
+ 969.822241E-03, ohm gain 1K lower limit 77 
+ 1.00000000E+00, ohm gain 10K initial value 78 
+ 1.00103785E+00, ohm gain 10K valid cal value 78 
+ 1.03017776E+00, ohm gain 10K upper limit 78 
+ 969.822241E-03, ohm gain 10K lower limit 78 
+ 1.00000000E+00, ohm gain 100K initial value 79 
+ 1.00040959E+00, ohm gain 100K valid cal value 79 
+ 1.03017776E+00, ohm gain 100K upper limit 79 
+ 969.822241E-03, ohm gain 100K lower limit 79 
+ 1.00000000E+00, ohm gain 1M initial value 80 
+ 1.00064876E+00, ohm gain 1M valid cal value 80 
+ 1.03017776E+00, ohm gain 1M upper limit 80 
+ 969.822241E-03, ohm gain 1M lower limit 80 
+ 1.00000000E+00, ohm gain 10M initial value 81 
+ 1.00059888E+00, ohm gain 10M valid cal value 81 
+ 1.03017776E+00, ohm gain 10M upper limit 81 
+ 969.822241E-03, ohm gain 10M lower limit 81 
+ 1.00000000E+00, ohm gain 100M initial value 82 
+ 1.00059888E+00, ohm gain 100M valid cal value 82 
+ 1.03017776E+00, ohm gain 100M upper limit 82 
+ 969.822241E-03, ohm gain 100M lower limit 82 
+ 1.00000000E+00, ohm gain 1G initial value 83 
+ 1.00059888E+00, ohm gain 1G valid cal value 83 
+ 1.03017776E+00, ohm gain 1G upper limit 83 
+ 969.822241E-03, ohm gain 1G lower limit 83 
+ 1.00000000E+00, ohm ocomp gain 10 initial value 84 
+ 999.676190E-03, ohm ocomp gain 10 valid cal value 84 
+ 1.03017776E+00, ohm ocomp gain 10 upper limit 84 
+ 969.822241E-03, ohm ocomp gain 10 lower limit 84 
+ 1.00000000E+00, ohm ocomp gain 100 initial value 85 
+ 999.597745E-03, ohm ocomp gain 100 valid cal value 85 
+ 1.03017776E+00, ohm ocomp gain 100 upper limit 85 
+ 969.822241E-03, ohm ocomp gain 100 lower limit 85 
+ 1.00000000E+00, ohm ocomp gain 1k initial value 86 
+ 1.00080032E+00, ohm ocomp gain 1k valid cal value 86 
+ 1.03017776E+00, ohm ocomp gain 1k upper limit 86 
+ 969.822241E-03, ohm ocomp gain 1k lower limit 86 
+ 1.00000000E+00, ohm ocomp gain 10k initial value 87 
+ 1.00103848E+00, ohm ocomp gain 10k valid cal value 87 
+ 1.03017776E+00, ohm ocomp gain 10k upper limit 87 
+ 969.822241E-03, ohm ocomp gain 10k lower limit 87 
+ 1.00000000E+00, ohm ocomp gain 100k initial value 88 
+ 1.00041097E+00, ohm ocomp gain 100k valid cal value 88 
+ 1.03017776E+00, ohm ocomp gain 100k upper limit 88 
+ 969.822241E-03, ohm ocomp gain 100k lower limit 88 
+ 1.00000000E+00, ohm ocomp gain 1M initial value 89 
+ 1.00064876E+00, ohm ocomp gain 1M valid cal value 89 
+ 1.03017776E+00, ohm ocomp gain 1M upper limit 89 
+ 969.822241E-03, ohm ocomp gain 1M lower limit 89 
+ 1.00000000E+00, ohm ocomp gain 10M initial value 90 
+ 1.00059888E+00, ohm ocomp gain 10M valid cal value 90 
+ 1.03017776E+00, ohm ocomp gain 10M upper limit 90 
+ 969.822241E-03, ohm ocomp gain 10M lower limit 90 
+ 1.00000000E+00, ohm ocomp gain 100M initial value 91 
+ 1.00059888E+00, ohm ocomp gain 100M valid cal value 91 
+ 1.03017776E+00, ohm ocomp gain 100M upper limit 91 
+ 969.822241E-03, ohm ocomp gain 100M lower limit 91 
+ 1.00000000E+00, ohm ocomp gain 1G initial value 92 
+ 1.00059888E+00, ohm ocomp gain 1G valid cal value 92 
+ 1.03017776E+00, ohm ocomp gain 1G upper limit 92 
+ 969.822241E-03, ohm ocomp gain 1G lower limit 92 
+ 1.00000000E+00, dci gain 100nA initial value 93 
+ 994.132392E-03, dci gain 100nA valid cal value 93 
+ 1.07000000E+00, dci gain 100nA upper limit 93 
+ 940.000000E-03, dci gain 100nA lower limit 93 
+ 1.00000000E+00, dci gain 1uA initial value 94 
+ 992.563266E-03, dci gain 1uA valid cal value 94 
+ 1.05016975E+00, dci gain 1uA upper limit 94 
+ 949.830253E-03, dci gain 1uA lower limit 94 
+ 1.00000000E+00, dci gain 10uA initial value 95 
+ 991.439103E-03, dci gain 10uA valid cal value 95 
+ 1.07017544E+00, dci gain 10uA upper limit 95 
+ 930.263158E-03, dci gain 10uA lower limit 95 
+ 1.00000000E+00, dci gain 100uA initial value 96 
+ 991.161441E-03, dci gain 100uA valid cal value 96 
+ 1.06998654E+00, dci gain 100uA upper limit 96 
+ 929.891105E-03, dci gain 100uA lower limit 96 
+ 1.00000000E+00, dci gain 1mA initial value 97 
+ 992.306278E-03, dci gain 1mA valid cal value 97 
+ 1.07005838E+00, dci gain 1mA upper limit 97 
+ 929.941618E-03, dci gain 1mA lower limit 97 
+ 1.00000000E+00, dci gain 10mA initial value 98 
+ 992.495370E-03, dci gain 10mA valid cal value 98 
+ 1.06986532E+00, dci gain 10mA upper limit 98 
+ 929.292929E-03, dci gain 10mA lower limit 98 
+ 1.00000000E+00, dci gain 100mA initial value 99 
+ 997.956718E-03, dci gain 100mA valid cal value 99 
+ 1.07974335E+00, dci gain 100mA upper limit 99 
+ 919.340055E-03, dci gain 100mA lower limit 99 
+ 1.00000000E+00, dci gain 1A initial value 100 
+ 1.08722162E+00, dci gain 1A valid cal value 100 
+ 1.12000000E+00, dci gain 1A upper limit 100 
+ 880.000000E-03, dci gain 1A lower limit 100 
+64, precharge dac initial value 101 
+64, precharge dac valid cal value 101 
+126, precharge dac upper limit 101 
+0, precharge dac lower limit 101 
+64, mc dac initial value 102 
+88, mc dac valid cal value 102 
+126, mc dac upper limit 102 
+0, mc dac lower limit 102 
+ 5.00000000E+00, high speed gain initial value 103 
+ 5.00461593E+00, high speed gain valid cal value 103 
+ 5.15000000E+00, high speed gain upper limit 103 
+ 4.85000000E+00, high speed gain lower limit 103 
+ 0.0000000E+00, il initial value 104 
+ 67.8252765E-12, il valid cal value 104 
+ 50.0000000E-09, il upper limit 104 
+-100.000000E-12, il lower limit 104 
+ 0.0000000E+00, il2 initial value 105 
+-5.84254677E-12, il2 valid cal value 105 
+ 200.000000E-12, il2 upper limit 105 
+-200.000000E-12, il2 lower limit 105 
+ 10.0000000E+06, rin initial value 106 
+ 10.0047499E+06, rin valid cal value 106 
+ 10.3000000E+06, rin upper limit 106 
+ 9.70000000E+06, rin lower limit 106 
+ 0.0000000E+00, low aperture initial value 107 
+-5.01537182E-03, low aperture valid cal value 107 
+ 1.00000000E+00, low aperture upper limit 107 
+-1.00000000E+00, low aperture lower limit 107 
+ 0.0000000E+00, high aperture initial value 108 
+-24.7055637E-03, high aperture valid cal value 108 
+ 1.00000000E+00, high aperture upper limit 108 
+-1.00000000E+00, high aperture lower limit 108 
+ 1.00000000E+00, high aperture slope .01 PLC initial value 109 
+ 999.998915E-03, high aperture slope .01 PLC valid cal value 109 
+ 1.00100000E+00, high aperture slope .01 PLC upper limit 109 
+ 999.000000E-03, high aperture slope .01 PLC lower limit 109 
+ 1.00000000E+00, high aperture slope .1 PLC initial value 110 
+ 1.00000000E+00, high aperture slope .1 PLC valid cal value 110 
+ 1.00100000E+00, high aperture slope .1 PLC upper limit 110 
+ 999.000000E-03, high aperture slope .1 PLC lower limit 110 
+ 1.66700000E+03, high aperture null .01 PLC  initial value 111 
+ 1.66699149E+03, high aperture null .01 PLC  valid cal value 111 
+ 1.66800000E+03, high aperture null .01 PLC  upper limit 111 
+ 1.66600000E+03, high aperture null .01 PLC  lower limit 111 
+ 16.6670000E+03, high aperture null .1 PLC initial value 112 
+ 16.6669752E+03, high aperture null .1 PLC valid cal value 112 
+ 16.6680000E+03, high aperture null .1 PLC upper limit 112 
+ 16.6660000E+03, high aperture null .1 PLC lower limit 112 
+5000, underload dcv 100mV initial value 113 
+5086, underload dcv 100mV valid cal value 113 
+9000, underload dcv 100mV upper limit 113 
+0, underload dcv 100mV lower limit 113 
+5000, underload dcv 1V initial value 114 
+5080, underload dcv 1V valid cal value 114 
+9000, underload dcv 1V upper limit 114 
+0, underload dcv 1V lower limit 114 
+5000, underload dcv 10V initial value 115 
+5082, underload dcv 10V valid cal value 115 
+9000, underload dcv 10V upper limit 115 
+0, underload dcv 10V lower limit 115 
+5000, underload dcv 100V initial value 116 
+5077, underload dcv 100V valid cal value 116 
+9000, underload dcv 100V upper limit 116 
+0, underload dcv 100V lower limit 116 
+5000, underload dcv 1000V initial value 117 
+5079, underload dcv 1000V valid cal value 117 
+9000, underload dcv 1000V upper limit 117 
+0, underload dcv 1000V lower limit 117 
+50000, overload dcv 100mV initial value 118 
+61032, overload dcv 100mV valid cal value 118 
+90000, overload dcv 100mV upper limit 118 
+0, overload dcv 100mV lower limit 118 
+50000, overload dcv 1V initial value 119 
+60960, overload dcv 1V valid cal value 119 
+90000, overload dcv 1V upper limit 119 
+0, overload dcv 1V lower limit 119 
+50000, overload dcv 10V initial value 120 
+60984, overload dcv 10V valid cal value 120 
+90000, overload dcv 10V upper limit 120 
+0, overload dcv 10V lower limit 120 
+50000, overload dcv 100V initial value 121 
+60924, overload dcv 100V valid cal value 121 
+90000, overload dcv 100V upper limit 121 
+0, overload dcv 100V lower limit 121 
+50000, overtoad dcv 1000V initial value 122 
+60948, overtoad dcv 1000V valid cal value 122 
+90000, overtoad dcv 1000V upper limit 122 
+0, overtoad dcv 1000V lower limit 122 
+5000, underload ohm 10 initial value 123 
+5010, underload ohm 10 valid cal value 123 
+9000, underload ohm 10 upper limit 123 
+0, underload ohm 10 lower limit 123 
+5000, underload ohm 100 initial value 124 
+5011, underload ohm 100 valid cal value 124 
+9000, underload ohm 100 upper limit 124 
+0, underload ohm 100 lower limit 124 
+5000, underload ohm 1k initial value 125 
+5005, underload ohm 1k valid cal value 125 
+9000, underload ohm 1k upper limit 125 
+0, underload ohm 1k lower limit 125 
+5000, underload ohm 10k initial value 126 
+5004, underload ohm 10k valid cal value 126 
+9000, underload ohm 10k upper limit 126 
+0, underload ohm 10k lower limit 126 
+2500, underload ohm 100k initial value 127 
+2503, underload ohm 100k valid cal value 127 
+9000, underload ohm 100k upper limit 127 
+0, underload ohm 100k lower limit 127 
+2500, underload ohm 1M initial value 128 
+2502, underload ohm 1M valid cal value 128 
+9000, underload ohm 1M upper limit 128 
+0, underload ohm 1M lower limit 128 
+2500, underload ohm 10M initial value 129 
+2503, underload ohm 10M valid cal value 129 
+9000, underload ohm 10M upper limit 129 
+0, underload ohm 10M lower limit 129 
+12500, underload ohm 100M initial value 130 
+12515, underload ohm 100M valid cal value 130 
+90000, underload ohm 100M upper limit 130 
+0, underload ohm 100M lower limit 130 
+25000, underload ohm 1G initial value 131 
+22755, underload ohm 1G valid cal value 131 
+90000, underload ohm 1G upper limit 131 
+0, underload ohm 1G lower limit 131 
+50000, overload ohm 10 initial value 132 
+60120, overload ohm 10 valid cal value 132 
+90000, overload ohm 10 upper limit 132 
+0, overload ohm 10 lower limit 132 
+50000, overload ohm 100 initial value 133 
+60132, overload ohm 100 valid cal value 133 
+90000, overload ohm 100 upper limit 133 
+0, overload ohm 100 lower limit 133 
+50000, overload ohm 1k initial value 134 
+60060, overload ohm 1k valid cal value 134 
+90000, overload ohm 1k upper limit 134 
+0, overload ohm 1k lower limit 134 
+50000, overload ohm 10k initial value 135 
+60048, overload ohm 10k valid cal value 135 
+90000, overload ohm 10k upper limit 135 
+0, overload ohm 10k lower limit 135 
+25000, overload ohm 100k initial value 136 
+30036, overload ohm 100k valid cal value 136 
+90000, overload ohm 100k upper limit 136 
+0, overload ohm 100k lower limit 136 
+25000, overload ohm 1M initial value 137 
+30024, overload ohm 1M valid cal value 137 
+90000, overload ohm 1M upper limit 137 
+0, overload ohm 1M lower limit 137 
+25000, overload ohm 10M initial value 138 
+30036, overload ohm 10M valid cal value 138 
+90000, overload ohm 10M upper limit 138 
+0, overload ohm 10M lower limit 138 
+125000, overload ohm 100M initial value 139 
+150180, overload ohm 100M valid cal value 139 
+900000, overload ohm 100M upper limit 139 
+0, overload ohm 100M lower limit 139 
+250000, overload ohm 1G initial value 140 
+273060, overload ohm 1G valid cal value 140 
+900000, overload ohm 1G upper limit 140 
+0, overload ohm 1G lower limit 140 
+5000, underload ohm ocomp 10 initial value 141 
+5010, underload ohm ocomp 10 valid cal value 141 
+9000, underload ohm ocomp 10 upper limit 141 
+0, underload ohm ocomp 10 lower limit 141 
+5000, underload ohm ocomp 100 initial value 142 
+5011, underload ohm ocomp 100 valid cal value 142 
+9000, underload ohm ocomp 100 upper limit 142 
+0, underload ohm ocomp 100 lower limit 142 
+5000, underload ohm ocomp 1k initial value 143 
+5005, underload ohm ocomp 1k valid cal value 143 
+9000, underload ohm ocomp 1k upper limit 143 
+0, underload ohm ocomp 1k lower limit 143 
+5000, underload ohm ocomp 10k initial value 144 
+5004, underload ohm ocomp 10k valid cal value 144 
+9000, underload ohm ocomp 10k upper limit 144 
+0, underload ohm ocomp 10k lower limit 144 
+2500, underload ohm ocomp 100k initial value 145 
+2503, underload ohm ocomp 100k valid cal value 145 
+9000, underload ohm ocomp 100k upper limit 145 
+0, underload ohm ocomp 100k lower limit 145 
+2500, underload ohm ocomp 1M initial value 146 
+2502, underload ohm ocomp 1M valid cal value 146 
+9000, underload ohm ocomp 1M upper limit 146 
+0, underload ohm ocomp 1M lower limit 146 
+2500, underload ohm ocomp 10M initial value 147 
+2503, underload ohm ocomp 10M valid cal value 147 
+9000, underload ohm ocomp 10M upper limit 147 
+0, underload ohm ocomp 10M lower limit 147 
+12500, underload ohm ocomp 100M initial value 148 
+12515, underload ohm ocomp 100M valid cal value 148 
+90000, underload ohm ocomp 100M upper limit 148 
+0, underload ohm ocomp 100M lower limit 148 
+25000, underload ohm ocomp 1G initial value 149 
+22755, underload ohm ocomp 1G valid cal value 149 
+90000, underload ohm ocomp 1G upper limit 149 
+0, underload ohm ocomp 1G lower limit 149 
+50000, overload ohm ocomp 10 initial value 150 
+60120, overload ohm ocomp 10 valid cal value 150 
+90000, overload ohm ocomp 10 upper limit 150 
+0, overload ohm ocomp 10 lower limit 150 
+50000, overload ohm ocomp 100 initial value 151 
+60132, overload ohm ocomp 100 valid cal value 151 
+90000, overload ohm ocomp 100 upper limit 151 
+0, overload ohm ocomp 100 lower limit 151 
+50000, overload ohm ocomp 1k initial value 152 
+60060, overload ohm ocomp 1k valid cal value 152 
+90000, overload ohm ocomp 1k upper limit 152 
+0, overload ohm ocomp 1k lower limit 152 
+50000, overload ohm ocomp 10k initial value 153 
+60048, overload ohm ocomp 10k valid cal value 153 
+90000, overload ohm ocomp 10k upper limit 153 
+0, overload ohm ocomp 10k lower limit 153 
+25000, overload ohm ocomp 100k initial value 154 
+30036, overload ohm ocomp 100k valid cal value 154 
+90000, overload ohm ocomp 100k upper limit 154 
+0, overload ohm ocomp 100k lower limit 154 
+25000, overload ohm ocomp 1M initial value 155 
+30024, overload ohm ocomp 1M valid cal value 155 
+90000, overload ohm ocomp 1M upper limit 155 
+0, overload ohm ocomp 1M lower limit 155 
+25000, overload ohm ocomp 10M initial value 156 
+30036, overload ohm ocomp 10M valid cal value 156 
+90000, overload ohm ocomp 10M upper limit 156 
+0, overload ohm ocomp 10M lower limit 156 
+125000, overload ohm ocomp 100M initial value 157 
+150180, overload ohm ocomp 100M valid cal value 157 
+900000, overload ohm ocomp 100M upper limit 157 
+0, overload ohm ocomp 100M lower limit 157 
+250000, overload ohm ocomp 1G initial value 158 
+273060, overload ohm ocomp 1G valid cal value 158 
+900000, overload ohm ocomp 1G upper limit 158 
+0, overload ohm ocomp 1G lower limit 158 
+2500, underload dci 100nA initial value 159 
+277, underload dci 100nA valid cal value 159 
+9000, underload dci 100nA upper limit 159 
+0, underload dci 100nA lower limit 159 
+2500, underload dci 1uA initial value 160 
+277, underload dci 1uA valid cal value 160 
+9000, underload dci 1uA upper limit 160 
+0, underload dci 1uA lower limit 160 
+2500, underload dci 10uA initial value 161 
+277, underload dci 10uA valid cal value 161 
+9000, underload dci 10uA upper limit 161 
+0, underload dci 10uA lower limit 161 
+2500, underload dci 100uA initial value 162 
+277, underload dci 100uA valid cal value 162 
+9000, underload dci 100uA upper limit 162 
+0, underload dci 100uA lower limit 162 
+2500, underload dci 1mA initial value 163 
+277, underload dci 1mA valid cal value 163 
+9000, underload dci 1mA upper limit 163 
+0, underload dci 1mA lower limit 163 
+2500, underload dci 10mA initial value 164 
+277, underload dci 10mA valid cal value 164 
+9000, underload dci 10mA upper limit 164 
+0, underload dci 10mA lower limit 164 
+2500, underload dci 100mA initial value 165 
+277, underload dci 100mA valid cal value 165 
+9000, underload dci 100mA upper limit 165 
+0, underload dci 100mA lower limit 165 
+2500, underload dci 1A initial value 166 
+277, underload dci 1A valid cal value 166 
+9000, underload dci 1A upper limit 166 
+0, underload dci 1A lower limit 166 
+25000, overload dci 100nA initial value 167 
+3324, overload dci 100nA valid cal value 167 
+90000, overload dci 100nA upper limit 167 
+0, overload dci 100nA lower limit 167 
+25000, overload dci 1uA initial value 168 
+3324, overload dci 1uA valid cal value 168 
+90000, overload dci 1uA upper limit 168 
+0, overload dci 1uA lower limit 168 
+25000, overload dci 10uA initial value 169 
+3324, overload dci 10uA valid cal value 169 
+90000, overload dci 10uA upper limit 169 
+0, overload dci 10uA lower limit 169 
+25000, overload dci 100uA initial value 170 
+3324, overload dci 100uA valid cal value 170 
+90000, overload dci 100uA upper limit 170 
+0, overload dci 100uA lower limit 170 
+25000, overload dci 1mA initial value 171 
+3324, overload dci 1mA valid cal value 171 
+90000, overload dci 1mA upper limit 171 
+0, overload dci 1mA lower limit 171 
+25000, overload dci 10mA initial value 172 
+3324, overload dci 10mA valid cal value 172 
+90000, overload dci 10mA upper limit 172 
+0, overload dci 10mA lower limit 172 
+25000, overload dci 100mA initial value 173 
+3324, overload dci 100mA valid cal value 173 
+90000, overload dci 100mA upper limit 173 
+0, overload dci 100mA lower limit 173 
+25000, overload dci 1A initial value 174 
+3324, overload dci 1A valid cal value 174 
+90000, overload dci 1A upper limit 174 
+0, overload dci 1A lower limit 174 
+ 32.0000000E+00, acal dcv temperature initial value 175 
+ 34.9392354E+00, acal dcv temperature valid cal value 175 
+ 100.000000E+00, acal dcv temperature upper limit 175 
+-20.0000000E+00, acal dcv temperature lower limit 175 
+ 32.0000000E+00, acal ohm temperature initial value 176 
+ 35.0076099E+00, acal ohm temperature valid cal value 176 
+ 100.000000E+00, acal ohm temperature upper limit 176 
+-20.0000000E+00, acal ohm temperature lower limit 176 
+ 32.0000000E+00, acal acv temperature initial value 177 
+ 35.0233247E+00, acal acv temperature valid cal value 177 
+ 100.000000E+00, acal acv temperature upper limit 177 
+-20.0000000E+00, acal acv temperature lower limit 177 
+128, ac offset dac 10mV initial value 178 
+139, ac offset dac 10mV valid cal value 178 
+255, ac offset dac 10mV upper limit 178 
+0, ac offset dac 10mV lower limit 178 
+128, ac offset dac 100mV initial value 179 
+140, ac offset dac 100mV valid cal value 179 
+255, ac offset dac 100mV upper limit 179 
+0, ac offset dac 100mV lower limit 179 
+128, ac offset dac 1V initial value 180 
+135, ac offset dac 1V valid cal value 180 
+255, ac offset dac 1V upper limit 180 
+0, ac offset dac 1V lower limit 180 
+128, ac offset dac 10V initial value 181 
+131, ac offset dac 10V valid cal value 181 
+255, ac offset dac 10V upper limit 181 
+0, ac offset dac 10V lower limit 181 
+128, ac offset dac 100V initial value 182 
+140, ac offset dac 100V valid cal value 182 
+255, ac offset dac 100V upper limit 182 
+0, ac offset dac 100V lower limit 182 
+128, ac offset dac 1KV initial value 183 
+141, ac offset dac 1KV valid cal value 183 
+255, ac offset dac 1KV upper limit 183 
+0, ac offset dac 1KV lower limit 183 
+128, acdc offset dac 10mV initial value 184 
+130, acdc offset dac 10mV valid cal value 184 
+255, acdc offset dac 10mV upper limit 184 
+0, acdc offset dac 10mV lower limit 184 
+128, acdc offset dac 100mV initial value 185 
+130, acdc offset dac 100mV valid cal value 185 
+255, acdc offset dac 100mV upper limit 185 
+0, acdc offset dac 100mV lower limit 185 
+128, acdc offset dac 1V initial value 186 
+134, acdc offset dac 1V valid cal value 186 
+255, acdc offset dac 1V upper limit 186 
+0, acdc offset dac 1V lower limit 186 
+128, acdc offset dac 10V initial value 187 
+131, acdc offset dac 10V valid cal value 187 
+255, acdc offset dac 10V upper limit 187 
+0, acdc offset dac 10V lower limit 187 
+128, acdc offset dac 100V initial value 188 
+140, acdc offset dac 100V valid cal value 188 
+255, acdc offset dac 100V upper limit 188 
+0, acdc offset dac 100V lower limit 188 
+128, acdc offset dac 1KV initial value 189 
+141, acdc offset dac 1KV valid cal value 189 
+255, acdc offset dac 1KV upper limit 189 
+0, acdc offset dac 1KV lower limit 189 
+128, acdci offset dac 100uA initial value 190 
+134, acdci offset dac 100uA valid cal value 190 
+255, acdci offset dac 100uA upper limit 190 
+0, acdci offset dac 100uA lower limit 190 
+128, acdci offset dac 1mA initial value 191 
+134, acdci offset dac 1mA valid cal value 191 
+255, acdci offset dac 1mA upper limit 191 
+0, acdci offset dac 1mA lower limit 191 
+128, acdci offset dac 10mA initial value 192 
+134, acdci offset dac 10mA valid cal value 192 
+255, acdci offset dac 10mA upper limit 192 
+0, acdci offset dac 10mA lower limit 192 
+128, acdci offset dac 100mA initial value 193 
+134, acdci offset dac 100mA valid cal value 193 
+255, acdci offset dac 100mA upper limit 193 
+0, acdci offset dac 100mA lower limit 193 
+128, acdci offset dac 1A initial value 194 
+134, acdci offset dac 1A valid cal value 194 
+255, acdci offset dac 1A upper limit 194 
+0, acdci offset dac 1A lower limit 194 
+2048, flatness dac 10mV initial value 195 
+2146, flatness dac 10mV valid cal value 195 
+4095, flatness dac 10mV upper limit 195 
+0, flatness dac 10mV lower limit 195 
+2048, flatness dac 100mV initial value 196 
+2151, flatness dac 100mV valid cal value 196 
+4095, flatness dac 100mV upper limit 196 
+0, flatness dac 100mV lower limit 196 
+2048, flatness dac 1V initial value 197 
+2006, flatness dac 1V valid cal value 197 
+4095, flatness dac 1V upper limit 197 
+0, flatness dac 1V lower limit 197 
+2048, flatness dac 10V initial value 198 
+2226, flatness dac 10V valid cal value 198 
+4095, flatness dac 10V upper limit 198 
+0, flatness dac 10V lower limit 198 
+2048, flatness dac 100V initial value 199 
+2456, flatness dac 100V valid cal value 199 
+4095, flatness dac 100V upper limit 199 
+0, flatness dac 100V lower limit 199 
+2048, flatness dac 1KV initial value 200 
+2456, flatness dac 1KV valid cal value 200 
+4095, flatness dac 1KV upper limit 200 
+0, flatness dac 1KV lower limit 200 
+128, level dac dc 1.2V initial value 201 
+133, level dac dc 1.2V valid cal value 201 
+158, level dac dc 1.2V upper limit 201 
+90, level dac dc 1.2V lower limit 201 
+128, level dac dc 12V initial value 202 
+128, level dac dc 12V valid cal value 202 
+158, level dac dc 12V upper limit 202 
+90, level dac dc 12V lower limit 202 
+128, level dac ac 1.2V initial value 203 
+126, level dac ac 1.2V valid cal value 203 
+158, level dac ac 1.2V upper limit 203 
+90, level dac ac 1.2V lower limit 203 
+128, level dac ac 12V initial value 204 
+127, level dac ac 12V valid cal value 204 
+158, level dac ac 12V upper limit 204 
+90, level dac ac 12V lower limit 204 
+128, dcv trigger offset 100mV initial value 205 
+123, dcv trigger offset 100mV valid cal value 205 
+158, dcv trigger offset 100mV upper limit 205 
+90, dcv trigger offset 100mV lower limit 205 
+128, dcv trigger offset 1V initial value 206 
+126, dcv trigger offset 1V valid cal value 206 
+158, dcv trigger offset 1V upper limit 206 
+90, dcv trigger offset 1V lower limit 206 
+128, dcv trigger offset 10V initial value 207 
+127, dcv trigger offset 10V valid cal value 207 
+158, dcv trigger offset 10V upper limit 207 
+90, dcv trigger offset 10V lower limit 207 
+128, dcv trigger offset 100V initial value 208 
+126, dcv trigger offset 100V valid cal value 208 
+158, dcv trigger offset 100V upper limit 208 
+90, dcv trigger offset 100V lower limit 208 
+128, dcv trigger offset 1000V initial value 209 
+127, dcv trigger offset 1000V valid cal value 209 
+158, dcv trigger offset 1000V upper limit 209 
+90, dcv trigger offset 1000V lower limit 209 
+-1.45908539E-03, acdcv sync offset 10mV initial value 210 
+-1.24692343E-03, acdcv sync offset 10mV valid cal value 210 
+-473.729023E-06, acdcv sync offset 10mV upper limit 210 
+-3.41084897E-03, acdcv sync offset 10mV lower limit 210 
+-15.1280958E-03, acdcv sync offset 100mV initial value 211 
+-12.1722682E-03, acdcv sync offset 100mV valid cal value 211 
+-4.91171942E-03, acdcv sync offset 100mV upper limit 211 
+-35.3643798E-03, acdcv sync offset 100mV lower limit 211 
+-150.544635E-03, acdcv sync offset 1V initial value 212 
+-118.642443E-03, acdcv sync offset 1V valid cal value 212 
+-48.8781283E-03, acdcv sync offset 1V upper limit 212 
+-351.922523E-03, acdcv sync offset 1V lower limit 212 
+-1.53281427E+00, acdcv sync offset 10V initial value 213 
+-1.20417800E+00, acdcv sync offset 10V valid cal value 213 
+-497.666972E-03, acdcv sync offset 10V upper limit 213 
+-3.58320220E+00, acdcv sync offset 10V lower limit 213 
+-15.1331564E+00, acdcv sync offset 100V initial value 214 
+-11.9630171E+00, acdcv sync offset 100V valid cal value 214 
+-4.91336248E+00, acdcv sync offset 100V upper limit 214 
+-35.3762098E+00, acdcv sync offset 100V lower limit 214 
+-151.293611E+00, acdcv sync offset 1KV initial value 215 
+-120.854746E+00, acdcv sync offset 1KV valid cal value 215 
+-49.1213022E+00, acdcv sync offset 1KV upper limit 215 
+-353.673376E+00, acdcv sync offset 1KV lower limit 215 
+-1.45908539E-03, acv sync offset 10mV initial value 216 
+-1.14591668E-03, acv sync offset 10mV valid cal value 216 
+-473.729023E-06, acv sync offset 10mV upper limit 216 
+-3.41084897E-03, acv sync offset 10mV lower limit 216 
+-15.1280958E-03, acv sync offset 100mV initial value 217 
+-11.8592596E-03, acv sync offset 100mV valid cal value 217 
+-4.91171942E-03, acv sync offset 100mV upper limit 217 
+-35.3643798E-03, acv sync offset 100mV lower limit 217 
+-150.544635E-03, acv sync offset 1V initial value 218 
+-117.951756E-03, acv sync offset 1V valid cal value 218 
+-48.8781283E-03, acv sync offset 1V upper limit 218 
+-351.922523E-03, acv sync offset 1V lower limit 218 
+-1.53281427E+00, acv sync offset 10V initial value 219 
+-1.20642228E+00, acv sync offset 10V valid cal value 219 
+-497.666972E-03, acv sync offset 10V upper limit 219 
+-3.58320220E+00, acv sync offset 10V lower limit 219 
+-15.1331564E+00, acv sync offset 100V initial value 220 
+-11.9669188E+00, acv sync offset 100V valid cal value 220 
+-4.91336248E+00, acv sync offset 100V upper limit 220 
+-35.3762098E+00, acv sync offset 100V lower limit 220 
+-151.293611E+00, acv sync offset 1KV initial value 221 
+-120.903253E+00, acv sync offset 1KV valid cal value 221 
+-49.1213022E+00, acv sync offset 1KV upper limit 221 
+-353.673376E+00, acv sync offset 1KV lower limit 221 
+ 1.00000000E+00, acv sync gain 10mV initial value 222 
+ 999.428319E-03, acv sync gain 10mV valid cal value 222 
+ 1.22890295E+00, acv sync gain 10mV upper limit 222 
+ 796.413502E-03, acv sync gain 10mV lower limit 222 
+ 1.00000000E+00, acv sync gain 100mV initial value 223 
+ 1.00598452E+00, acv sync gain 100mV valid cal value 223 
+ 1.22887865E+00, acv sync gain 100mV upper limit 223 
+ 798.771121E-03, acv sync gain 100mV lower limit 223 
+ 1.00000000E+00, acv sync gain 1V initial value 224 
+ 1.00108814E+00, acv sync gain 1V valid cal value 224 
+ 1.22887865E+00, acv sync gain 1V upper limit 224 
+ 798.771121E-03, acv sync gain 1V lower limit 224 
+ 1.00000000E+00, acv sync gain 10V initial value 225 
+ 1.01928719E+00, acv sync gain 10V valid cal value 225 
+ 1.22887865E+00, acv sync gain 10V upper limit 225 
+ 798.771121E-03, acv sync gain 10V lower limit 225 
+ 1.00000000E+00, acv sync gain 100V initial value 226 
+ 1.00632104E+00, acv sync gain 100V valid cal value 226 
+ 1.22887865E+00, acv sync gain 100V upper limit 226 
+ 798.771121E-03, acv sync gain 100V lower limit 226 
+ 1.00000000E+00, acv sync gain 1KV initial value 227 
+ 1.00606866E+00, acv sync gain 1KV valid cal value 227 
+ 1.22887865E+00, acv sync gain 1KV upper limit 227 
+ 798.771121E-03, acv sync gain 1KV lower limit 227 
+ 0.0000000E+00, ab ratio initial value 228 
+ 307.680951E+03, ab ratio valid cal value 228 
+ 2.84000000E+06, ab ratio upper limit 228 
+-2.84000000E+06, ab ratio lower limit 228 
+ 10.2000000E+00, gain ratio initial value 229 
+ 10.3688989E+00, gain ratio valid cal value 229 
+ 11.0000000E+00, gain ratio upper limit 229 
+ 9.50000000E+00, gain ratio lower limit 229 
+ 1.00000000E+00, acv ana gain 10mV initial value 230 
+ 985.194242E-03, acv ana gain 10mV valid cal value 230 
+ 1.17233294E+00, acv ana gain 10mV upper limit 230 
+ 854.128287E-03, acv ana gain 10mV lower limit 230 
+ 1.00000000E+00, acv ana gain 100mV initial value 231 
+ 991.738966E-03, acv ana gain 100mV valid cal value 231 
+ 1.16260163E+00, acv ana gain 100mV upper limit 231 
+ 853.658537E-03, acv ana gain 100mV lower limit 231 
+ 1.00000000E+00, acv ana gain 1V initial value 232 
+ 986.911920E-03, acv ana gain 1V valid cal value 232 
+ 1.16260163E+00, acv ana gain 1V upper limit 232 
+ 853.658537E-03, acv ana gain 1V lower limit 232 
+ 1.00000000E+00, acv ana gain 10V initial value 233 
+ 1.00485326E+00, acv ana gain 10V valid cal value 233 
+ 1.16260163E+00, acv ana gain 10V upper limit 233 
+ 853.658537E-03, acv ana gain 10V lower limit 233 
+ 1.00000000E+00, acv ana gain 100V initial value 234 
+ 992.070721E-03, acv ana gain 100V valid cal value 234 
+ 1.16260163E+00, acv ana gain 100V upper limit 234 
+ 853.658537E-03, acv ana gain 100V lower limit 234 
+ 1.00000000E+00, acv ana gain 1KV initial value 235 
+ 991.821912E-03, acv ana gain 1KV valid cal value 235 
+ 1.16260163E+00, acv ana gain 1KV upper limit 235 
+ 853.658537E-03, acv ana gain 1KV lower limit 235 
+ 0.0000000E+00, acv ana offset 10mV initial value 236 
+ 9.09686765E-06, acv ana offset 10mV valid cal value 236 
+ 50.2620489E-06, acv ana offset 10mV upper limit 236 
+-50.2620489E-06, acv ana offset 10mV lower limit 236 
+ 0.0000000E+00, acv ana offset 100mV initial value 237 
+ 93.6957562E-06, acv ana offset 100mV valid cal value 237 
+ 517.688160E-06, acv ana offset 100mV upper limit 237 
+-517.688160E-06, acv ana offset 100mV lower limit 237 
+ 0.0000000E+00, acv ana offset 1V initial value 238 
+ 936.957562E-06, acv ana offset 1V valid cal value 238 
+ 5.17688160E-03, acv ana offset 1V upper limit 238 
+-5.17688160E-03, acv ana offset 1V lower limit 238 
+ 0.0000000E+00, acv ana offset 10V initial value 239 
+ 9.36957562E-03, acv ana offset 10V valid cal value 239 
+ 51.7688160E-03, acv ana offset 10V upper limit 239 
+-51.7688160E-03, acv ana offset 10V lower limit 239 
+ 0.0000000E+00, acv ana offset 100V initial value 240 
+ 93.6957562E-03, acv ana offset 100V valid cal value 240 
+ 517.688160E-03, acv ana offset 100V upper limit 240 
+-517.688160E-03, acv ana offset 100V lower limit 240 
+ 0.0000000E+00, acv ana offset 1KV initial value 241 
+ 936.957562E-03, acv ana offset 1KV valid cal value 241 
+ 5.17688160E+00, acv ana offset 1KV upper limit 241 
+-5.17688160E+00, acv ana offset 1KV lower limit 241 
+ 1.02000000E+00, rmsdc ratio initial value 242 
+ 1.02496466E+00, rmsdc ratio valid cal value 242 
+ 1.06000000E+00, rmsdc ratio upper limit 242 
+ 990.000000E-03, rmsdc ratio lower limit 242 
+ 1.00000000E+00, sampdc ratio initial value 243 
+ 1.00017733E+00, sampdc ratio valid cal value 243 
+ 1.00100000E+00, sampdc ratio upper limit 243 
+ 999.000000E-03, sampdc ratio lower limit 243 
+ 1.00000000E+00, aci gain initial value 244 
+ 1.00013749E+00, aci gain valid cal value 244 
+ 1.00500000E+00, aci gain upper limit 244 
+ 995.000000E-03, aci gain lower limit 244 
+ 1.00000000E+00, freq gain initial value 245 
+ 1.00000238E+00, freq gain valid cal value 245 
+ 1.00012500E+00, freq gain upper limit 245 
+ 999.875000E-03, freq gain lower limit 245 
+70, attenuator high frequency dac initial value 246 
+81, attenuator high frequency dac valid cal value 246 
+255, attenuator high frequency dac upper limit 246 
+0, attenuator high frequency dac lower limit 246 
+70, amplifier high frequency dac 10mV initial value 247 
+35, amplifier high frequency dac 10mV valid cal value 247 
+255, amplifier high frequency dac 10mV upper limit 247 
+0, amplifier high frequency dac 10mV lower limit 247 
+70, amplifier high frequency dac 100mV initial value 248 
+35, amplifier high frequency dac 100mV valid cal value 248 
+255, amplifier high frequency dac 100mV upper limit 248 
+0, amplifier high frequency dac 100mV lower limit 248 
+70, amplifier high frequency dac 1V initial value 249 
+35, amplifier high frequency dac 1V valid cal value 249 
+255, amplifier high frequency dac 1V upper limit 249 
+0, amplifier high frequency dac 1V lower limit 249 
+70, amplifier high frequency dac 10V initial value 250 
+43, amplifier high frequency dac 10V valid cal value 250 
+255, amplifier high frequency dac 10V upper limit 250 
+0, amplifier high frequency dac 10V lower limit 250 
+70, amplifier high frequency dac 100V initial value 251 
+49, amplifier high frequency dac 100V valid cal value 251 
+255, amplifier high frequency dac 100V upper limit 251 
+0, amplifier high frequency dac 100V lower limit 251 
+70, amplifier high frequency dac 1KV initial value 252 
+49, amplifier high frequency dac 1KV valid cal value 252 
+255, amplifier high frequency dac 1KV upper limit 252 
+0, amplifier high frequency dac 1KV lower limit 252 
+16, interpolator initial value 253 
+11, interpolator valid cal value 253 
+31, interpolator upper limit 253 
+0, interpolator lower limit 253 

@@ -10,6 +10,9 @@ dd = '.' * 2048
 
 def printDump():
 	global dd
+	print()
+	print('READ DATA BYTES:')
+	print('================')
 	BLOCKSIZE = 32
 	adr = 0
 	for l in [dd[i:i+BLOCKSIZE] for i in range(0, len(dd), BLOCKSIZE)]:
