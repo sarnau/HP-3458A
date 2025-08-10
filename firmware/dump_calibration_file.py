@@ -13,6 +13,8 @@ def printDump():
 	print()
 	print('READ DATA BYTES:')
 	print('================')
+	print('D = Double, L = Long, W = Work, B = Byte')
+	print('S = String, X = Checksum, . = not accessed')
 	BLOCKSIZE = 32
 	adr = 0
 	for l in [dd[i:i+BLOCKSIZE] for i in range(0, len(dd), BLOCKSIZE)]:
