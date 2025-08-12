@@ -4,7 +4,37 @@ The 3458A uses a Motorola 68000 running at 8MHz and has 384kb of ROM plus a vari
 
 ## IRQ Map
 
-The 68000 has 7 IPL
+The 68000 has 7 IPL:
+
+	LEVEL
+	1 - Timer (U400)
+	2 - Isolator (Inboard)
+	3 - Isolator (Inboard)
+	4 - Frontend (U800, Display, Keyboard)
+	5 - GPIB (U904)
+	6 - endless loop
+	7 - CALRAM access
+
+The following TRAPs are used:
+
+	TRAP #0  - pSOS function call
+	TRAP #1  - pSOS driver call
+	TRAP #2  - Run pSOS scheduler
+	TRAP #3  - pSOS startup
+	TRAP #4  - unknown
+	TRAP #5  - Enable IRQ 2
+	TRAP #6  - Disable IRQs
+	TRAP #7  - Enable IRQs
+	TRAP #8  - unused
+	TRAP #9  - unused
+	TRAP #10 - unused
+	TRAP #11 - unused
+	TRAP #12 - unused
+	TRAP #13 - unused
+	TRAP #14 - unused
+	TRAP #15 - looks like some debugging helper code
+
+VECTOR $100 also seems to be tied to some debugging code.
 
 ## Memory Map
 
