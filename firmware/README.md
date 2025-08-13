@@ -43,13 +43,13 @@ Unknown Adr: Enable Register (1 Byte, Write Only). Bit 0: EITRIG, 1:N/C, 2:DTACK
 	0x000000-0x01FFFF - ROM0L/ROM0U - U110/U111 - 128KB ROM0
 	0x020000-0x03FFFF - ROM1L/ROM1U - U112/U113 - 128KB ROM1
 	0x040000-0x05FFFF - ROM2L/ROM2U - U114/U115 - 128KB ROM2
-	0x060000-0x060FFF - CRAM        - U132      - CALRAM 16k Nonvolatile SRAM (DS1220Y-150)
+	0x060000-0x060FFF - CRAM        - U132      - CALRAM 16k Nonvolatile SRAM (DS1220Y-150) – only upper byte
 	0x070000-0x070006 -             - U700      - IO Crossguard/Isolator (MB62H301 CMOS Gate Array)
 	0x080000-0x08001F -             - U904      - IO HPIB (TMS9914ANL)
 	0x090000-0x090000 -             -           - IO ?
 	0x0A0000-0x0A0001 -             -           - IO ?
 	0x0B0000-0x0B0001 -             -           - IO ?
-	0x0C0001-0x0C0001 -             - U102      - IO ENABLE REGISTER
+	0x0C0001-0x0C0001 -             - U102      - IO ENABLE REGISTER (74HCT273N)
 	0x0D0001-0x0D0001 -             -           - IO ?
 	0x0E0000-0x0E0003 -             - U800      - IO Front Panel Interface (HD63A50 @ 10MHz)
 	0x0F0000-0x0F000F -             - U400      - IO Programmable Timer (HD83A40/MC6840)
