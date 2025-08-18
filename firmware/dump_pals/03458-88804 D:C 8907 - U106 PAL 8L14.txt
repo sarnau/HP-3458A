@@ -1,5 +1,17 @@
+Inputs:
+ID Pin   Label
+U -  3 - UDS-
+L -  4 - LDS-
+A -  5 - AS-
+  -  6 - A16
+  -  7 - A17
+  -  8 - A18
+  -  9 - A19
+  - 10 - A20
+
 AS- has to be low, otherwise all outputs will be high
 
+Outputs:
 ID Pin   Label
 a -  1 - n/c
 b -  2 - SREGL-  => Page 2

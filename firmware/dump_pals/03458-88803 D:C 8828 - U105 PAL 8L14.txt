@@ -1,6 +1,36 @@
+Inputs:
+ID Pin   Label
+U -  3 - UDS-
+L -  4 - LDS-
+A -  5 - AS-
+  -  6 - A16
+  -  7 - A17
+  -  8 - A18
+  -  9 - A19
+  - 10 - A20
+
 AS- has to be low, otherwise all outputs will be high
 
-ULA A16-A20   .cr1r1r0R2R1R0
+Outputs:
+ID Pin   Label
+a -  1 - ROM0L-
+b -  2 - ROM0U-
+c - 11 - ROM1L-
+d - 13 - ROM1U-
+e - 14 - ROM2L-
+f - 15 - ROM2U-
+g - 16 - RAM0L-
+h - 17 - RAM0U-
+i - 18 - RAM1L-
+j - 19 - RAM1U-
+k - 20 - RAM2L-
+l - 21 - RAM2U-
+m - 22 - CRAM-
+n - 23 - n/c
+
+'x' = bit ignored
+
+ULA A16-A20   nmlkjihgfedcba
 000 $000000 - 11111111111100
 010 $000000 - 11111111111101 ROM0
 100 $000000 - 11111111111110
