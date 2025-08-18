@@ -1,0 +1,35 @@
+AS- has to be low, otherwise all outputs will be high
+
+ID Pin   Label
+a -  1 - n/c
+b -  2 - SREGL-  => Page 2
+c - 11 - HPIBA-  => Page 2
+d - 13 - HPIBD-  => Page 2
+e - 14 - RSASM-  => Page 2
+f - 15 - ASMHD-  => !(ASMHD- & WRITE-) = HDASM
+g - 16 - ASM-    => !(ASM- & WRITE-)   = ASMWT
+h - 17 - ENREG-  => !(ENREG- & WRITE-) = CSEN
+i - 18 - FP-     => (FP- & VMA-)       = CSFP-
+j - 19 - PTIME-  => (PTIME- & VMA-)    = CSPT-
+k - 20 - XGRD-
+l - 21 - n/c
+m - 22 - CSCE-   => (CSCE- & WRITE-)   = CREN-
+n - 23 - RSXGD-
+
+'x' = bit ignored
+
+ULA A16-A20   nmlkjihgfedcba
+xx0 $070000 - 11101111111111
+000 $080000 - 11111110110011
+010 $080000 - 11111111110011
+100 $080000 - 11111110111011
+110 $080000 - 11111111111011
+xx0 $090000 - 11111111101111
+xx0 $0A0000 - 01111111111111
+xx0 $0B0000 - 10111111111111
+x00 $0C0000 - 11111101111101
+x00 $0D0000 - 11111111011111
+0x0 $0E0000 - 11111011111111
+x00 $0F0000 - 11110111111111
+000 $100000 - 11011111111111
+100 $100000 - 11010111111111
