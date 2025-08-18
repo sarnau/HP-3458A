@@ -38,8 +38,6 @@ VECTOR $100 also seems to be tied to some debugging code.
 
 ## Memory Map
 
-Unknown Adr: Enable Register (1 Byte, Write Only). Bit 0: EITRIG, 1:N/C, 2:DTACK-stuff, 3:INT7, 4:EXG1, 5:RSFP, 6:FPTST, 7:EITE
-
 	0x000000-0x01FFFF - ROM0L/ROM0U - U110/U111 - 128KB ROM0
 	0x020000-0x03FFFF - ROM1L/ROM1U - U112/U113 - 128KB ROM1
 	0x040000-0x05FFFF - ROM2L/ROM2U - U114/U115 - 128KB ROM2
@@ -49,12 +47,11 @@ Unknown Adr: Enable Register (1 Byte, Write Only). Bit 0: EITRIG, 1:N/C, 2:DTACK
 	0x090000-0x090000 -             -           - IO ?
 	0x0A0000-0x0A0001 -             -           - IO ?
 	0x0B0000-0x0B0001 -             -           - IO ?
-	0x0C0001-0x0C0001 -             - U102      - IO ENABLE REGISTER (74HCT273N)
+	0x0C0001-0x0C0001 -             - U102      - IO ENABLE REGISTER (74HCT273N, Write-Only) Bit 0: EITRIG, 1:N/C, 2:DTACK-stuff, 3:INT7, 4:EXG1, 5:RSFP, 6:FPTST, 7:EITE
 	0x0D0001-0x0D0001 -             -           - IO ?
 	0x0E0000-0x0E0003 -             - U800      - IO Front Panel Interface (HD63A50 @ 10MHz)
 	0x0F0000-0x0F000F -             - U400      - IO Programmable Timer (HD83A40/MC6840)
-	0x100000-0x11FFFF - RAM0L/RAM0U - U121/U122 - RAM 256K Nonvolatile SRAM (2 x DS1235Y-150)
-	0x120000-0x12AFFF -      "      -     "     - DATARAM
-	0x12B000-0x12FFFF -      "      -     "     - NON-VOLATILE RAM
+	0x100000-0x11FFFF -             -           - 
+	0x120000-0x12AFFF - RAM0L/RAM0U - U121/U122 - DATARAM RAM 256K Nonvolatile SRAM (2 x DS1235Y-150)
 	0x130000-0x13FFFF - RAM1L/RAM1U - U123/U123 - 64KB OPTIONAL RAM 0 (2 x HM62256LP-12)
 	0x140000-0x14FFFF - RAM2L/RAM2U - U124/U126 - 64KB OPTIONAL RAM 1 (2 x HM62256LP-12)
