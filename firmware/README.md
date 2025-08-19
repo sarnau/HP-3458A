@@ -25,7 +25,8 @@ The Outguard Controller Board has two jumpers:
 	0x0D0001-0x0D0001 -             - U902A.3   - HDASM (triggered by any write access)
 	0x0E0000-0x0E0003 -             - U800      - Front Panel Interface - Serial Interface Controller (HD63A50P @ 10MHz)
 	0x0F0000-0x0F000F -             - U400      - Programmable Timer (HD83A40P)
-	0x100000-0x11FFFF -             -      "    - Mirror of 0x0F0000-0x0Fxxxxx
+	0x100000-0x100001 -             -           - Internal output for a scope to measure a low-level hang
+	0x110000-0x11FFFF -             -           - Internal simulator IO for debugging the hardware
 	0x120000-0x12FFFF - RAM0L/RAM0U - U121/U122 - DATARAM RAM 256K Nonvolatile SRAM (2 x DS1235Y-150)
 	0x130000-0x13FFFF - RAM1L/RAM1U - U123/U123 - 64KB OPTIONAL RAM 0 (2 x HM62256LP-12)
 	0x140000-0x14FFFF - RAM2L/RAM2U - U124/U126 - 64KB OPTIONAL RAM 1 (2 x HM62256LP-12)
@@ -35,13 +36,13 @@ The Outguard Controller Board has two jumpers:
 The 68000 has 7 IPL, triggered by U605 as the interrupt controller
 
     0 -        - never triggered, illegal
-	1 - IPT-   - Timer (U400)
-	2 - IXGRD- - Isolator (Inboard) (EXGI & CTRLO)
-	3 - IXGO1- - Isolator (Inboard) (IRQ from U700)
-	4 - U805.1 - Frontend (U800, Display, Keyboard)
-	5 - U910.8 - GPIB (U904)
-	6 - ITRIG- - endless loop (U800.2 EITRIG & Timer 3 Out)
-	7 - INT7-  - CALRAM access
+	1 - IPT-   - IPT-   - Timer (U400)
+	2 - IXGRD- - IXGRD- - Crossguard IRQ (EXGI & CTRLO)
+	3 - IXGO1- - IXGO1- - Crossguard IRQ (IRQ from U700)
+	4 - U805.1 - IFP-   - Frontend IRQ (U800.7: IRQ output from the HD63A50P)
+	5 - U910.8 - IIB-   - GPIB (/(ATN & NRFD & EITE) & IHPIB-)
+	6 - ITRIG- - ITRIG- - endless loop (U800.2 EITRIG & Timer 3 Out)
+	7 - INT7-  - INT7-  - request CALRAM access, triggered by bit 3 in the enable register
 
 ## Traps
 
@@ -60,6 +61,6 @@ The 68000 has 7 IPL, triggered by U605 as the interrupt controller
 	TRAP #12 - unused
 	TRAP #13 - unused
 	TRAP #14 - unused
-	TRAP #15 - looks like some debugging helper code
+	TRAP #15 - Simulator call, e.g. a breakpoint trigger
 
-VECTOR $100 also seems to be tied to some debugging code.
+VECTOR $100 is tied to debugging via a simulator.
