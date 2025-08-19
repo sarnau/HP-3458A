@@ -2,6 +2,13 @@
 
 The 3458A uses a Motorola 68000 running at 8MHz and has 384kb of ROM plus a variable amount of RAM.
 
+## Jumper
+
+The Outguard Controller Board has two jumpers:
+
+- JM600: Default Position at +5V, Alternative to GND, which allows to override password security for CALRAM access
+- JM132: Default Position at U908C.8, Alternative to +5V, which allows to disable any write access to the CALRAM
+
 ## Memory Map
 
 	0x000000-0x01FFFF - ROM0L/ROM0U - U110/U111 - 128KB ROM0 (2 x TM27C512)
@@ -10,11 +17,12 @@ The 3458A uses a Motorola 68000 running at 8MHz and has 384kb of ROM plus a vari
 	0x060000-0x060FFF - CRAM        - U132      - CALRAM 16k Nonvolatile SRAM (1 x DS1220Y-150) – only upper byte
 	0x070000-0x070006 -             - U700      - Crossguard/Isolator (MB62H301 CMOS Gate Array)
 	0x080000-0x08001F -             - U904      - HPIB (TMS9914ANL)
-	0x090000-0x090000 -             -           - ?
-	0x0A0000-0x0A0001 -             -           - ?
-	0x0B0000-0x0B0001 -             -           - ?
-	0x0C0001-0x0C0001 -             - U102      - ENABLE REGISTER (74HCT273N, Write-Only) Bit 0: EITRIG, 1:n/c, 2:DTACK-stuff, 3:INT7, 4:EXG1, 5:RSFP, 6:FPTST, 7:EITE
-	0x0D0001-0x0D0001 -             -           - ?
+	0x090000-0x090000 -             - U909A.1   - RESET ASM (triggered by any write access)
+	0x0A0000-0x0A0001 -             - U703C.10  - Crossguard Reset (triggered by any write access)
+	0x0B0000-0x0B0001 -             - U908D     - CALRAM Write-Enable (triggered by any write access)
+	0x0C0001-0x0C0001 -             - U102.13   - Write: ENABLE REGISTER (74HCT273N, Write-Only) Bit 0: EITRIG, 1:n/c, 2:DTACK-stuff, 3:INT7, 4:EXG1, 5:RSFP, 6:FPTST, 7:EITE
+	0x0C0001-0x0C0001 -             - U603      - Read: STATUS REGISTER
+	0x0D0001-0x0D0001 -             - U902A.3   - HDASM (triggered by any write access)
 	0x0E0000-0x0E0003 -             - U800      - Front Panel Interface - Serial Interface Controller (HD63A50P @ 10MHz)
 	0x0F0000-0x0F000F -             - U400      - Programmable Timer (HD83A40P)
 	0x100000-0x11FFFF -             -      "    - Mirror of 0x0F0000-0x0Fxxxxx
