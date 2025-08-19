@@ -7,6 +7,7 @@ import sys
 import math
 
 dd = '.' * 2048
+dda = '.' * 2048
 
 def printDump():
 	global dd
@@ -18,6 +19,19 @@ def printDump():
 	BLOCKSIZE = 32
 	adr = 0
 	for l in [dd[i:i+BLOCKSIZE] for i in range(0, len(dd), BLOCKSIZE)]:
+		print('%#06x : %s' % (adr,l))
+		adr += BLOCKSIZE
+
+def printDumpAccess():
+	global dda
+	print()
+	print('AREA DATA BYTES:')
+	print('================')
+	print('c = CAL, a = ACAL, s = SCAL, S = SECURE')
+	print('. = not part of a secure area')
+	BLOCKSIZE = 32
+	adr = 0
+	for l in [dda[i:i+BLOCKSIZE] for i in range(0, len(dda), BLOCKSIZE)]:
 		print('%#06x : %s' % (adr,l))
 		adr += BLOCKSIZE
 
@@ -58,9 +72,11 @@ def getDouble(data,offset):
 	dd = dd[:offset] + 'Dddddddd' + dd[offset+8:]
 	return struct.unpack('>d', data[offset:offset+8])[0]
 
-def verifyChecksum(data, startadr, endadr):
+def verifyChecksum(data, startadr, endadr, typ='?'):
+	global dda
 	chk = 0x0000
 	for adr in range(startadr,endadr):
+		dda = dda[:adr] + typ + dda[adr+1:]
 		chk += data[adr]
 
 	for adr in range(startadr,endadr):
@@ -108,7 +124,7 @@ dd = '.' * 2048
 
 print('SECURE')
 print('======')
-print('=> CHECKSUM %#06x == %#06x' % (getWord(data,0x624,'X'),verifyChecksum(data,0x5ca,0x624)))
+print('=> CHECKSUM %#06x == %#06x' % (getWord(data,0x624,'X'),verifyChecksum(data,0x5ca,0x624,'S')))
 
 baseadr = 0x5ca
 print('CALSTR? "%s"' % getString(data,baseadr))
@@ -129,19 +145,19 @@ print('CAL? 2437 => %d, %s %s %d' % (getLong(data,0x62a),'DEFEATS','valid', 2437
 print()
 print('SCAL')
 print('====')
-print('=> CHECKSUM %#06x == %#06x' % (getWord(data,0x5c8,'X'),verifyChecksum(data,0x5a0,0x5c8)))
+print('=> CHECKSUM %#06x == %#06x' % (getWord(data,0x5c8,'X'),verifyChecksum(data,0x5a0,0x5c8,'s')))
 
 print()
 print('ACAL')
 print('====')
-print('=> CHECKSUM %#06x == %#06x' % (getWord(data,0x59c,'X'),verifyChecksum(data,0x1c0,0x59c) + verifyChecksum(data,0x040,0x060)))
+print('=> CHECKSUM %#06x == %#06x' % (getWord(data,0x59c,'X'),verifyChecksum(data,0x1c0,0x59c,'a') + verifyChecksum(data,0x040,0x060,'a')))
 
 
 print()
 print('CAL')
 print('===')
 
-print('=> CHECKSUM %#06x == %#06x' % (getWord(data,0x1bc,'X'),verifyChecksum(data,0x60,0x1bc) + verifyChecksum(data,0x000,0x040)))
+print('=> CHECKSUM %#06x == %#06x' % (getWord(data,0x1bc,'X'),verifyChecksum(data,0x60,0x1bc,'c') + verifyChecksum(data,0x000,0x040,'c')))
 
 #sys.exit(0)
 print()
@@ -440,3 +456,5 @@ printCal_byte(0x5c6, 'interpolator', 253)
 
 
 printDump()
+
+printDumpAccess()
