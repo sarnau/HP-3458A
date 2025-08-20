@@ -24,8 +24,8 @@ The Outguard Controller Board has two jumpers:
 	0x090000-0x090000 -             - U909A.1   - RESET ASM (triggered by any write access)
 	0x0A0000-0x0A0001 -             - U703C.10  - Crossguard Reset (triggered by any write access)
 	0x0B0000-0x0B0001 -             - U908D     - CALRAM Write-Enable (triggered by any write access)
-	0x0C0001-0x0C0001 -             - U102.13   - Write: ENABLE REGISTER (74HCT273N, Write-Only) Bit 0: EITRIG, 1:n/c, 2:DTACK-stuff, 3:INT7, 4:EXG1, 5:RSFP, 6:FPTST, 7:EITE
-	0x0C0001-0x0C0001 -             - U603      - Read: STATUS REGISTER
+	0x0C0001-0x0C0001 -             - U102.13   - Write-only: ENABLE REGISTER
+	0x0C0001-0x0C0001 -             - U603      - Read-only:  STATUS REGISTER
 	0x0D0001-0x0D0001 -             - U902A.3   - HDASM (triggered by any write access)
 	0x0E0000-0x0E0003 -             - U800      - Front Panel Interface - Serial Interface Controller (HD63A50P @ 10MHz)
 	0x0F0000-0x0F000F -             - U400      - Programmable Timer (HD83A40P)
@@ -34,6 +34,30 @@ The Outguard Controller Board has two jumpers:
 	0x120000-0x12FFFF - RAM0L/RAM0U - U121/U122 - DATARAM RAM 256K Nonvolatile SRAM (2 x DS1235Y-150)
 	0x130000-0x13FFFF - RAM1L/RAM1U - U123/U123 - 64KB OPTIONAL RAM 0 (2 x HM62256LP-12)
 	0x140000-0x14FFFF - RAM2L/RAM2U - U124/U126 - 64KB OPTIONAL RAM 1 (2 x HM62256LP-12)
+
+## Registers
+
+### ENABLE Register
+
+- D0 - EITRIG
+- D1 - EITE
+- D2 - FPTST (Front panel test)
+- D3 - n/c
+- D4 - disable BERR
+- D5 - RSFP
+- D6 - EXG1
+- D7 - INT7 (trigger an IPL 7 interrupt)
+
+### STATUS Register
+
+- D0 - JM600 jumper (override CALRAM password)
+- D1 - ASMON
+- D2 - HOLD
+- D3 - A-
+- D4 - B-
+- D5 - IFP-
+- D6 - HPIB: ITE0 (ATN & NRFD from TMS99114)
+- D7 - CALWE (CALRAM is write-enabled for a short time)
 
 ## IRQ Levels
 
