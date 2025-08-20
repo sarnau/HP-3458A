@@ -2,6 +2,10 @@
 
 The 3458A uses a Motorola 68000 running at 8MHz and has 384kb of ROM plus a variable amount of RAM.
 
+## Ghidra Firmware
+
+To open the firmware in Ghidra, you need Ghidra 11.4.1 and update the 68000 processor files with the ones in this repo. The reason for this is, that certain custom calling conventions are needed. pascal calling convention is still an issue – stack cleanup by the called function seemed to be an unsolved issue in Ghidra and technically the parameter order needs to be reversed.
+
 ## Jumper
 
 The Outguard Controller Board has two jumpers:
