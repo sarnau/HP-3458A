@@ -62,8 +62,10 @@ def getWord(data,offset,ch='W'):
 
 def getLong(data,offset):
 	global dd
+	if len(data) < offset+3:
+		return 0
 	dd = dd[:offset] + 'Llll' + dd[offset+4:]
-	val = struct.unpack('>L', data[offset:offset+4])[0]
+	val = struct.unpack('>l', data[offset:offset+4])[0]
 	#print("%#06x : %#10x / %d" % (offset,val,val))
 	return val
 
@@ -75,19 +77,20 @@ def getDouble(data,offset):
 def verifyChecksum(data, startadr, endadr, typ='?'):
 	global dda
 	chk = 0x0000
-	for adr in range(startadr,endadr):
-		dda = dda[:adr] + typ + dda[adr+1:]
-		chk += data[adr]
-
-	for adr in range(startadr,endadr):
-		b = 0x718 + (adr >> 3)
-		bit = adr & 7
-		chk += (getByte(data, b) & (1 << bit)) != 0
+	if len(data) == 0x800:
+		for adr in range(startadr,endadr):
+			dda = dda[:adr] + typ + dda[adr+1:]
+			chk += data[adr]
+		for adr in range(startadr,endadr):
+			b = 0x718 + (adr >> 3)
+			bit = adr & 7
+			chk += (getByte(data, b) & (1 << bit)) != 0
 	return (chk & 0xFFFF)
 
 data = open('hp3458.calram.bin','rb').read()
 initial_data = open('hp3458a.calram.initial.bin','rb').read()
-#print(binascii.hexlify(data).decode('ascii'))
+# Uncomment the following line to see the initial ROM calibration data
+# data = initial_data
 
 # which start addresses have valid data?
 if False:
