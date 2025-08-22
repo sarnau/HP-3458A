@@ -21,17 +21,17 @@ The Outguard Controller Board has two jumpers:
 | 0x020000-0x03FFFF | ROM1L/ROM1U | U112/U113 | 128KB ROM0 (2 x TM27C512) |
 | 0x040000-0x05FFFF | ROM2L/ROM2U | U114/U115 | 128KB ROM0 (2 x TM27C512) |
 | 0x060000-0x060FFF | CRAM        |      U132 | CALRAM 16k Nonvolatile SRAM (1 x DS1220Y-150) – only upper byte |
-| 0x070000-0x070006 |             |      U700 | Crossguard/Isolator (MB62H301 CMOS Gate Array) |
+| 0x070000-0x070005 |             |      U700 | Crossguard/Isolator (MB62H301 CMOS Gate Array) |
 | 0x080000-0x08001F |             |      U904 | HPIB (TMS9914ANL) |
-| 0x090000-0x090000 |             |   U909A.1 | RESET ASM (triggered by any write access) |
-| 0x0A0000-0x0A0001 |             |  U703C.10 | Crossguard Reset (triggered by any write access) |
-| 0x0B0000-0x0B0001 |             |     U908D | CALRAM Write-Enable (triggered by any write access) |
-| 0x0C0000-0x0C0001 |             |   U102.13 | Write-only: ENABLE REGISTER |
-| 0x0C0000-0x0C0001 |             |      U603 | Read-only:  STATUS REGISTER |
-| 0x0D0000-0x0D0001 |             |   U902A.3 | HDASM (triggered by any write access) |
+| 0x090000-0x090001 |             |   U909A.1 | RESET ASM (triggered by any write access, byte or word-wide) |
+| 0x0A0000-0x0A0001 |             |  U703C.10 | Write-only: word-write, Crossguard Reset (triggered by any write access) |
+| 0x0B0000-0x0B0001 |             |     U908D | Write-only: word-write 0, CALRAM Write-Enable |
+| 0x0C0001-0x0C0001 |             |   U102.13 | Write-only: ENABLE REGISTER |
+| 0x0C0001-0x0C0001 |             |      U603 | Read-only:  STATUS REGISTER |
+| 0x0D0001-0x0D0001 |             |   U902A.3 | HDASM (triggered by any write access) |
 | 0x0E0000-0x0E0003 |             |      U800 | Front Panel Interface - Serial Interface Controller (HD63A50P @ 10MHz) |
 | 0x0F0000-0x0F000F |             |      U400 | Programmable Timer (HD83A40P) |
-| 0x100000-0x100001 |             |           | Internal output for a scope to measure a low-level hang |
+| 0x100000-0x100001 |             |           | Write-only: word-write 1, during internal output for a scope to measure a low-level hang |
 | 0x110000-0x11FFFF |             |           | Internal simulator IO for debugging the hardware |
 | 0x120000-0x12FFFF | RAM0L/RAM0U | U121/U122 | DATARAM RAM 256K Nonvolatile SRAM (2 x DS1235Y-150) |
 | 0x130000-0x13FFFF | RAM1L/RAM1U | U123/U124 | 64KB OPTIONAL RAM 0 (2 x HM62256LP-12) |
