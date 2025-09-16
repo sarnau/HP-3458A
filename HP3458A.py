@@ -4,11 +4,14 @@
 import time
 from datetime import datetime
 import pyvisa
+import os
+
+os.system('clear')
 
 # send a command and read the response
 def query(cmd):
 	dev.write(cmd)
-	return dev.read('\n')
+	return dev.read('\n').strip()
 
 # read internal memory between start and end address
 def mread(start, end):
@@ -36,31 +39,35 @@ def nvram_read(fname):
 
 rm = pyvisa.ResourceManager()
 dev = rm.open_resource('TCPIP::192.168.1.192::gpib0,22::INSTR')
+#dev.write("OFORMAT NUM")
 while True:
-	print(datetime.now().strftime("%Y-%m-%d %H:%M:%S"))
-	try:
-		dev.write("QFORMAT ALPHA")
-		#print(query("DSP?"))
-		#print(query("ID?"))
-		#print(query("REV?"))
-		#print(query("OPT?"))
-		#print(query("CAT"))
-		print(query("TEMP?"))
-		if False:
-			for i in range(10):
-				print(query("DEFKEY? %d" % i))
-		if False:
-			print(query("CALSTR?"))
-			print(query("CALNUM?"))
-			for i in [2941,2437]:
-				print(query("CAL? %d" % i))
-		if False:
-			for i in range(1,254):
-				for l in [0,1,3,5]:
-					print(query("CAL? %d,%d" % (i,l)))
+	while True:
+		dt = datetime.now()
+		if (dt.second % 10) == 0:
+			break
+	currTime = dt.strftime("%Y-%m-%d %H:%M:%S")
+	dev.write("NDIG 9")
+	dev.write("NPLC 100")
+	dsp = query("DSP?")
+	#print(query("ID?"))
+	#print(query("REV?"))
+	#print(query("OPT?"))
+	#print(query("CAT"))
+	temp = float(query("TEMP?"))
+	print('%s: %s / %.1f' % (currTime,dsp,temp))
+
+	if False:
+		for i in range(10):
+			print(query("DEFKEY? %d" % i))
+	if False:
+		print(query("CALSTR?"))
+		print(query("CALNUM?"))
+		for i in [2941,2437]:
+			print(query("CAL? %d" % i))
+	if False:
+		for i in range(1,254):
+			for l in [0,1,3,5]:
+				print(query("CAL? %d,%d" % (i,l)))
+	time.sleep(1)
 	
-#	print(query("TARM SGL,1"))
 #	nvram_read("hp3458.calram.bin")
-	except:
-		pass
-	time.sleep(10)
