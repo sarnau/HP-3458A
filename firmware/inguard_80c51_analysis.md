@@ -79,6 +79,39 @@ values it loads (opcodes 0x23/0x24/0x25) and how it converts them back (`CMD_TIM
 **Opcode 0x19 (line frequency)** uses the same two carries. The 8-bit counter counts line-sync cycles, and the 68000 computes
 `period = (T0 × 4096 + GA reg 9) × 100 ns / (T1 × 256 + GA reg 8)`, falling back to 60 Hz if the reply is FFFF.
 
+### 2b. Opcode 0x18 subsampling: words and units
+
+`0x18` is sent as `ISOLATOR_0002b178(4, 0x18, B1, B2, STEP)` (sync-sampling planner just before `CMD_SYNCPARM` @0x39400,
+`READING_FAST_INT_PATH` @0x1C992 and `MEAS_read_scale_float` @0x37D7C / @0x39156). A variant `0x0118` (param bit0 = 1, i.e. 26h.4 = start without
+waiting for a trigger) is used with B1=1, B2=0, STEP=0x0010 (100 ns).
+
+| Word | 8051 RAM | Unit / meaning |
+|---|---|---|
+| B1 | R2 / 43h (DJNZ pair) | number of bursts that take the full per-burst reading count |
+| B2 | R3 / 44h (2Dh.1 = B2 is 0) | number of further bursts that take **one reading fewer**. Between the phases the 8051 adds 1 to the negated 24-bit count in 6D/6C/6B (SR4 GA counter + T1) and re-latches SR4. |
+| STEP | R4/R5/R6 (2Dh.0 = STEP is 0) | **Δt in 10 ns units**, encoded `((Δt/10) << 4) \| (Δt % 10)`: 12 bits of 100 ns plus a decimal 10 ns digit. Max ≈ 409.59 µs. |
+
+`SUBSAMPLE_advance_delay_BCD` @0A96 adds STEP to the DELAY before each burst:
+* The 10 ns digit is added with `DA A` (decimal carry into the 100 ns field) and copied into the low nibble of both SR2 (7C) and SR3 (77).
+* The 100 ns part is subtracted from the **inverted** 12-bit prescaler in SR2 (7B:7C), which adds it to the delay. A borrow out of the 12-bit
+  field goes into the negated 409.6 µs tick count 78–7A. In other words it is a 10 ns-resolution adder on the DELAY value t = ticks × 409.6 µs + d × 10 ns
+  from §2a.
+
+How the 68000 fills the words for sync sampling (0x39400…0x3976C, constants at 0x39B42):
+* `P` = signal period × 1e8 (10 ns units), from the measured period in `$175C`.
+* `Δt = P / N` (N = samples per period, `$1754`), at least 1. When Δt ≥ 10 it is rounded down to a multiple of 10 (100 ns).
+* `T = M·Δt` is the spacing of the samples within one burst. It is the smallest multiple of Δt (and of 100 ns) that is ≥ 2010 × 10 ns = 20.1 µs
+  (the ADC conversion/recovery time). M = T/Δt is the number of interleaved delay offsets.
+* Readings per burst (`$1748`) go to NRDGS (`0x29048`). T − 100 ns goes to **TIMER** (0x23). The initial **DELAY** is 30 × 10 ns = 300 ns (0x24).
+* B1 = (total span / Δt) mod M (or M if that is 0), B2 = M − B1. The total sample count is `(n−1)·B2 + n·B1`.
+
+So each burst is: sync trigger → DELAY → n samples spaced T apart. The next burst uses DELAY + Δt. After M bursts the samples cover every Δt
+slot, giving an **effective sample interval Δt with 10 ns resolution** (equivalent rate up to 100 MHz). For SWEEP-driven sampling the
+interval is `$1434` = round(SWEEP effective interval × 1e8), default 10 (100 ns), set by `CMD_SWEEP` @0x30F84.
+
+Inside each burst the 8051 strobes INCMP/ENTRG, then waits for the ADC handshake with a timeout. The timeout comes from cmd 0x3D (2B/2C) × 0x22
+loops, and on expiry it pulses `UPTRG` itself (26h.2) so a missing sync trigger cannot hang the sequence.
+
 ### Input-amp switching (autozero / precharge)
 
 These three JFETs form the autozero front end of the DC input amplifier:
@@ -212,7 +245,7 @@ Semantics marked † are inferred from code behaviour and/or the name of the 680
 | 15 / 1A | 0776/077F | **main reading sequence** (slot `$1214BC`): 0x15 for DCV, DCI, DSAC/DSDC and OHM/OHMF without OCOMP. 0x1A first forces the amp onto the input with precharge (`SWITCH_TO_INPUT_PRECHARGED`) and is used for analog ACV/ACDCV (mode 8) and ACI/ACDCI (mode 7). EXT OUT per reading, waits for 2E/09 when 24h.4 is set. |
 | 16 | 0AFE | **OCOMP ohms sequence** (OHM/OHMF with OCOMP ON): when 24h.5 is set, each result is a reading pair. It clears the current-source bits in SR1 byte 47h (`ANL 47h,#C0`), re-latches, waits the settle time 41/42 (cmd 0x2A), takes the second reading, then restores 47h. |
 | 17 | 02F1 | strobe GA reg 0D, clear busy flag |
-| 18 | 09A6 | **SYNC subsampling burst**: two nested sample loops. Each sample advances the SR2 delay by a BCD/binary increment (`SUBSAMPLE_advance_delay_BCD` @0A96), matching the journal's AC digital subsampling. |
+| 18 | 09A6 | **subsampling burst sequencer** (sync sampling / SSAC-SSDC, DSAC-DSDC with SWEEP). Three words: B1, B2, Δt. Runs B1 + B2 = M triggered bursts and adds **Δt to the DELAY before each burst**, so the bursts interleave into uniform sampling at Δt. Units and planner in §2b. |
 | 19 | 08DA | **line-frequency / sync-period measurement**: sent by `DETECT_LFREQ` (`0x0119`) and `CMD_SYNCPARM`, not by FREQ/PER. Runs both counters for a ~1 s window (until TH0 = 0x0A, i.e. 2560 × 409.6 µs) and sends 4 words: GA reg 9 (12-bit prescaler), T0, GA reg 8 (8-bit cycle counter), T1. FFFF = no signal; the 68000 then assumes 60 Hz. |
 | 1B | 0BF6 | **AC-cal paired-reading burst**: repeats {arm, wait trigger, latch SR1, trigger, wait reading, latch SR1, delay(param)} until the count is done. Sent only by AC autocal/test (`ACAL_ACV_RATIO_1`, `TEST_ACV_etc` via 0x3B1C2) as `0x1B, time/500`, bracketed by 0x1E/0x1D. `ISOLATOR_0002ba6c` reads N pairs and accumulates Σ(A−B). |
 | 1C | 0BB0 | **one-shot OCOMP zero pair** (slot `$1214BE` for OHM/OHMF with OCOMP ON and AZERO not ON): reading with the source on, then source off (47h&C0), settle, second reading. For OHMF the result is kept in `$14E8`, otherwise it goes to `ADCAL_SEND`. |
@@ -296,4 +329,4 @@ For codes >5 the zero slot is always set to 0x14, but it is only sent when `$147
 
 ## 8. Open points
 
-* 0x18 is confirmed as part of the sampling read paths (`MEAS_read_scale_float`, `READING_FAST_INT_PATH`), but the exact subsample timing units are still open.
+None outstanding from the original list. The pin, counter and opcode questions are all resolved above.

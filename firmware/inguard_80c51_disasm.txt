@@ -155,8 +155,8 @@ L_00D9:  ; from 00CC
 0159: 02 0a fe  LJMP CMD16_OCOMP_sequence
 
 ; ======== CMD18 @015C  (callers: -)
-; ---- outguard command 0x18: SYNC subsample burst
-015C: 02 09 a6  LJMP CMD18_SYNC_SUBSAMPLE_burst
+; ---- outguard command 0x18: subsample bursts: B1, B2, step dt (10ns units, BCD digit) added to DELAY per burst
+015C: 02 09 a6  LJMP CMD18_SUBSAMPLE_BURSTS
 
 ; ======== CMD19 @015F  (callers: -)
 ; ---- outguard command 0x19: line-frequency measure: send GA reg9, T0, GA reg8, T1
@@ -1309,7 +1309,7 @@ L_0989:  ; from 0912 0929 093F
 099F: 12 0c 3c  LCALL GA_WRITE_BYTE_strobe
 09A2: d2 a8     SETB EX0
 09A4: 80 e1     SJMP 0987h
-CMD18_SYNC_SUBSAMPLE_burst:  ; from 015C
+CMD18_SUBSAMPLE_BURSTS:  ; from 015C
 09A6: 12 00 05  LCALL rx_low_byte_bit0_to_C
 09A9: 75 80 ff  MOV P0,#FFh
 09AC: 12 0c 59  LCALL RX_WORD_first_byte_wait
@@ -1366,7 +1366,7 @@ L_0A09:  ; from 09FD 0A36 0A38
 0A0F: d2 94     SETB P1.4
 0A11: c2 a8     CLR EX0
 0A13: 20 68 03  JB 2Dh.0,0A19h
-0A16: 12 0a 96  LCALL SUBSAMPLE_advance_delay_BCD
+0A16: 12 0a 96  LCALL SUBSAMPLE_DELAY_ADD_STEP_10ns
 L_0A19:  ; from 0A13
 0A19: d2 a8     SETB EX0
 0A1B: 85 2b 32  MOV 32h,2Bh
@@ -1376,7 +1376,7 @@ L_0A19:  ; from 0A13
 0A25: 79 22     MOV R1,#22h
 L_0A27:  ; from 0A2D
 0A27: 20 92 05  JB P1.2,0A2Fh
-0A2A: 12 0a e5  LCALL SUBSAMPLE_timeout_check
+0A2A: 12 0a e5  LCALL SUBSAMPLE_TRIGGER_TIMEOUT
 0A2D: 80 f8     SJMP 0A27h
 L_0A2F:  ; from 0A27 0A2F
 0A2F: 30 26 fd  JNB 24h.6,0A2Fh
@@ -1411,7 +1411,7 @@ L_0A62:  ; from 0A5B 0A8F 0A91
 0A68: d2 94     SETB P1.4
 0A6A: c2 a8     CLR EX0
 0A6C: 20 68 03  JB 2Dh.0,0A72h
-0A6F: 12 0a 96  LCALL SUBSAMPLE_advance_delay_BCD
+0A6F: 12 0a 96  LCALL SUBSAMPLE_DELAY_ADD_STEP_10ns
 L_0A72:  ; from 0A6C
 0A72: d2 a8     SETB EX0
 0A74: 85 2b 32  MOV 32h,2Bh
@@ -1421,7 +1421,7 @@ L_0A72:  ; from 0A6C
 0A7E: 79 22     MOV R1,#22h
 L_0A80:  ; from 0A86
 0A80: 20 92 05  JB P1.2,0A88h
-0A83: 12 0a e5  LCALL SUBSAMPLE_timeout_check
+0A83: 12 0a e5  LCALL SUBSAMPLE_TRIGGER_TIMEOUT
 0A86: 80 f8     SJMP 0A80h
 L_0A88:  ; from 0A80 0A88
 0A88: 30 26 fd  JNB 24h.6,0A88h
@@ -1432,7 +1432,7 @@ L_0A88:  ; from 0A80 0A88
 L_0A94:  ; from 0A3B 0A94
 0A94: 80 fe     SJMP 0A94h
 
-; ======== SUBSAMPLE_advance_delay_BCD @0A96  (callers: 0A16 0A6F)
+; ======== SUBSAMPLE_DELAY_ADD_STEP_10ns @0A96  (callers: 0A16 0A6F)
 0A96: d2 33     SETB 26h.3
 0A98: e5 7c     MOV A,7Ch
 0A9A: 54 0f     ANL A,#0Fh
@@ -1480,7 +1480,7 @@ L_0A94:  ; from 0A3B 0A94
 0AE2: d1 0c     ACALL CALC_flags_3A_3B
 0AE4: 22        RET
 
-; ======== SUBSAMPLE_timeout_check @0AE5  (callers: 0A2A 0A83)
+; ======== SUBSAMPLE_TRIGGER_TIMEOUT @0AE5  (callers: 0A2A 0A83)
 0AE5: 20 3e 15  JB 27h.6,0AFDh
 0AE8: 20 32 0b  JB 26h.2,0AF6h
 0AEB: d9 10     DJNZ R1,0AFDh
