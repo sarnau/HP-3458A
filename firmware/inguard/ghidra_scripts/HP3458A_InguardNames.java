@@ -1,5 +1,5 @@
 // Create, name and comment the HP 3458A inguard 80C51 (A3U220, 03458-85501) functions.
-// Source: firmware/inguard_80c51_analysis.md. Ghidra does not follow the JMP @A+DPTR command dispatch at 0x00C0,
+// Source: firmware/inguard/inguard_80c51_analysis.md. Ghidra does not follow the JMP @A+DPTR command dispatch at 0x00C0,
 // so the 62 command handlers (jump table at 0x00DD), their LJMP stubs and the long sequence bodies are created here.
 // Names you set yourself are kept (only default FUN_/LAB_ names or names from this list are replaced).
 //@category HP3458A

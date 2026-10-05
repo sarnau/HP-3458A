@@ -1,7 +1,7 @@
 // Name the HP 3458A inguard 80C51 (A3U220) internal RAM variables and flag bits.
 // INTMEM bytes get labels (and byte arrays for multi-byte shadows); the bit-addressable flags get labels in the BITS
 // space (bit address = (byte - 0x20) * 8 + bit), which replace the default "27.4"-style names the decompiler shows as _7_4.
-// Source: firmware/inguard_80c51_analysis.md (sections 2a/2b/5/7). Labels you set yourself are kept.
+// Source: firmware/inguard/inguard_80c51_analysis.md (sections 2.3, 6 and 8.3). Labels you set yourself are kept.
 //@category HP3458A
 import ghidra.app.script.GhidraScript;
 import ghidra.program.model.address.*;
