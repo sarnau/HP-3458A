@@ -147,32 +147,32 @@ L_00D9:  ; from 00CC
 014D: DB c1 27 c1 3b c1 45 61 0e 61 17 c1 50
 
 ; ======== CMD16 @0159  (callers: -)
-; ---- outguard command 0x16: reading sequence (alt)
-0159: 02 0a fe  LJMP CMD16_sequence
+; ---- outguard command 0x16: OCOMP ohms sequence (reading pairs, source off/on)
+0159: 02 0a fe  LJMP CMD16_OCOMP_sequence
 
 ; ======== CMD18 @015C  (callers: -)
 ; ---- outguard command 0x18: SYNC subsample burst
 015C: 02 09 a6  LJMP CMD18_SYNC_SUBSAMPLE_burst
 
 ; ======== CMD19 @015F  (callers: -)
-; ---- outguard command 0x19: freq/period count
-015F: 02 08 da  LJMP CMD19_FREQ_PERIOD_count
+; ---- outguard command 0x19: line-frequency / sync period measure (DETECT_LFREQ)
+015F: 02 08 da  LJMP CMD19_LFREQ_measure
 
 ; ======== CMD1A @0162  (callers: -)
-; ---- outguard command 0x1A: reading sequence (swB)
-0162: 02 07 7f  LJMP CMD1A_reading_sequence_swB
+; ---- outguard command 0x1A: AC analog sequence (input switch B)
+0162: 02 07 7f  LJMP CMD1A_AC_sequence_swB
 
 ; ======== CMD1B @0165  (callers: -)
-; ---- outguard command 0x1B: repeat sequence
-0165: 02 0b f6  LJMP CMD1B_repeat_sequence
+; ---- outguard command 0x1B: AC-cal paired-reading burst (sum A-B)
+0165: 02 0b f6  LJMP CMD1B_ACCAL_pair_burst
 
 ; ======== CMD1C @0168  (callers: -)
-; ---- outguard command 0x1C: sequence
-0168: 02 0b b0  LJMP CMD1C_sequence
+; ---- outguard command 0x1C: one-shot OCOMP zero pair
+0168: 02 0b b0  LJMP CMD1C_OCOMP_zero_pair
 
 ; ======== CMD14 @016B  (callers: -)
-; ---- outguard command 0x14: single reading
-016B: 02 08 89  LJMP CMD14_single_reading
+; ---- outguard command 0x14: one-shot zero reading (AZERO off) -> ADCAL
+016B: 02 08 89  LJMP CMD14_zero_reading
 
 ; ======== CMD00 @016E  (callers: -)
 ; ---- outguard command 0x00: TRIGGER (pulse P1.3 or defer)
@@ -207,7 +207,7 @@ L_0179:  ; from 0175
 0195: c1 67     AJMP CMD_EXIT_popPSW_ACC_ret
 
 ; ======== CMD03 @0197  (callers: -)
-; ---- outguard command 0x03: EXTOUT config (24h[5:0])
+; ---- outguard command 0x03: sequence/EXTOUT/OCOMP config (24h[5:0])
 0197: 12 0c 62  LCALL GA_READ_BYTE
 019A: e5 99     MOV A,SBUF
 019C: 54 3f     ANL A,#3Fh
@@ -237,7 +237,7 @@ L_0179:  ; from 0175
 01C3: c1 67     AJMP CMD_EXIT_popPSW_ACC_ret
 
 ; ======== CMD08 @01C5  (callers: -)
-; ---- outguard command 0x08: ??? input test / measure P1.2 handshake
+; ---- outguard command 0x08: ADC self-test conversion (ISOLATOR_0004e448)
 01C5: 12 00 05  LCALL rx_low_byte_bit0_to_C
 01C8: 43 62 20  ORL 62h,#20h
 01CB: 12 0d 69  LCALL SR5_LATCH_59_64
@@ -1025,12 +1025,12 @@ ISR_INT1_OVERLOAD_PROTECT:  ; from 0013
 0773: d0 e0     POP ACC
 0775: 32        RETI
 
-; ======== CMD15_reading_sequence @0776  (callers: -)
-; ---- outguard command 0x15: reading sequence
+; ======== CMD15_main_sequence @0776  (callers: -)
+; ---- outguard command 0x15: main reading sequence (DCV/DCI/DS/OHM)
 0776: 12 00 05  LCALL rx_low_byte_bit0_to_C
 0779: 30 22 0f  JNB 24h.2,078Bh
 077C: 02 07 fa  LJMP 07FAh
-CMD1A_reading_sequence_swB:  ; from 0162
+CMD1A_AC_sequence_swB:  ; from 0162
 077F: d2 3f     SETB 27h.7
 0781: 12 00 05  LCALL rx_low_byte_bit0_to_C
 0784: c2 92     CLR P1.2
@@ -1170,7 +1170,7 @@ L_087A:  ; from 087A
 0884: c2 a5     CLR P2.5
 0886: c2 a6     CLR P2.6
 0888: 22        RET
-CMD14_single_reading:  ; from 016B
+CMD14_zero_reading:  ; from 016B
 0889: e5 62     MOV A,62h
 088B: f5 40     MOV 40h,A
 088D: 54 c0     ANL A,#C0h
@@ -1209,7 +1209,7 @@ L_08AA:  ; from 08AA
 08D4: 12 0d 69  LCALL SR5_LATCH_59_64
 L_08D7:  ; from 08CE
 08D7: 02 06 67  LJMP CMD_EXIT_popPSW_ACC_ret
-CMD19_FREQ_PERIOD_count:  ; from 015F
+CMD19_LFREQ_measure:  ; from 015F
 08DA: 12 00 05  LCALL rx_low_byte_bit0_to_C
 08DD: 12 0e 37  LCALL LEAVE_ISR_CONTINUE_FOREGROUND
 08E0: 20 34 03  JB 26h.4,08E6h
@@ -1491,7 +1491,7 @@ L_0AFA:  ; from 0AFA
 0AFA: 30 92 fd  JNB P1.2,0AFAh
 L_0AFD:  ; from 0AE5 0AEB 0AED 0AF0
 0AFD: 22        RET
-CMD16_sequence:  ; from 0159
+CMD16_OCOMP_sequence:  ; from 0159
 0AFE: c2 92     CLR P1.2
 0B00: d2 92     SETB P1.2
 0B02: 12 0d 0b  LCALL INPUT_SW_B
@@ -1593,7 +1593,7 @@ L_0BA0:  ; from 0B92
 0BAD: f1 67     ACALL DELAY_settle_41_42
 L_0BAF:  ; from 0BA5
 0BAF: 22        RET
-CMD1C_sequence:  ; from 0168
+CMD1C_OCOMP_zero_pair:  ; from 0168
 0BB0: c2 92     CLR P1.2
 0BB2: d2 92     SETB P1.2
 0BB4: 12 0c eb  LCALL INPUT_SW_A
@@ -1629,7 +1629,7 @@ L_0BEC:  ; from 0BCF
 0BEE: 12 0c e8  LCALL INPUT_SW_A_if_set
 0BF1: 71 84     ACALL set_P2_5
 0BF3: 02 06 67  LJMP CMD_EXIT_popPSW_ACC_ret
-CMD1B_repeat_sequence:  ; from 0165
+CMD1B_ACCAL_pair_burst:  ; from 0165
 0BF6: 75 80 ff  MOV P0,#FFh
 0BF9: 12 0c 59  LCALL RX_WORD_first_byte_wait
 0BFC: 85 99 43  MOV 43h,SBUF

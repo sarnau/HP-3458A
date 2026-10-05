@@ -134,11 +134,11 @@ Semantics marked † are inferred from code behaviour and/or the name of the 680
 | 00 | 016E | **trigger**: pulse P1.3 (deferred via 28h.1 while the delay counter runs) |
 | 01 | 017B | pulse P2.7 (start) |
 | 02 | 0181 | read GA status reg (1A) → send as data word |
-| 03 | 0197 | **EXTOUT config** → 24h[5:0] † |
+| 03 | 0197 | **sequence/EXTOUT config** → 24h[5:0]: bit0/1 = EXT OUT pulse at sequence end / per reading, bit2 = alternate ADC handshake path, bit4 = wait for 0x2E/0x09 between readings, bit5 = **OCOMP** (used by 0x16/0x1C) † |
 | 04 | 000E | software arm (25h.5) – TARM SGL † |
 | 05 | 0191 | **EXT OUT pulse** (P2.4) – sent by `CMD_EXTOUT` |
 | 06 / 07 | 01BA/01A5 | ext-trigger disable / enable+edge (param bit0 → 26h.6; 27h.5, ctl reg bit5) |
-| 08 | 01C5 | timed P1.2 handshake test; result bit → data word † |
+| 08 | 01C5 | **ADC self-test conversion**: sets SR5 (ADMEM) bit 0x62.5 (test mode), switch A, arms, optionally triggers (param bit0), checks the P1.2 handshake timing, replies with a data word (always 00; pass/fail shows up as gate-array convergence-error flags). Sent only by the self-test `ISOLATOR_0004e448(0/1)`, called from `ISOLATOR_0004ddb8` (0x0108, then 0x0008 with different ADC settings). |
 | 09 | 051D | **stop** running sequence (25h.7) |
 | 0A/0B/0C/29/36 | | ADC input switch states (P2.0–P2.2), 0A/0B also set the zero/signal flag 26h.1 † |
 | 0D | 0016 | SETB P2.5 |
@@ -147,14 +147,14 @@ Semantics marked † are inferred from code behaviour and/or the name of the 680
 | 10 | 0276 | **measurement init/abort**: reset GA, reload counters, reply `02` (`ISOLATOR_CHECK`) |
 | 11 / 12 | 02BD/02D6 | cycle-timed input-switch sequences (P2.0/P2.2/P2.6, then pulse P2.7) |
 | 13 | 02B8 | leave ISR / idle |
-| 14 | 0889 | **single reading** (ADC handshake, optional SR5 bit tweak) |
-| 15 / 1A | 0776/077F | **reading sequence** (EXTOUT per reading, waits for 2E/09) |
-| 16 | 0AFE | reading sequence with SR1 range/relay switching between readings (autorange/ohms †) |
+| 14 | 0889 | **one-shot zero reading** (switch A, ADC handshake, switch back after settle 29/2A). Sent from slot `$1214BE` when AZERO is not ON. The 68000 feeds the result into `ADCAL_SEND` (SR6 offset). |
+| 15 / 1A | 0776/077F | **main reading sequence** (slot `$1214BC`): 0x15 for DCV, DCI, DSAC/DSDC and OHM/OHMF without OCOMP. 0x1A forces input switch B first (`INPUT_SW_B`) and is used for analog ACV/ACDCV (mode 8) and ACI/ACDCI (mode 7). EXT OUT per reading, waits for 2E/09 when 24h.4 is set. |
+| 16 | 0AFE | **OCOMP ohms sequence** (OHM/OHMF with OCOMP ON): when 24h.5 is set, each result is a reading pair. It clears the current-source bits in SR1 byte 47h (`ANL 47h,#C0`), re-latches, waits the settle time 41/42 (cmd 0x2A), takes the second reading, then restores 47h. |
 | 17 | 02F1 | strobe GA reg 0D, clear busy flag |
 | 18 | 09A6 | **SYNC subsampling burst**: two nested sample loops. Each sample advances the SR2 delay by a BCD/binary increment (`SUBSAMPLE_advance_delay_BCD` @0A96), matching the journal's AC digital subsampling. |
-| 19 | 08DA | **frequency/period**: counts with T0/T1 and GA counters 18/19, sends 4 data words (FFFF = timeout) |
-| 1B | 0BF6 | repeat sequence with SR1 re-latch and delay |
-| 1C | 0BB0 | single sequence with SR1 update |
+| 19 | 08DA | **line-frequency / sync-period measurement**: sent by `DETECT_LFREQ` and `CMD_SYNCPARM` (not by FREQ/PER). Checks that the T0 input toggles, counts input cycles (T0) against a reference (T1) plus GA counters 18/19, sends 4 data words (FFFF = no signal). |
+| 1B | 0BF6 | **AC-cal paired-reading burst**: repeats {arm, wait trigger, latch SR1, trigger, wait reading, latch SR1, delay(param)} until the count is done. Sent only by AC autocal/test (`ACAL_ACV_RATIO_1`, `TEST_ACV_etc` via 0x3B1C2) as `0x1B, time/500`, bracketed by 0x1E/0x1D. `ISOLATOR_0002ba6c` reads N pairs and accumulates Σ(A−B). |
+| 1C | 0BB0 | **one-shot OCOMP zero pair** (slot `$1214BE` for OHM/OHMF with OCOMP ON and AZERO not ON): reading with the source on, then source off (47h&C0), settle, second reading. For OHMF the result is kept in `$14E8`, otherwise it goes to `ADCAL_SEND`. |
 | 1D/1E, 3B/3C | | control reg bit 2 / bit 1 on/off |
 | **1F** | 0320 | **load SR1 (DC board)**, 5 words via direct mode |
 | **20** | 033B | **load SR0 (AC board)**, 5 words |
@@ -181,7 +181,36 @@ Semantics marked † are inferred from code behaviour and/or the name of the 680
 | 3D | 0650 | aux count 2B/2C (used as a timeout in the subsample loop) |
 | ≥3E | — | reply `0A` (unknown command) |
 
-## 6. RAM map (highlights)
+## 6. How the 68000 picks the measurement opcodes
+
+`MEASURE_SELECT_ROUTINE` @0x31EC6 (args: internal function code `$1397`, AZERO `$13A0`, OCOMP `$139F`) fills two opcode slots plus the
+reading routine `$1214C0`. `MEASURE_TRIGGER_AND_TAKE` @0x39B7A then works in three steps:
+
+1. If a zero reading is pending (`$1477 == 2`) and `$1214BE != 0x13`, it sends `$1214BE`, reads the result (`ISOLATOR_0002a9c6`) and loads it into
+   `ADCAL_SEND` (or `$14E8` for OHMF + 0x1C).
+2. Unless the fast integer path is selected, it sends `$1214BC` (the sequence), plus `0x00` (trigger) or `0x04` (arm) for TRIG/TARM SGL.
+3. It calls the reading routine. When the EXTOUT mode `$13A4` is 4, it sends `0x05` at the end.
+
+Internal function codes (from `CMD_FUNC?` @0x1EFB0): 1 DCV, 3 OHM, 4 OHMF, 5 DCI, 6 DSAC/DSDC, 7 ACI/ACDCI,
+8/10/11 ACV/ACDCV (SETACV analog/sync/random), 12 SSAC/SSDC, 13/14 FREQ/PER.
+
+| Code | Function | `$1214BC` sequence | `$1214BE` zero op (AZERO off) |
+|---|---|---|---|
+| 1 | DCV | 0x15 | 0x14 |
+| 3 / 4 | OHM / OHMF | 0x15, or **0x16** with OCOMP | 0x14, or **0x1C** with OCOMP |
+| 5 | DCI | 0x15 | 0x13 (default case: no zero reading) |
+| 6 | DSAC/DSDC | 0x15 | 0x14 |
+| 7 | ACI/ACDCI | 0x1A | 0x14 |
+| 8 | ACV/ACDCV analog | 0x1A | 0x14 |
+| 10 / 11 | ACV/ACDCV sync / random | 0x13 (none; read path drives 0x18 etc.) | 0x14 |
+| 12 | SSAC/SSDC | 0x13 | 0x14 |
+| 13 / 14 | FREQ/PER | 0x13 | 0x14 |
+
+For DC-type codes (≤5) with AZERO ON the zero slot is 0x13 (none), because autozero then happens inside the sequence.
+For codes >5 the zero slot is always set to 0x14, but it is only sent when `$1477 == 2`.
+`$1477` is set to 2 by `ADMEM_SEND_00029ca8`/the AZERO path (0x2A6C2) whenever the zero reference has to be re-taken.
+
+## 7. RAM map (highlights)
 
 | Addr | Use |
 |---|---|
@@ -204,10 +233,9 @@ Semantics marked † are inferred from code behaviour and/or the name of the 680
 | 73–75 / 76–77 | interval count / SR3 |
 | 78–7A / 7B–7C | first/delay count / SR2 |
 
-## 7. Open points
+## 8. Open points
 
 * Exact meaning of P2.0/P2.1/P2.2/P2.6 (which ADC input/zero switches) needs the A3 schematic. The CLIP schematic
   pages were not OCR-readable.
 * T0/T1 count sources (which gate-array clocks or events drive pins T0/T1) are inferred from usage only.
-* Commands 0x08, 0x16, 0x1B, 0x1C would benefit from mapping each one to the 68000 call site in `MEASURE_TRIGGER_AND_TAKE`
-  (most of those opcodes are sent through variables, so the static scan did not resolve them).
+* 0x18 is confirmed as part of the sampling read paths (`MEAS_read_scale_float`, `READING_FAST_INT_PATH`), but the exact subsample timing units are still open.
