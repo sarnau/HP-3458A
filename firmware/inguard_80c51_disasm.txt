@@ -4,12 +4,15 @@
 ;
 ; Hardware model used for names:
 ;   Serial port mode 0 (SCON=0) = 8-bit synchronous byte bus to gate array U210 (RXD=data, TXD=clock)
-;   P0[4:0] = gate-array register address, P2.3 = address/transfer strobe
-;   P0.5/P0.6/P0.7 = gate-array status inputs (P0.6 = UART word ready / TX ready)
-;   Reg 1F (P0=FF) = UART RX word, 07 = UART TX data word, 08 = UART TX command (interrupt) msg,
-;   09 = control reg (shadow 22h), 1A = status reg (-> 21h), 1C/1D = readback, 18/19 = counters,
+;   P0[3:0] = gate-array register (ADD0-3), P0.4 = XRXW (1=read), P2.3 = IGSTB strobe
+;   P0.5 NRDGOUT / P0.6 BFSTAT (UART word ready / TX ready) / P0.7 OTHINT = gate-array status inputs
+;   Read F (P0=FF) = UART RX word, write 7 = UART TX data word, write 8 = UART TX command (interrupt) msg,
+;   write 9 = control reg (shadow 22h), read A = status reg (-> 21h), read C/D = readback, read 8/9 = counters,
 ;   E0..E6 = latch shift register n, F0..F6 = "direct mode" (UART word -> shift reg n + CPU copy)
-;   Timer0/Timer1 = 16-bit EXTERNAL EVENT COUNTERS (TMOD=55h), T0 extended to 24 bit with 31h
+;   Timer0/Timer1 = 16-bit EXTERNAL EVENT COUNTERS (TMOD=55h) on C0MIN/C1MIN, T0 extended with 31h
+;   Input amp JFETs on A1 (via P2 connector, LM339 U11): P2.0 = PC precharge (Q10), P2.1 = HZ zero connect (Q11),
+;   P2.2 = XHC HI connect, active low (Q12). P2.4 XEXOR=EXT OUT, P2.5 SEND, P2.6 HOLD, P2.7 XETRG,
+;   P1.0 LEVEL, P1.1 ADBSY, P1.2 INCMP, P1.3 UPTRG, P1.4 ENTRG, P1.5/6 XCOT0/1, P1.7 NRFT, INT1 = XD_OVLD_F
 ;
 
 ; ======== RESET @0000  (callers: -)
@@ -244,7 +247,7 @@ L_0179:  ; from 0175
 01CE: c2 17     CLR 22h.7
 01D0: 12 0f 8c  LCALL GA_WRITE_CTRL_reg09_from_22h
 01D3: d2 a8     SETB EX0
-01D5: 12 0c eb  LCALL INPUT_SW_A
+01D5: 12 0c eb  LCALL SWITCH_TO_ZERO
 01D8: c2 92     CLR P1.2
 01DA: d2 92     SETB P1.2
 01DC: c2 a5     CLR P2.5
@@ -289,7 +292,7 @@ L_022F:  ; from 01F1 0201 0204 020D 0218 021B
 0231: 80 eb     SJMP 021Eh
 
 ; ======== CMD0A @0233  (callers: -)
-; ---- outguard command 0x0A: input switch state A
+; ---- outguard command 0x0A: amp -> input HI (XHC=0 HZ=0 PC=0)
 0233: c2 a0     CLR P2.0
 0235: c2 a1     CLR P2.1
 0237: c2 a2     CLR P2.2
@@ -297,7 +300,7 @@ L_022F:  ; from 01F1 0201 0204 020D 0218 021B
 023B: c1 67     AJMP CMD_EXIT_popPSW_ACC_ret
 
 ; ======== CMD0B @023D  (callers: -)
-; ---- outguard command 0x0B: input switch state B
+; ---- outguard command 0x0B: amp -> zero (XHC=1 HZ=1)
 023D: d2 a2     SETB P2.2
 023F: c2 a0     CLR P2.0
 0241: d2 a1     SETB P2.1
@@ -305,7 +308,7 @@ L_022F:  ; from 01F1 0201 0204 020D 0218 021B
 0245: c1 67     AJMP CMD_EXIT_popPSW_ACC_ret
 
 ; ======== CMD0C @0247  (callers: -)
-; ---- outguard command 0x0C: input switch state C
+; ---- outguard command 0x0C: precharge only (PC=1)
 0247: c2 a6     CLR P2.6
 0249: d2 a2     SETB P2.2
 024B: c2 a1     CLR P2.1
@@ -370,7 +373,7 @@ L_02BB:  ; from 02BB
 02BB: 80 fe     SJMP 02BBh
 
 ; ======== CMD11 @02BD  (callers: -)
-; ---- outguard command 0x11: input switch timed seq 1
+; ---- outguard command 0x11: timed HI/precharge seq 1 + XETRG
 02BD: c2 a6     CLR P2.6
 02BF: c2 a0     CLR P2.0
 02C1: c2 a2     CLR P2.2
@@ -386,7 +389,7 @@ L_02BB:  ; from 02BB
 02D4: c1 67     AJMP CMD_EXIT_popPSW_ACC_ret
 
 ; ======== CMD12 @02D6  (callers: -)
-; ---- outguard command 0x12: input switch timed seq 2
+; ---- outguard command 0x12: timed precharged connect + XETRG
 02D6: c2 a6     CLR P2.6
 02D8: d2 a2     SETB P2.2
 02DA: 75 33 14  MOV 33h,#14h
@@ -634,7 +637,7 @@ L_0499:  ; from 048F
 04B0: c1 67     AJMP CMD_EXIT_popPSW_ACC_ret
 
 ; ======== CMD29 @04B2  (callers: -)
-; ---- outguard command 0x29: input switch state D
+; ---- outguard command 0x29: all input switches open
 04B2: c2 a0     CLR P2.0
 04B4: d2 a2     SETB P2.2
 04B6: c2 a1     CLR P2.1
@@ -836,7 +839,7 @@ L_05DD:  ; from 05D9
 0610: c1 67     AJMP CMD_EXIT_popPSW_ACC_ret
 
 ; ======== CMD36 @0612  (callers: -)
-; ---- outguard command 0x36: input switch state E
+; ---- outguard command 0x36: HI + zero connected
 0612: c2 a0     CLR P2.0
 0614: d2 a1     SETB P2.1
 0616: c2 a2     CLR P2.2
@@ -1035,7 +1038,7 @@ CMD1A_AC_sequence_swB:  ; from 0162
 0781: 12 00 05  LCALL rx_low_byte_bit0_to_C
 0784: c2 92     CLR P1.2
 0786: d2 92     SETB P1.2
-0788: 12 0d 0b  LCALL INPUT_SW_B
+0788: 12 0d 0b  LCALL SWITCH_TO_INPUT_PRECHARGED
 L_078B:  ; from 0779
 078B: c2 92     CLR P1.2
 078D: d2 92     SETB P1.2
@@ -1099,7 +1102,7 @@ L_07F8:  ; from 079F 07F1 07F8
 L_07FA:  ; from 077C
 07FA: c2 92     CLR P1.2
 07FC: d2 92     SETB P1.2
-07FE: 12 0d 0b  LCALL INPUT_SW_B
+07FE: 12 0d 0b  LCALL SWITCH_TO_INPUT_PRECHARGED
 0801: c2 a6     CLR P2.6
 0803: c2 a5     CLR P2.5
 0805: c2 26     CLR 24h.6
@@ -1154,7 +1157,7 @@ L_085E:  ; from 085E
 0865: d2 92     SETB P1.2
 L_0867:  ; from 0867
 0867: 20 91 fd  JB P1.1,0867h
-086A: 12 0c e8  LCALL INPUT_SW_A_if_set
+086A: 12 0c e8  LCALL TOGGLE_INPUT_ZERO
 086D: d2 a6     SETB P2.6
 086F: d2 a5     SETB P2.5
 0871: c2 a7     CLR P2.7
@@ -1166,7 +1169,7 @@ L_087A:  ; from 087A
 087A: 20 91 fd  JB P1.1,087Ah
 087D: c2 92     CLR P1.2
 087F: d2 92     SETB P1.2
-0881: 12 0c e8  LCALL INPUT_SW_A_if_set
+0881: 12 0c e8  LCALL TOGGLE_INPUT_ZERO
 0884: c2 a5     CLR P2.5
 0886: c2 a6     CLR P2.6
 0888: 22        RET
@@ -1180,7 +1183,7 @@ CMD14_zero_reading:  ; from 016B
 L_0898:  ; from 088F
 0898: c2 92     CLR P1.2
 089A: d2 92     SETB P1.2
-089C: 12 0c eb  LCALL INPUT_SW_A
+089C: 12 0c eb  LCALL SWITCH_TO_ZERO
 089F: d2 a5     SETB P2.5
 08A1: d2 a6     SETB P2.6
 08A3: c2 a7     CLR P2.7
@@ -1197,7 +1200,7 @@ L_08AA:  ; from 08AA
 08B7: 85 2a 3f  MOV 3Fh,2Ah
 08BA: 85 29 3e  MOV 3Eh,29h
 08BD: d2 3f     SETB 27h.7
-08BF: 12 0c e8  LCALL INPUT_SW_A_if_set
+08BF: 12 0c e8  LCALL TOGGLE_INPUT_ZERO
 08C2: c2 a6     CLR P2.6
 08C4: d0 3e     POP 3Eh
 08C6: d0 3f     POP 3Fh
@@ -1494,7 +1497,7 @@ L_0AFD:  ; from 0AE5 0AEB 0AED 0AF0
 CMD16_OCOMP_sequence:  ; from 0159
 0AFE: c2 92     CLR P1.2
 0B00: d2 92     SETB P1.2
-0B02: 12 0d 0b  LCALL INPUT_SW_B
+0B02: 12 0d 0b  LCALL SWITCH_TO_INPUT_PRECHARGED
 0B05: c2 26     CLR 24h.6
 0B07: 71 84     ACALL set_P2_5
 0B09: 12 00 05  LCALL rx_low_byte_bit0_to_C
@@ -1596,7 +1599,7 @@ L_0BAF:  ; from 0BA5
 CMD1C_OCOMP_zero_pair:  ; from 0168
 0BB0: c2 92     CLR P1.2
 0BB2: d2 92     SETB P1.2
-0BB4: 12 0c eb  LCALL INPUT_SW_A
+0BB4: 12 0c eb  LCALL SWITCH_TO_ZERO
 0BB7: c3        CLR C
 0BB8: 71 86     ACALL 0B86h
 0BBA: c2 26     CLR 24h.6
@@ -1626,7 +1629,7 @@ L_0BE5:  ; from 0BE5
 0BEA: d2 92     SETB P1.2
 L_0BEC:  ; from 0BCF
 0BEC: d2 3f     SETB 27h.7
-0BEE: 12 0c e8  LCALL INPUT_SW_A_if_set
+0BEE: 12 0c e8  LCALL TOGGLE_INPUT_ZERO
 0BF1: 71 84     ACALL set_P2_5
 0BF3: 02 06 67  LJMP CMD_EXIT_popPSW_ACC_ret
 CMD1B_ACCAL_pair_burst:  ; from 0165
@@ -1791,10 +1794,10 @@ L_0CE1:  ; from 0CD5
 0CE4: d5 33 f0  DJNZ 33h,0CD7h
 0CE7: 22        RET
 
-; ======== INPUT_SW_A_if_set @0CE8  (callers: 086A 0881 08BF 0BEE)
-0CE8: 30 31 20  JNB 26h.1,INPUT_SW_B
+; ======== TOGGLE_INPUT_ZERO @0CE8  (callers: 086A 0881 08BF 0BEE)
+0CE8: 30 31 20  JNB 26h.1,SWITCH_TO_INPUT_PRECHARGED
 
-; ======== INPUT_SW_A @0CEB  (callers: 01D5 089C 0BB4)
+; ======== SWITCH_TO_ZERO @0CEB  (callers: 01D5 089C 0BB4)
 0CEB: 30 31 1c  JNB 26h.1,0D0Ah
 0CEE: c2 a8     CLR EX0
 0CF0: d2 a2     SETB P2.2
@@ -1812,7 +1815,7 @@ L_0CE1:  ; from 0CD5
 L_0D0A:  ; from 0CEB
 0D0A: 22        RET
 
-; ======== INPUT_SW_B @0D0B  (callers: 0788 07FE 0B02)
+; ======== SWITCH_TO_INPUT_PRECHARGED @0D0B  (callers: 0788 07FE 0B02)
 0D0B: 20 31 2a  JB 26h.1,0D38h
 0D0E: c2 a8     CLR EX0
 0D10: d2 a2     SETB P2.2

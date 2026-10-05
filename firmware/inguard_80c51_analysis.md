@@ -16,43 +16,81 @@ Annotated disassembly: [`inguard_80c51_disasm.txt`](inguard_80c51_disasm.txt)
 * Code coverage: 3960 of 4096 bytes are reached from the reset/IRQ vectors and the command jump table. The only
   unreached bytes are the jump table itself and 8 dead bytes at 0x0824.
 
-## 2. Hardware model (derived from the code)
+## 2. Hardware model (code + A3/A1 schematics)
 
-The 80C51 has no external bus. It reaches all the inguard hardware through the gate array:
+Pin names below come from the CLIP schematic, A3 sheet 1 "IN-GRD CTL & INTERPOLATOR" (03458-66503, "IN GUARD CONTROL LOGIC"
+block). U220 is drawn there as "MC8051", clocked from the gate array's 10 MHz `CK10` into XTAL2.
+The 80C51 has no external bus (EA tied high, ALE/PSEN not connected). Everything else goes through gate array U210 ("GA_CHIP"):
 
-| 80C51 resource | Use |
-|---|---|
-| **Serial port, mode 0** (`SCON=00`) | 8-bit synchronous byte bus to the gate array (RXD = data, TXD = clock). No UART use. |
-| **P0[4:0]** | gate-array **register address** (P0 is written as `0xE0 \| reg` or `0xF0 \| reg`) |
-| **P2.3** | address/transfer **strobe** (always pulsed `CLR`/`SETB`) |
-| **P0.5 / P0.6 / P0.7** | gate-array status inputs, read in the INT0 ISR. **P0.6 = UART word ready / TX ready** (every transfer polls it). P0.5 = trigger event, P0.7 = status changed. |
-| **INT0** (P3.2) | gate-array interrupt (UART message, trigger, status change) |
-| **INT1** (P3.3) | **input overload / protection** interrupt (high priority, `IP=04`) |
-| **Timer0 / Timer1** | `TMOD=55h`: both are **16-bit external event counters** (C/T=1), not timers. T0 is extended to 24+8 bits with RAM 31h. |
-| P3.6 (WR) | pulsed together with gate-array reg 0C: a reset/clear strobe |
-| P3.7 (RD) | read as an input in the INT0 ISR (selects the direct-dispatch path) |
-| P1.3 | **trigger pulse** to the ADC/trigger logic (command 0x00, Timer0 ISR) |
-| P1.2 / P1.1 | ADC handshake: pulse P1.2 to start, wait on P1.2 and P1.1 (`ADC_HANDSHAKE_reading` @0860) |
-| P1.4, P1.7, P2.7 | sequence strobes: arm, end-of-reading, start |
-| P1.5 / P1.6 | gate the T0/T1 count inputs; the Timer1 ISR just pulses P1.6 when the count overflows |
-| P2.0 / P2.1 / P2.2 / P2.6 | ADC input switch/FET control. Commands 0x0A/0B/0C/11/12/29/36 set fixed patterns, some with cycle-exact `MUL AB` padding, and settle times come from RAM 3E/3F. |
-| P2.4 | **EXT OUT** pulse (commands 0x05/0x26, and at reading or sequence end depending on the EXTOUT config in 24h) |
-| P1.0 | input bit returned to the outguard by command 0x37 |
+| 80C51 pin | Net → destination | Use in the firmware |
+|---|---|---|
+| RXD P3.0 / TXD P3.1 | `UPDA` / `IGCLK` → U210 | serial port mode 0 (`SCON=00`): 8-bit synchronous byte bus to the gate array |
+| P0.0–P0.3 | `ADD0`–`ADD3` → U210 | gate-array **register address** (low nibble of P0) |
+| P0.4 | `XRXW` → U210 | **read/write select**: P0 = `0xE0\|reg` writes, `0xF0\|reg` reads |
+| P0.5 | `NRDGOUT` ← U210 | "new reading out" status (INT0 ISR: start delay counter) |
+| P0.6 | `BFSTAT` ← U210 | **UART buffer status**: word ready / TX ready, polled by every transfer |
+| P0.7 | `OTHINT` ← U210 | "other interrupt" (status change → read status reg A) |
+| P2.3 | `IGSTB` → U210 | inguard strobe (always pulsed `CLR`/`SETB`) |
+| P3.7 | `CMDI` ← U210 | command-message indicator (INT0 ISR goes straight to `CMD_DISPATCH`) |
+| INT0 P3.2 | `XINTR` ← U210 | gate-array interrupt |
+| INT1 P3.3 | `XD_OVLD_F` ← A1 overload detector (U10A via P3(6)/P2(6)) | **input overload** interrupt (high priority, `IP=04`) |
+| RESET | `UPRST` ← U210 | the gate array resets the CPU |
+| T0 P3.4 / T1 P3.5 | `C0MIN` / `C1MIN` ← U210 | `TMOD=55h`: **external event counters**. T0 is extended to 24+8 bits with RAM 31h. |
+| P1.0 | `LEVEL` ← AC board (P1(12)) | AC level-trigger comparator, returned by cmd 0x37 |
+| P1.1 | `ADBSY` ← U210 (TP220) | **A/D busy** (`JB P1.1,$` waits) |
+| P1.2 | `INCMP`/`XCINCMP` ↔ U210 via R223 1 kΩ | ADC handshake: pulsed low as a strobe, read as the integrator-compare/done input |
+| P1.3 | `UPTRG` → U210 | **µP trigger** (cmd 0x00, Timer0 ISR) |
+| P1.4 | `ENTRG` → U210 | enable trigger (arm) |
+| P1.5 / P1.6 | `XCOT0` / `XCOT1` → U210 | counter 0/1 gate. The Timer1 ISR pulses XCOT1 on overflow. |
+| P1.7 | `NRFT` → U210, U212B | reading-done / flip-flop reset strobe |
+| P3.6 | `INRFT` → U211B PRE | pulsed at init and with reg C (`GA_RESET_regC_pulse_WR`) |
+| P2.4 | `XEXOR` → U210 | **EXT OUT** pulse (cmds 0x05/0x26, per reading or per sequence per 24h) |
+| P2.5 | `SEND` → U210 | enable sending ADC readings to the UART |
+| P2.6 | `HOLD` → U210, U212A CLR | A/D hold |
+| P2.7 | `XETRG` → U210 | execute/start trigger for the A/D sequence (cmd 0x01, sequences) |
+| **P2.0** | `PC` → R283 → `PC_F` → P2(12) → **A1** U11D → **Q10** | **PRECHARGE**: JFET from `BOOT` (U12, bootstrapped buffer copy of the input) to the DC input-amp node `P4(1)`. Active high. |
+| **P2.1** | `HZ` → R282 → `HZ_F` → P2(11) → **A1** U11C → **Q11** | **ZERO connect**: JFET from the input-amp node to the zero/low FET mux Q22–Q25 (selected by HDGI/HZHVA/HGND/HOHHL from shift reg U6, i.e. from SR1). Active high. Also clears U211A → `XENOV`, which disables the overload clamp sense while on zero. |
+| **P2.2** | `XHC` → R281 → `XHC_F` → P2(10) → **A1** U11B → Q28 → **Q12** | **HI connect** (active low): JFET from the selected input HI bus (front-end FET mux Q13–Q21, also the gate of the U12 bootstrap buffer) to the input-amp node |
+
+On A1 ("SENTRY INPUT SIGNAL CONDITIONING", sheet 4 of 5) U11 is an LM339 used as a level shifter (inputs vs +2 V, open-collector
+outputs to the −21 V JFET gate drive). Power-up state (`HW_INIT`: P2=0xBE) is PC off, HZ on, HC off, so the input amp sits on zero.
+
+### Input-amp switching (autozero / precharge)
+
+These three JFETs form the autozero front end of the DC input amplifier:
+
+| State | P2.2 XHC | P2.1 HZ | P2.0 PC | Set by |
+|---|---|---|---|---|
+| amp on **input HI** | 0 | 0 | 0 | cmd 0x0A (flag 26h.1=1) |
+| amp on **zero** | 1 | 1 | 0 | cmd 0x0B (26h.1=0), power-up |
+| **precharge** only | 1 | 0 | 1 | cmd 0x0C (also P2.6=0) |
+| all open | 1 | 0 | 0 | cmd 0x29 |
+| HI and zero together | 0 | 1 | 0 | cmd 0x36 |
+
+* `SWITCH_TO_ZERO` @0CEB (was `INPUT_SW_A`): HC off, short wait, HZ on, settle (3E/3F).
+* `SWITCH_TO_INPUT_PRECHARGED` @0D0B (was `INPUT_SW_B`): HZ off, **PC on for a few µs** (charges the amp input to the
+  bootstrapped input voltage, so closing the HI switch pulls almost no charge from the source), PC off, HC on, settle (3E/3F).
+* `TOGGLE_INPUT_ZERO` @0CE8: picks one of the two above from flag 26h.1.
+* `ADC_HANDSHAKE_reading` @0860 takes a reading, toggles, takes a second reading and toggles back. That is the in-sequence **AZERO ON**
+  signal/zero pair. Cmd 0x14 (zero reading) is `SWITCH_TO_ZERO` + reading + toggle back with settle time 29/2A.
+* Cmds 0x11/0x12 are cycle-timed variants: 0x12 = HC off, 20 ms, precharge pulse, HC on, trigger. 0x11 = HC on for 20 ms, then HC off + PC on, trigger.
 
 ### Gate-array register map (as used by the code)
 
+P0 low nibble = register, bit 4 (`XRXW`) = 1 for read. The upper bits P0.5–P0.7 are inputs and are written as 1.
+
 | P0 | Reg | Access | Meaning |
 |---|---|---|---|
-| `FF` | 1F | read 1–2 bytes | **UART RX word** from outguard (byte 1 = opcode, byte 2 = parameter) |
-| `E7` | 07 | write 2 bytes | **UART TX data word** to outguard |
-| `E8` | 08 | write 1 byte | **UART TX command/interrupt message** to outguard |
-| `E9` | 09 | write | control register (RAM shadow 22h; init 0x80) |
-| `FA` | 1A | read | status register → RAM 21h (bit0 = front/rear terminal, bit2 = terminal changed, bit5 = trigger/event) |
-| `F8`, `F9` | 18/19 | read | counter capture (frequency/period command 0x19) |
-| `FC`, `FD` | 1C/1D | read ×10 | diagnostic readback (commands 0x2C/0x2D) |
-| `EA`,`EB`,`EC`,`ED` | 0A–0D | strobe | clear/reset strobes (ADC/counter reset, init) |
-| `E0`–`E6` | 00–06 | write | **shift-register chain n**: shift out the RAM shadow, then latch |
-| `F0`–`F6` | 10–16 | read | **direct mode**: incoming UART words go into shift register n *and* to the CPU (RAM copy) |
+| `FF` | F (rd) | read 1–2 bytes | **UART RX word** from outguard (byte 1 = opcode, byte 2 = parameter) |
+| `E7` | 7 (wr) | write 2 bytes | **UART TX data word** to outguard |
+| `E8` | 8 (wr) | write 1 byte | **UART TX command/interrupt message** to outguard |
+| `E9` | 9 (wr) | write | control register (RAM shadow 22h; init 0x80) |
+| `FA` | A (rd) | read | status register → RAM 21h (bit0 = front/rear terminal, bit2 = terminal changed, bit5 = trigger/event) |
+| `F8`, `F9` | 8/9 (rd) | read | counter capture (line-frequency command 0x19) |
+| `FC`, `FD` | C/D (rd) | read ×10 | diagnostic readback (commands 0x2C/0x2D) |
+| `EA`,`EB`,`EC`,`ED` | A–D (wr) | strobe | clear/reset strobes (ADC/counter reset, init) |
+| `E0`–`E6` | 0–6 (wr) | write | **shift-register chain n**: shift out the RAM shadow, then latch |
+| `F0`–`F6` | 0–6 (rd) | read | **direct mode**: incoming UART words go into shift register n *and* to the CPU (RAM copy) |
 
 This matches the HP Journal (Apr 1989, p.36) description of the "direct output mode": configuration data goes
 straight into the shift registers while the processor keeps a copy.
@@ -133,26 +171,26 @@ Semantics marked † are inferred from code behaviour and/or the name of the 680
 |---|---|---|
 | 00 | 016E | **trigger**: pulse P1.3 (deferred via 28h.1 while the delay counter runs) |
 | 01 | 017B | pulse P2.7 (start) |
-| 02 | 0181 | read GA status reg (1A) → send as data word |
+| 02 | 0181 | read GA status reg (A) → send as data word |
 | 03 | 0197 | **sequence/EXTOUT config** → 24h[5:0]: bit0/1 = EXT OUT pulse at sequence end / per reading, bit2 = alternate ADC handshake path, bit4 = wait for 0x2E/0x09 between readings, bit5 = **OCOMP** (used by 0x16/0x1C) † |
 | 04 | 000E | software arm (25h.5) – TARM SGL † |
 | 05 | 0191 | **EXT OUT pulse** (P2.4) – sent by `CMD_EXTOUT` |
 | 06 / 07 | 01BA/01A5 | ext-trigger disable / enable+edge (param bit0 → 26h.6; 27h.5, ctl reg bit5) |
 | 08 | 01C5 | **ADC self-test conversion**: sets SR5 (ADMEM) bit 0x62.5 (test mode), switch A, arms, optionally triggers (param bit0), checks the P1.2 handshake timing, replies with a data word (always 00; pass/fail shows up as gate-array convergence-error flags). Sent only by the self-test `ISOLATOR_0004e448(0/1)`, called from `ISOLATOR_0004ddb8` (0x0108, then 0x0008 with different ADC settings). |
 | 09 | 051D | **stop** running sequence (25h.7) |
-| 0A/0B/0C/29/36 | | ADC input switch states (P2.0–P2.2), 0A/0B also set the zero/signal flag 26h.1 † |
+| 0A/0B/0C/29/36 | | input-amp switch states: 0A = HI, 0B = zero, 0C = precharge, 29 = all open, 36 = HI+zero (see §2) |
 | 0D | 0016 | SETB P2.5 |
 | 0E | 0251 | reply flag 25h.4 as data (`CMD_MSIZE?`) |
 | 0F | 0265 | load SR2 + delay count without restarting |
 | 10 | 0276 | **measurement init/abort**: reset GA, reload counters, reply `02` (`ISOLATOR_CHECK`) |
-| 11 / 12 | 02BD/02D6 | cycle-timed input-switch sequences (P2.0/P2.2/P2.6, then pulse P2.7) |
+| 11 / 12 | 02BD/02D6 | cycle-timed HI/precharge sequences, then `XETRG` (see §2) |
 | 13 | 02B8 | leave ISR / idle |
 | 14 | 0889 | **one-shot zero reading** (switch A, ADC handshake, switch back after settle 29/2A). Sent from slot `$1214BE` when AZERO is not ON. The 68000 feeds the result into `ADCAL_SEND` (SR6 offset). |
-| 15 / 1A | 0776/077F | **main reading sequence** (slot `$1214BC`): 0x15 for DCV, DCI, DSAC/DSDC and OHM/OHMF without OCOMP. 0x1A forces input switch B first (`INPUT_SW_B`) and is used for analog ACV/ACDCV (mode 8) and ACI/ACDCI (mode 7). EXT OUT per reading, waits for 2E/09 when 24h.4 is set. |
+| 15 / 1A | 0776/077F | **main reading sequence** (slot `$1214BC`): 0x15 for DCV, DCI, DSAC/DSDC and OHM/OHMF without OCOMP. 0x1A first forces the amp onto the input with precharge (`SWITCH_TO_INPUT_PRECHARGED`) and is used for analog ACV/ACDCV (mode 8) and ACI/ACDCI (mode 7). EXT OUT per reading, waits for 2E/09 when 24h.4 is set. |
 | 16 | 0AFE | **OCOMP ohms sequence** (OHM/OHMF with OCOMP ON): when 24h.5 is set, each result is a reading pair. It clears the current-source bits in SR1 byte 47h (`ANL 47h,#C0`), re-latches, waits the settle time 41/42 (cmd 0x2A), takes the second reading, then restores 47h. |
 | 17 | 02F1 | strobe GA reg 0D, clear busy flag |
 | 18 | 09A6 | **SYNC subsampling burst**: two nested sample loops. Each sample advances the SR2 delay by a BCD/binary increment (`SUBSAMPLE_advance_delay_BCD` @0A96), matching the journal's AC digital subsampling. |
-| 19 | 08DA | **line-frequency / sync-period measurement**: sent by `DETECT_LFREQ` and `CMD_SYNCPARM` (not by FREQ/PER). Checks that the T0 input toggles, counts input cycles (T0) against a reference (T1) plus GA counters 18/19, sends 4 data words (FFFF = no signal). |
+| 19 | 08DA | **line-frequency / sync-period measurement**: sent by `DETECT_LFREQ` and `CMD_SYNCPARM` (not by FREQ/PER). Checks that the T0 input toggles, counts input cycles (T0) against a reference (T1) plus GA counters 8/9, sends 4 data words (FFFF = no signal). |
 | 1B | 0BF6 | **AC-cal paired-reading burst**: repeats {arm, wait trigger, latch SR1, trigger, wait reading, latch SR1, delay(param)} until the count is done. Sent only by AC autocal/test (`ACAL_ACV_RATIO_1`, `TEST_ACV_etc` via 0x3B1C2) as `0x1B, time/500`, bracketed by 0x1E/0x1D. `ISOLATOR_0002ba6c` reads N pairs and accumulates Σ(A−B). |
 | 1C | 0BB0 | **one-shot OCOMP zero pair** (slot `$1214BE` for OHM/OHMF with OCOMP ON and AZERO not ON): reading with the source on, then source off (47h&C0), settle, second reading. For OHMF the result is kept in `$14E8`, otherwise it goes to `ADCAL_SEND`. |
 | 1D/1E, 3B/3C | | control reg bit 2 / bit 1 on/off |
@@ -167,7 +205,7 @@ Semantics marked † are inferred from code behaviour and/or the name of the 680
 | 27 / 28 | 0445/0458 | DC relay drive release / protected relay sequence (checks INT1 and reports 05 on overload) |
 | 2A | 04BA | settle flag + settle time 41/42 |
 | 2B | 04CD | input-switch settle time (value − 0x16 → 29/2A) |
-| 2C / 2D | 04F9/0514 | read 10 bytes from GA reg 1C / 1D → data words (diagnostic) |
+| 2C / 2D | 04F9/0514 | read 10 bytes from GA reg C / D → data words (diagnostic) |
 | 2E | 0521 | **next reading** (25h.6) |
 | 2F | 0525 | **TARM event** select (23h bits 4–6) † |
 | 30 | 0549 | **TRIG event** select (23h bits 0–2) + 24-bit count 37–39 † |
@@ -235,7 +273,5 @@ For codes >5 the zero slot is always set to 0x14, but it is only sent when `$147
 
 ## 8. Open points
 
-* Exact meaning of P2.0/P2.1/P2.2/P2.6 (which ADC input/zero switches) needs the A3 schematic. The CLIP schematic
-  pages were not OCR-readable.
 * T0/T1 count sources (which gate-array clocks or events drive pins T0/T1) are inferred from usage only.
 * 0x18 is confirmed as part of the sampling read paths (`MEAS_read_scale_float`, `READING_FAST_INT_PATH`), but the exact subsample timing units are still open.
