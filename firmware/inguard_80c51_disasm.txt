@@ -1,0 +1,2247 @@
+; HP 3458A  A3U220  80C51BH  03458-85501 Rev1  -- INGUARD controller (A3 "A/D Inguard Logic")
+; Recursive-descent disassembly (3960/4096 bytes reached; jump table @00DD = 62 AJMP entries).
+; See inguard_80c51_analysis.md for the hardware model, command table and message protocol.
+;
+; Hardware model used for names:
+;   Serial port mode 0 (SCON=0) = 8-bit synchronous byte bus to gate array U210 (RXD=data, TXD=clock)
+;   P0[4:0] = gate-array register address, P2.3 = address/transfer strobe
+;   P0.5/P0.6/P0.7 = gate-array status inputs (P0.6 = UART word ready / TX ready)
+;   Reg 1F (P0=FF) = UART RX word, 07 = UART TX data word, 08 = UART TX command (interrupt) msg,
+;   09 = control reg (shadow 22h), 1A = status reg (-> 21h), 1C/1D = readback, 18/19 = counters,
+;   E0..E6 = latch shift register n, F0..F6 = "direct mode" (UART word -> shift reg n + CPU copy)
+;   Timer0/Timer1 = 16-bit EXTERNAL EVENT COUNTERS (TMOD=55h), T0 extended to 24 bit with 31h
+;
+
+; ======== RESET @0000  (callers: -)
+0000: 02 00 20  LJMP MAIN_init
+
+; ======== VEC_INT0 @0003  (callers: -)
+0003: 01 87     AJMP ISR_INT0_gatearray
+
+; ======== rx_low_byte_bit0_to_C @0005  (callers: 01C5 0776 0781 08DA 09A6 0B09)
+0005: 12 0d d1  LCALL RX_BYTE_bit0_to_C
+0008: 92 34     MOV 26h.4,C
+000A: 22        RET
+
+; ======== VEC_TIMER0 @000B  (callers: -)
+000B: 02 06 d9  LJMP ISR_TIMER0_delay_timer_expired
+
+; ======== CMD04 @000E  (callers: -)
+; ---- outguard command 0x04: TARM SGL software arm (25h.5)
+000E: d2 2d     SETB 25h.5
+0010: 02 06 67  LJMP CMD_EXIT_popPSW_ACC_ret
+
+; ======== VEC_INT1 @0013  (callers: -)
+0013: 02 07 10  LJMP ISR_INT1_OVERLOAD_PROTECT
+
+; ======== CMD0D @0016  (callers: -)
+; ---- outguard command 0x0D: SETB P2.5
+0016: d2 a5     SETB P2.5
+0018: 02 06 67  LJMP CMD_EXIT_popPSW_ACC_ret
+
+; ======== VEC_TIMER1_pulse_P1_6 @001B  (callers: -)
+001B: c2 96     CLR P1.6
+001D: d2 96     SETB P1.6
+001F: 32        RETI
+MAIN_init:  ; from 0000
+0020: 11 3c     ACALL HW_INIT
+0022: 75 80 ff  MOV P0,#FFh
+0025: c2 a3     CLR P2.3
+0027: d2 a3     SETB P2.3
+0029: 75 22 80  MOV 22h,#80h
+002C: 12 0f 8c  LCALL GA_WRITE_CTRL_reg09_from_22h
+002F: 74 01     MOV A,#01h
+0031: 75 80 e8  MOV P0,#E8h
+0034: 12 0c 39  LCALL TX_CMD_wait_ready
+0037: 75 a8 8f  MOV IE,#8Fh
+L_003A:  ; from 003A
+003A: 80 fe     SJMP 003Ah
+
+; ======== HW_INIT @003C  (callers: 0020 05DD)
+003C: c2 b6     CLR WR
+003E: d2 b6     SETB WR
+0040: 74 00     MOV A,#00h
+0042: f5 6d     MOV 6Dh,A
+0044: f5 6e     MOV 6Eh,A
+0046: f5 6f     MOV 6Fh,A
+0048: f5 70     MOV 70h,A
+004A: f5 71     MOV 71h,A
+004C: 12 0d 4c  LCALL SR4_LATCH_6D_72
+004F: 75 80 ff  MOV P0,#FFh
+0052: 75 90 7f  MOV P1,#7Fh
+0055: 75 a0 be  MOV P2,#BEh
+0058: 75 b0 ff  MOV P3,#FFh
+005B: 75 23 11  MOV 23h,#11h
+005E: e4        CLR A
+005F: f5 24     MOV 24h,A
+0061: f5 25     MOV 25h,A
+0063: f5 26     MOV 26h,A
+0065: f5 27     MOV 27h,A
+0067: f5 28     MOV 28h,A
+0069: 75 b8 04  MOV IP,#04h
+006C: 75 89 55  MOV TMOD,#55h
+006F: 75 88 50  MOV TCON,#50h
+0072: 75 98 00  MOV SCON,#00h
+0075: c2 d3     CLR RS0
+0077: c2 d4     CLR RS1
+0079: 90 00 dd  MOV DPTR,#00DDh
+007C: 75 80 ef  MOV P0,#EFh
+007F: c2 a3     CLR P2.3
+0081: d2 a3     SETB P2.3
+0083: 75 80 ff  MOV P0,#FFh
+0086: 22        RET
+ISR_INT0_gatearray:  ; from 0003
+0087: 75 80 fa  MOV P0,#FAh
+008A: c2 a3     CLR P2.3
+008C: d2 a3     SETB P2.3
+008E: 20 b7 2c  JB RD,00BDh
+0091: 30 85 04  JNB P0.5,0098h
+0094: c2 97     CLR P1.7
+0096: d1 80     ACALL TRIGGER_EVENT_start_delay_counter
+L_0098:  ; from 0091
+0098: 30 87 1f  JNB P0.7,00BAh
+009B: 75 80 fa  MOV P0,#FAh
+009E: 12 0c 62  LCALL GA_READ_BYTE
+00A1: 85 99 21  MOV 21h,SBUF
+00A4: 30 0d 0e  JNB 21h.5,00B5h
+00A7: 30 2c 09  JNB 25h.4,00B3h
+00AA: c2 15     CLR 22h.5
+00AC: 12 0f 8c  LCALL GA_WRITE_CTRL_reg09_from_22h
+00AF: d2 a8     SETB EX0
+00B1: 80 02     SJMP 00B5h
+L_00B3:  ; from 00A7
+00B3: d2 2c     SETB 25h.4
+L_00B5:  ; from 00A4 00B1
+00B5: 30 0a 02  JNB 21h.2,00BAh
+00B8: c1 6c     AJMP ISR_exit_report_terminal
+L_00BA:  ; from 0098 00B5
+00BA: 30 86 02  JNB P0.6,00BFh
+L_00BD:  ; from 008E
+00BD: 11 c0     ACALL CMD_DISPATCH
+L_00BF:  ; from 00BA
+00BF: 32        RETI
+
+; ======== CMD_DISPATCH @00C0  (callers: 00BD 0F32)
+00C0: c0 e0     PUSH ACC
+00C2: c0 d0     PUSH PSW
+00C4: 75 80 ff  MOV P0,#FFh
+00C7: 12 0c 59  LCALL RX_WORD_first_byte_wait
+00CA: e5 99     MOV A,SBUF
+00CC: b4 3e 0a  CJNE A,#3Eh,00D9h
+L_00CF:  ; from 00D9
+00CF: 74 0a     MOV A,#0Ah
+00D1: 75 80 e8  MOV P0,#E8h
+00D4: 12 0c 39  LCALL TX_CMD_wait_ready
+00D7: c1 67     AJMP CMD_EXIT_popPSW_ACC_ret
+L_00D9:  ; from 00CC
+00D9: 50 f4     JNC 00CFh
+00DB: 23        RL A
+00DC: 73        JMP @A+DPTR
+00DD: DB 21 6e 21 7b 21 81 21 97 01 0e 21 91 21 ba 21 a5
+00ED: DB 21 c5 a1 1d 41 33 41 3d 41 47 01 16 41 51 41 65
+00FD: DB 41 76 41 bd 41 d6 41 b8 21 6b e1 76 21 59 41 f1
+010D: DB 21 5c 21 5f 21 62 21 65 21 68 41 fc 61 05 61 20
+011D: DB 61 3b 61 67 61 53 61 7e 61 be 61 f8 81 40 81 45
+012D: DB 81 58 81 b2 81 ba 81 cd 81 f9 a1 14 a1 21 a1 25
+013D: DB a1 49 a1 8a a1 bb a1 e9 a1 f5 c1 01 c1 12 c1 1a
+014D: DB c1 27 c1 3b c1 45 61 0e 61 17 c1 50
+
+; ======== CMD16 @0159  (callers: -)
+; ---- outguard command 0x16: reading sequence (alt)
+0159: 02 0a fe  LJMP CMD16_sequence
+
+; ======== CMD18 @015C  (callers: -)
+; ---- outguard command 0x18: SYNC subsample burst
+015C: 02 09 a6  LJMP CMD18_SYNC_SUBSAMPLE_burst
+
+; ======== CMD19 @015F  (callers: -)
+; ---- outguard command 0x19: freq/period count
+015F: 02 08 da  LJMP CMD19_FREQ_PERIOD_count
+
+; ======== CMD1A @0162  (callers: -)
+; ---- outguard command 0x1A: reading sequence (swB)
+0162: 02 07 7f  LJMP CMD1A_reading_sequence_swB
+
+; ======== CMD1B @0165  (callers: -)
+; ---- outguard command 0x1B: repeat sequence
+0165: 02 0b f6  LJMP CMD1B_repeat_sequence
+
+; ======== CMD1C @0168  (callers: -)
+; ---- outguard command 0x1C: sequence
+0168: 02 0b b0  LJMP CMD1C_sequence
+
+; ======== CMD14 @016B  (callers: -)
+; ---- outguard command 0x14: single reading
+016B: 02 08 89  LJMP CMD14_single_reading
+
+; ======== CMD00 @016E  (callers: -)
+; ---- outguard command 0x00: TRIGGER (pulse P1.3 or defer)
+016E: 20 3c 06  JB 27h.4,0177h
+0171: c2 93     CLR P1.3
+0173: d2 93     SETB P1.3
+0175: 80 02     SJMP 0179h
+L_0177:  ; from 016E
+0177: d2 41     SETB 28h.1
+L_0179:  ; from 0175
+0179: c1 67     AJMP CMD_EXIT_popPSW_ACC_ret
+
+; ======== CMD01 @017B  (callers: -)
+; ---- outguard command 0x01: pulse P2.7
+017B: c2 a7     CLR P2.7
+017D: d2 a7     SETB P2.7
+017F: c1 67     AJMP CMD_EXIT_popPSW_ACC_ret
+
+; ======== CMD02 @0181  (callers: -)
+; ---- outguard command 0x02: pass-through byte -> outguard data
+0181: 75 80 fa  MOV P0,#FAh
+0184: 12 0c 5c  LCALL GA_STROBE_then_read
+0187: e5 99     MOV A,SBUF
+0189: 75 80 e7  MOV P0,#E7h
+018C: 12 0c 39  LCALL TX_CMD_wait_ready
+018F: c1 67     AJMP CMD_EXIT_popPSW_ACC_ret
+
+; ======== CMD05 @0191  (callers: -)
+; ---- outguard command 0x05: EXTOUT pulse P2.4
+0191: c2 a4     CLR P2.4
+0193: d2 a4     SETB P2.4
+0195: c1 67     AJMP CMD_EXIT_popPSW_ACC_ret
+
+; ======== CMD03 @0197  (callers: -)
+; ---- outguard command 0x03: EXTOUT config (24h[5:0])
+0197: 12 0c 62  LCALL GA_READ_BYTE
+019A: e5 99     MOV A,SBUF
+019C: 54 3f     ANL A,#3Fh
+019E: 53 24 c0  ANL 24h,#C0h
+01A1: 42 24     ORL 24h,A
+01A3: c1 67     AJMP CMD_EXIT_popPSW_ACC_ret
+
+; ======== CMD07 @01A5  (callers: -)
+; ---- outguard command 0x07: ext-trigger disable
+01A5: 12 0c 62  LCALL GA_READ_BYTE
+01A8: e5 99     MOV A,SBUF
+01AA: 13        RRC A
+01AB: 92 36     MOV 26h.6,C
+01AD: c2 2c     CLR 25h.4
+01AF: d2 3d     SETB 27h.5
+01B1: d2 15     SETB 22h.5
+01B3: 12 0f 8c  LCALL GA_WRITE_CTRL_reg09_from_22h
+01B6: d2 a8     SETB EX0
+01B8: c1 67     AJMP CMD_EXIT_popPSW_ACC_ret
+
+; ======== CMD06 @01BA  (callers: -)
+; ---- outguard command 0x06: ext-trigger enable cfg
+01BA: c2 3d     CLR 27h.5
+01BC: c2 15     CLR 22h.5
+01BE: 12 0f 8c  LCALL GA_WRITE_CTRL_reg09_from_22h
+01C1: d2 a8     SETB EX0
+01C3: c1 67     AJMP CMD_EXIT_popPSW_ACC_ret
+
+; ======== CMD08 @01C5  (callers: -)
+; ---- outguard command 0x08: ??? input test / measure P1.2 handshake
+01C5: 12 00 05  LCALL rx_low_byte_bit0_to_C
+01C8: 43 62 20  ORL 62h,#20h
+01CB: 12 0d 69  LCALL SR5_LATCH_59_64
+01CE: c2 17     CLR 22h.7
+01D0: 12 0f 8c  LCALL GA_WRITE_CTRL_reg09_from_22h
+01D3: d2 a8     SETB EX0
+01D5: 12 0c eb  LCALL INPUT_SW_A
+01D8: c2 92     CLR P1.2
+01DA: d2 92     SETB P1.2
+01DC: c2 a5     CLR P2.5
+01DE: d2 97     SETB P1.7
+01E0: 75 f0 00  MOV B,#00h
+01E3: 12 0e 37  LCALL LEAVE_ISR_CONTINUE_FOREGROUND
+01E6: c2 94     CLR P1.4
+01E8: d2 94     SETB P1.4
+01EA: 20 34 1c  JB 26h.4,0209h
+01ED: c2 93     CLR P1.3
+01EF: d2 93     SETB P1.3
+01F1: 30 92 3b  JNB P1.2,022Fh
+01F4: c2 92     CLR P1.2
+01F6: d2 92     SETB P1.2
+01F8: 75 33 03  MOV 33h,#03h
+01FB: 75 32 e8  MOV 32h,#E8h
+01FE: 12 0c d1  LCALL DELAY_long_32h_33h
+0201: 20 92 2b  JB P1.2,022Fh
+0204: 30 92 28  JNB P1.2,022Fh
+0207: 80 15     SJMP 021Eh
+L_0209:  ; from 01EA
+0209: c2 93     CLR P1.3
+020B: d2 93     SETB P1.3
+020D: 30 92 1f  JNB P1.2,022Fh
+0210: c2 92     CLR P1.2
+0212: d2 92     SETB P1.2
+0214: e4        CLR A
+L_0215:  ; from 0215
+0215: d5 e0 fd  DJNZ ACC,0215h
+0218: 20 92 14  JB P1.2,022Fh
+021B: 30 92 11  JNB P1.2,022Fh
+L_021E:  ; from 0207 0231
+021E: e5 f0     MOV A,B
+0220: 75 80 e7  MOV P0,#E7h
+0223: 12 0c 39  LCALL TX_CMD_wait_ready
+0226: d2 17     SETB 22h.7
+0228: 12 0f 8c  LCALL GA_WRITE_CTRL_reg09_from_22h
+022B: d2 a8     SETB EX0
+022D: 41 b8     AJMP CMD13
+L_022F:  ; from 01F1 0201 0204 020D 0218 021B
+022F: c2 f0     CLR B.0
+0231: 80 eb     SJMP 021Eh
+
+; ======== CMD0A @0233  (callers: -)
+; ---- outguard command 0x0A: input switch state A
+0233: c2 a0     CLR P2.0
+0235: c2 a1     CLR P2.1
+0237: c2 a2     CLR P2.2
+0239: d2 31     SETB 26h.1
+023B: c1 67     AJMP CMD_EXIT_popPSW_ACC_ret
+
+; ======== CMD0B @023D  (callers: -)
+; ---- outguard command 0x0B: input switch state B
+023D: d2 a2     SETB P2.2
+023F: c2 a0     CLR P2.0
+0241: d2 a1     SETB P2.1
+0243: c2 31     CLR 26h.1
+0245: c1 67     AJMP CMD_EXIT_popPSW_ACC_ret
+
+; ======== CMD0C @0247  (callers: -)
+; ---- outguard command 0x0C: input switch state C
+0247: c2 a6     CLR P2.6
+0249: d2 a2     SETB P2.2
+024B: c2 a1     CLR P2.1
+024D: d2 a0     SETB P2.0
+024F: c1 67     AJMP CMD_EXIT_popPSW_ACC_ret
+
+; ======== CMD0E @0251  (callers: -)
+; ---- outguard command 0x0E: query flag 25h.4 -> data
+0251: e4        CLR A
+0252: a2 2c     MOV C,25h.4
+0254: 92 e0     MOV ACC.0,C
+0256: 75 80 e7  MOV P0,#E7h
+0259: 12 0c 39  LCALL TX_CMD_wait_ready
+025C: c2 2c     CLR 25h.4
+025E: 12 0f 3c  LCALL set_ctl_bit5
+0261: d2 a8     SETB EX0
+0263: c1 67     AJMP CMD_EXIT_popPSW_ACC_ret
+
+; ======== CMD0F @0265  (callers: -)
+; ---- outguard command 0x0F: load SR2 + delay count (no restart)
+0265: 78 7c     MOV R0,#7Ch
+0267: 75 30 01  MOV 30h,#01h
+026A: 12 0c 6e  LCALL RX_WORDS_DIRECT_to_RAM
+026D: 71 df     ACALL 03DFh
+026F: 12 0e 0c  LCALL CALC_flags_3A_3B
+0272: d2 33     SETB 26h.3
+0274: c1 67     AJMP CMD_EXIT_popPSW_ACC_ret
+
+; ======== CMD10 @0276  (callers: -)
+; ---- outguard command 0x10: INIT/ABORT measurement, reply 02
+0276: d2 a7     SETB P2.7
+0278: d2 94     SETB P1.4
+027A: 12 0d 39  LCALL GA_RESET_regC_pulse_WR
+027D: 75 80 e2  MOV P0,#E2h
+0280: c2 a3     CLR P2.3
+0282: d2 a3     SETB P2.3
+0284: 75 80 eb  MOV P0,#EBh
+0287: c2 a3     CLR P2.3
+0289: d2 a3     SETB P2.3
+028B: 75 32 02  MOV 32h,#02h
+028E: 12 0c ab  LCALL DELAY_short_32h
+0291: 75 80 ea  MOV P0,#EAh
+0294: c2 a3     CLR P2.3
+0296: d2 a3     SETB P2.3
+0298: 75 80 ff  MOV P0,#FFh
+029B: c2 a3     CLR P2.3
+029D: d2 a3     SETB P2.3
+029F: c2 26     CLR 24h.6
+02A1: 53 25 07  ANL 25h,#07h
+02A4: 12 0d e3  LCALL LOAD_T0_first_or_interval
+02A7: 12 0e 21  LCALL LOAD_T1_count
+02AA: 12 0f 5d  LCALL RELOAD_TRIG_COUNT
+02AD: 12 0e 47  LCALL START_COUNTERS
+02B0: 74 02     MOV A,#02h
+02B2: 75 80 e8  MOV P0,#E8h
+02B5: 12 0c 39  LCALL TX_CMD_wait_ready
+
+; ======== CMD13 @02B8  (callers: -)
+; ---- outguard command 0x13: idle (leave ISR)
+02B8: 12 0e 37  LCALL LEAVE_ISR_CONTINUE_FOREGROUND
+L_02BB:  ; from 02BB
+02BB: 80 fe     SJMP 02BBh
+
+; ======== CMD11 @02BD  (callers: -)
+; ---- outguard command 0x11: input switch timed seq 1
+02BD: c2 a6     CLR P2.6
+02BF: c2 a0     CLR P2.0
+02C1: c2 a2     CLR P2.2
+02C3: 75 33 14  MOV 33h,#14h
+02C6: 12 0c c6  LCALL DELAY_ms_33h
+02C9: d2 a2     SETB P2.2
+02CB: a4        MUL AB
+02CC: d2 a0     SETB P2.0
+02CE: a4        MUL AB
+02CF: a4        MUL AB
+02D0: c2 a7     CLR P2.7
+02D2: d2 a7     SETB P2.7
+02D4: c1 67     AJMP CMD_EXIT_popPSW_ACC_ret
+
+; ======== CMD12 @02D6  (callers: -)
+; ---- outguard command 0x12: input switch timed seq 2
+02D6: c2 a6     CLR P2.6
+02D8: d2 a2     SETB P2.2
+02DA: 75 33 14  MOV 33h,#14h
+02DD: 12 0c c6  LCALL DELAY_ms_33h
+02E0: d2 a0     SETB P2.0
+02E2: a4        MUL AB
+02E3: 84        DIV AB
+02E4: c2 a0     CLR P2.0
+02E6: c2 a2     CLR P2.2
+02E8: a4        MUL AB
+02E9: a4        MUL AB
+02EA: a4        MUL AB
+02EB: c2 a7     CLR P2.7
+02ED: d2 a7     SETB P2.7
+02EF: c1 67     AJMP CMD_EXIT_popPSW_ACC_ret
+
+; ======== CMD17 @02F1  (callers: -)
+; ---- outguard command 0x17: GA reg 0D strobe
+02F1: 75 80 ed  MOV P0,#EDh
+02F4: c2 a3     CLR P2.3
+02F6: d2 a3     SETB P2.3
+02F8: c2 38     CLR 27h.0
+02FA: c1 67     AJMP CMD_EXIT_popPSW_ACC_ret
+
+; ======== CMD1D @02FC  (callers: -)
+; ---- outguard command 0x1D: ctl bit2 on
+02FC: d2 12     SETB 22h.2
+02FE: 12 0f 8c  LCALL GA_WRITE_CTRL_reg09_from_22h
+0301: d2 a8     SETB EX0
+0303: c1 67     AJMP CMD_EXIT_popPSW_ACC_ret
+
+; ======== CMD1E @0305  (callers: -)
+; ---- outguard command 0x1E: ctl bit2 off
+0305: c2 12     CLR 22h.2
+0307: 12 0f 8c  LCALL GA_WRITE_CTRL_reg09_from_22h
+030A: d2 a8     SETB EX0
+030C: c1 67     AJMP CMD_EXIT_popPSW_ACC_ret
+
+; ======== CMD3B @030E  (callers: -)
+; ---- outguard command 0x3B: ctl bit1 on
+030E: d2 11     SETB 22h.1
+0310: 12 0f 8c  LCALL GA_WRITE_CTRL_reg09_from_22h
+0313: d2 a8     SETB EX0
+0315: c1 67     AJMP CMD_EXIT_popPSW_ACC_ret
+
+; ======== CMD3C @0317  (callers: -)
+; ---- outguard command 0x3C: ctl bit1 off
+0317: c2 11     CLR 22h.1
+0319: 12 0f 8c  LCALL GA_WRITE_CTRL_reg09_from_22h
+031C: d2 a8     SETB EX0
+031E: c1 67     AJMP CMD_EXIT_popPSW_ACC_ret
+
+; ======== CMD1F @0320  (callers: -)
+; ---- outguard command 0x1F: load SR1 (DC board, 80b)
+0320: c2 aa     CLR EX1
+0322: 75 80 f1  MOV P0,#F1h
+0325: 78 4e     MOV R0,#4Eh
+0327: 75 30 05  MOV 30h,#05h
+032A: 12 0c 6e  LCALL RX_WORDS_DIRECT_to_RAM
+032D: 75 80 e1  MOV P0,#E1h
+0330: c2 a3     CLR P2.3
+0332: d2 a3     SETB P2.3
+0334: d2 aa     SETB EX1
+0336: 85 47 40  MOV 40h,47h
+0339: c1 67     AJMP CMD_EXIT_popPSW_ACC_ret
+
+; ======== CMD20 @033B  (callers: -)
+; ---- outguard command 0x20: load SR0 (AC board, 80b)
+033B: c2 aa     CLR EX1
+033D: 75 80 f0  MOV P0,#F0h
+0340: 78 58     MOV R0,#58h
+0342: 75 30 05  MOV 30h,#05h
+0345: 12 0c 6e  LCALL RX_WORDS_DIRECT_to_RAM
+0348: 75 80 e0  MOV P0,#E0h
+034B: c2 a3     CLR P2.3
+034D: d2 a3     SETB P2.3
+034F: d2 aa     SETB EX1
+0351: c1 67     AJMP CMD_EXIT_popPSW_ACC_ret
+
+; ======== CMD22 @0353  (callers: -)
+; ---- outguard command 0x22: load SR6 (ADCAL, 48b)
+0353: 75 80 f6  MOV P0,#F6h
+0356: 78 6a     MOV R0,#6Ah
+0358: 75 30 03  MOV 30h,#03h
+035B: 12 0c 6e  LCALL RX_WORDS_DIRECT_to_RAM
+035E: 75 80 e6  MOV P0,#E6h
+0361: c2 a3     CLR P2.3
+0363: d2 a3     SETB P2.3
+0365: c1 67     AJMP CMD_EXIT_popPSW_ACC_ret
+
+; ======== CMD21 @0367  (callers: -)
+; ---- outguard command 0x21: load SR5 (ADMEM, 96b)
+0367: 75 80 f5  MOV P0,#F5h
+036A: 78 64     MOV R0,#64h
+036C: 75 30 06  MOV 30h,#06h
+036F: 12 0c 6e  LCALL RX_WORDS_DIRECT_to_RAM
+0372: 75 80 e5  MOV P0,#E5h
+0375: c2 a3     CLR P2.3
+0377: d2 a3     SETB P2.3
+0379: 75 80 ff  MOV P0,#FFh
+037C: c1 67     AJMP CMD_EXIT_popPSW_ACC_ret
+
+; ======== CMD23 @037E  (callers: -)
+; ---- outguard command 0x23: load SR3 + TIMER count
+037E: 12 0d 39  LCALL GA_RESET_regC_pulse_WR
+0381: c2 8c     CLR TR0
+0383: 75 80 f3  MOV P0,#F3h
+0386: 78 77     MOV R0,#77h
+0388: 75 30 01  MOV 30h,#01h
+038B: 12 0c 6e  LCALL RX_WORDS_DIRECT_to_RAM
+038E: 75 80 e3  MOV P0,#E3h
+0391: c2 a3     CLR P2.3
+0393: d2 a3     SETB P2.3
+0395: 75 80 ff  MOV P0,#FFh
+0398: 12 0c 59  LCALL RX_WORD_first_byte_wait
+039B: 85 99 75  MOV 75h,SBUF
+039E: 12 0c 62  LCALL GA_READ_BYTE
+03A1: 85 99 74  MOV 74h,SBUF
+03A4: 12 0c 59  LCALL RX_WORD_first_byte_wait
+03A7: 85 99 73  MOV 73h,SBUF
+03AA: c2 28     CLR 25h.0
+03AC: e5 73     MOV A,73h
+03AE: 45 74     ORL A,74h
+03B0: 45 75     ORL A,75h
+03B2: 70 02     JNZ 03B6h
+03B4: d2 28     SETB 25h.0
+L_03B6:  ; from 03B2
+03B6: 12 0d e3  LCALL LOAD_T0_first_or_interval
+03B9: 12 0e 47  LCALL START_COUNTERS
+03BC: c1 67     AJMP CMD_EXIT_popPSW_ACC_ret
+
+; ======== CMD24 @03BE  (callers: -)
+; ---- outguard command 0x24: load SR2 + DELAY count
+03BE: 12 0d 39  LCALL GA_RESET_regC_pulse_WR
+03C1: c2 8c     CLR TR0
+03C3: 75 80 f2  MOV P0,#F2h
+03C6: 78 7c     MOV R0,#7Ch
+03C8: 75 30 01  MOV 30h,#01h
+03CB: 12 0c 6e  LCALL RX_WORDS_DIRECT_to_RAM
+03CE: 75 80 e2  MOV P0,#E2h
+03D1: c2 a3     CLR P2.3
+03D3: d2 a3     SETB P2.3
+03D5: 71 df     ACALL 03DFh
+03D7: 12 0d e3  LCALL LOAD_T0_first_or_interval
+03DA: 12 0e 47  LCALL START_COUNTERS
+03DD: c1 67     AJMP CMD_EXIT_popPSW_ACC_ret
+
+; ======== SUB_03DF @03DF  (callers: 026D 03D5)
+03DF: 75 80 ff  MOV P0,#FFh
+03E2: 12 0c 59  LCALL RX_WORD_first_byte_wait
+03E5: 85 99 7a  MOV 7Ah,SBUF
+03E8: 12 0c 62  LCALL GA_READ_BYTE
+03EB: 85 99 79  MOV 79h,SBUF
+03EE: 12 0c 59  LCALL RX_WORD_first_byte_wait
+03F1: 85 99 78  MOV 78h,SBUF
+03F4: 12 0d c4  LCALL CHK_DELAYCOUNT_zero
+03F7: 22        RET
+
+; ======== CMD25 @03F8  (callers: -)
+; ---- outguard command 0x25: load SR4 + T1 count
+03F8: d2 96     SETB P1.6
+03FA: c2 8c     CLR TR0
+03FC: 75 80 e4  MOV P0,#E4h
+03FF: c2 a3     CLR P2.3
+0401: d2 a3     SETB P2.3
+0403: 75 80 f4  MOV P0,#F4h
+0406: 78 72     MOV R0,#72h
+0408: 75 30 03  MOV 30h,#03h
+040B: 12 0c 6e  LCALL RX_WORDS_DIRECT_to_RAM
+040E: 75 80 e4  MOV P0,#E4h
+0411: c2 a3     CLR P2.3
+0413: d2 a3     SETB P2.3
+0415: 75 80 ff  MOV P0,#FFh
+0418: c2 b6     CLR WR
+041A: d2 b6     SETB WR
+041C: d2 97     SETB P1.7
+041E: c2 97     CLR P1.7
+0420: 75 80 ff  MOV P0,#FFh
+0423: 12 0c 59  LCALL RX_WORD_first_byte_wait
+0426: 85 99 6c  MOV 6Ch,SBUF
+0429: 12 0c 62  LCALL GA_READ_BYTE
+042C: 85 99 6b  MOV 6Bh,SBUF
+042F: e5 6e     MOV A,6Eh
+0431: a2 e1     MOV C,ACC.1
+0433: 92 40     MOV 28h.0,C
+0435: 12 0d d8  LCALL CHK_T1COUNT_zero
+0438: 12 0e 21  LCALL LOAD_T1_count
+043B: 12 0e 47  LCALL START_COUNTERS
+043E: c1 67     AJMP CMD_EXIT_popPSW_ACC_ret
+
+; ======== CMD26 @0440  (callers: -)
+; ---- outguard command 0x26: EXTOUT pulse (deferred)
+0440: 12 0f 4a  LCALL EXTOUT_pulse
+0443: c1 67     AJMP CMD_EXIT_popPSW_ACC_ret
+
+; ======== CMD27 @0445  (callers: -)
+; ---- outguard command 0x27: DC relay drive release
+0445: c0 00     PUSH 00h
+0447: 53 45 3f  ANL 45h,#3Fh
+044A: 12 0d 82  LCALL SR1_DCBD_LATCH_45_4E
+044D: c2 a3     CLR P2.3
+044F: d2 a3     SETB P2.3
+0451: 12 0c c3  LCALL DELAY_2ms
+0454: d0 00     POP 00h
+0456: c1 67     AJMP CMD_EXIT_popPSW_ACC_ret
+
+; ======== CMD28 @0458  (callers: -)
+; ---- outguard command 0x28: DC relay protect sequence
+0458: c0 00     PUSH 00h
+045A: c2 af     CLR EA
+045C: 43 45 01  ORL 45h,#01h
+045F: 12 0d 82  LCALL SR1_DCBD_LATCH_45_4E
+0462: c2 a3     CLR P2.3
+0464: d2 a3     SETB P2.3
+0466: 75 33 1d  MOV 33h,#1Dh
+0469: 12 0c c6  LCALL DELAY_ms_33h
+046C: 30 b3 22  JNB INT1,0491h
+046F: 43 45 42  ORL 45h,#42h
+0472: 12 0d 82  LCALL SR1_DCBD_LATCH_45_4E
+0475: c2 a3     CLR P2.3
+0477: d2 a3     SETB P2.3
+0479: 75 33 05  MOV 33h,#05h
+047C: 12 0c c6  LCALL DELAY_ms_33h
+047F: 53 45 fd  ANL 45h,#FDh
+0482: 12 0d 82  LCALL SR1_DCBD_LATCH_45_4E
+0485: c2 a3     CLR P2.3
+0487: d2 a3     SETB P2.3
+0489: 75 33 03  MOV 33h,#03h
+048C: 12 0c c6  LCALL DELAY_ms_33h
+048F: 80 08     SJMP 0499h
+L_0491:  ; from 046C
+0491: 74 05     MOV A,#05h
+0493: 75 80 e8  MOV P0,#E8h
+0496: 12 0c 39  LCALL TX_CMD_wait_ready
+L_0499:  ; from 048F
+0499: 53 45 fe  ANL 45h,#FEh
+049C: 53 4d 7f  ANL 4Dh,#7Fh
+049F: 43 4d 66  ORL 4Dh,#66h
+04A2: 12 0d 82  LCALL SR1_DCBD_LATCH_45_4E
+04A5: c2 a3     CLR P2.3
+04A7: d2 a3     SETB P2.3
+04A9: 12 0c c3  LCALL DELAY_2ms
+04AC: d0 00     POP 00h
+04AE: d2 af     SETB EA
+04B0: c1 67     AJMP CMD_EXIT_popPSW_ACC_ret
+
+; ======== CMD29 @04B2  (callers: -)
+; ---- outguard command 0x29: input switch state D
+04B2: c2 a0     CLR P2.0
+04B4: d2 a2     SETB P2.2
+04B6: c2 a1     CLR P2.1
+04B8: c1 67     AJMP CMD_EXIT_popPSW_ACC_ret
+
+; ======== CMD2A @04BA  (callers: -)
+; ---- outguard command 0x2A: set settle flag + time 41/42
+04BA: 12 0d d1  LCALL RX_BYTE_bit0_to_C
+04BD: 92 37     MOV 26h.7,C
+04BF: 12 0c 59  LCALL RX_WORD_first_byte_wait
+04C2: 85 99 42  MOV 42h,SBUF
+04C5: 12 0c 62  LCALL GA_READ_BYTE
+04C8: 85 99 41  MOV 41h,SBUF
+04CB: c1 67     AJMP CMD_EXIT_popPSW_ACC_ret
+
+; ======== CMD2B @04CD  (callers: -)
+; ---- outguard command 0x2B: set switch settle time 3E/3F
+04CD: 12 0c 59  LCALL RX_WORD_first_byte_wait
+04D0: 85 99 3e  MOV 3Eh,SBUF
+04D3: 12 0c 62  LCALL GA_READ_BYTE
+04D6: e5 99     MOV A,SBUF
+04D8: f5 3f     MOV 3Fh,A
+04DA: 70 0f     JNZ 04EBh
+04DC: e5 3e     MOV A,3Eh
+04DE: b4 16 08  CJNE A,#16h,04E9h
+L_04E1:  ; from 04E9
+04E1: 75 2a 00  MOV 2Ah,#00h
+04E4: 75 29 01  MOV 29h,#01h
+04E7: c1 67     AJMP CMD_EXIT_popPSW_ACC_ret
+L_04E9:  ; from 04DE
+04E9: 40 f6     JC 04E1h
+L_04EB:  ; from 04DA
+04EB: e5 3e     MOV A,3Eh
+04ED: 94 16     SUBB A,#16h
+04EF: f5 29     MOV 29h,A
+04F1: e5 3f     MOV A,3Fh
+04F3: 94 00     SUBB A,#00h
+04F5: f5 2a     MOV 2Ah,A
+04F7: c1 67     AJMP CMD_EXIT_popPSW_ACC_ret
+
+; ======== CMD2C @04F9  (callers: -)
+; ---- outguard command 0x2C: read GA reg 1C x10 -> outguard
+04F9: c0 02     PUSH 02h
+04FB: 7a 0a     MOV R2,#0Ah
+04FD: 75 f0 fc  MOV B,#FCh
+L_0500:  ; from 050E 051B
+0500: 85 f0 80  MOV P0,B
+0503: 12 0c 62  LCALL GA_READ_BYTE
+0506: e5 99     MOV A,SBUF
+0508: 75 80 e7  MOV P0,#E7h
+050B: 12 0c 39  LCALL TX_CMD_wait_ready
+050E: da f0     DJNZ R2,0500h
+0510: d0 02     POP 02h
+0512: c1 67     AJMP CMD_EXIT_popPSW_ACC_ret
+
+; ======== CMD2D @0514  (callers: -)
+; ---- outguard command 0x2D: read GA reg 1D x10 -> outguard
+0514: c0 02     PUSH 02h
+0516: 7a 0a     MOV R2,#0Ah
+0518: 75 f0 fd  MOV B,#FDh
+051B: 80 e3     SJMP 0500h
+
+; ======== CMD09 @051D  (callers: -)
+; ---- outguard command 0x09: STOP sequence (25h.7)
+051D: d2 2f     SETB 25h.7
+051F: c1 67     AJMP CMD_EXIT_popPSW_ACC_ret
+
+; ======== CMD2E @0521  (callers: -)
+; ---- outguard command 0x2E: NEXT reading (25h.6)
+0521: d2 2e     SETB 25h.6
+0523: c1 67     AJMP CMD_EXIT_popPSW_ACC_ret
+
+; ======== CMD2F @0525  (callers: -)
+; ---- outguard command 0x2F: TARM event
+0525: 12 0c 62  LCALL GA_READ_BYTE
+0528: e5 99     MOV A,SBUF
+052A: 53 23 0f  ANL 23h,#0Fh
+052D: c2 2b     CLR 25h.3
+052F: c2 2d     CLR 25h.5
+0531: c2 27     CLR 24h.7
+0533: 20 e1 07  JB ACC.1,053Dh
+0536: 20 e0 0c  JB ACC.0,0545h
+0539: d2 1c     SETB 23h.4
+053B: c1 67     AJMP CMD_EXIT_popPSW_ACC_ret
+L_053D:  ; from 0533
+053D: d2 1e     SETB 23h.6
+053F: a2 e0     MOV C,ACC.0
+0541: 92 36     MOV 26h.6,C
+0543: c1 67     AJMP CMD_EXIT_popPSW_ACC_ret
+L_0545:  ; from 0536
+0545: d2 1d     SETB 23h.5
+0547: c1 67     AJMP CMD_EXIT_popPSW_ACC_ret
+
+; ======== CMD30 @0549  (callers: -)
+; ---- outguard command 0x30: TRIG event + count
+0549: 12 0c 62  LCALL GA_READ_BYTE
+054C: e5 99     MOV A,SBUF
+054E: 53 23 f0  ANL 23h,#F0h
+0551: c2 2b     CLR 25h.3
+0553: c2 2d     CLR 25h.5
+0555: c2 27     CLR 24h.7
+0557: 20 e1 07  JB ACC.1,0561h
+055A: 20 e0 0c  JB ACC.0,0569h
+055D: d2 18     SETB 23h.0
+055F: 80 0a     SJMP 056Bh
+L_0561:  ; from 0557
+0561: d2 1a     SETB 23h.2
+0563: a2 e0     MOV C,ACC.0
+0565: 92 36     MOV 26h.6,C
+0567: 80 02     SJMP 056Bh
+L_0569:  ; from 055A
+0569: d2 19     SETB 23h.1
+L_056B:  ; from 055F 0567
+056B: 12 0c 59  LCALL RX_WORD_first_byte_wait
+056E: 85 99 39  MOV 39h,SBUF
+0571: 12 0c 59  LCALL RX_WORD_first_byte_wait
+0574: 85 99 37  MOV 37h,SBUF
+0577: 12 0c 62  LCALL GA_READ_BYTE
+057A: 85 99 38  MOV 38h,SBUF
+057D: 78 37     MOV R0,#37h
+057F: 75 30 02  MOV 30h,#02h
+0582: 12 0f 7f  LCALL PREP_DJNZ_COUNTER
+0585: 12 0f 5d  LCALL RELOAD_TRIG_COUNT
+0588: c1 67     AJMP CMD_EXIT_popPSW_ACC_ret
+
+; ======== CMD31 @058A  (callers: -)
+; ---- outguard command 0x31: trigger DELAY (32-bit)
+058A: 12 0c 59  LCALL RX_WORD_first_byte_wait
+058D: 85 99 3c  MOV 3Ch,SBUF
+0590: 12 0c 62  LCALL GA_READ_BYTE
+0593: 85 99 3d  MOV 3Dh,SBUF
+0596: 12 0c 59  LCALL RX_WORD_first_byte_wait
+0599: 85 99 3a  MOV 3Ah,SBUF
+059C: 12 0c 62  LCALL GA_READ_BYTE
+059F: e5 99     MOV A,SBUF
+05A1: f5 3b     MOV 3Bh,A
+05A3: 45 3c     ORL A,3Ch
+05A5: 45 3d     ORL A,3Dh
+05A7: 45 3a     ORL A,3Ah
+05A9: c2 35     CLR 26h.5
+05AB: 70 04     JNZ 05B1h
+05AD: d2 35     SETB 26h.5
+05AF: 80 08     SJMP 05B9h
+L_05B1:  ; from 05AB
+05B1: 78 3a     MOV R0,#3Ah
+05B3: 75 30 03  MOV 30h,#03h
+05B6: 12 0f 7f  LCALL PREP_DJNZ_COUNTER
+L_05B9:  ; from 05AF
+05B9: c1 67     AJMP CMD_EXIT_popPSW_ACC_ret
+
+; ======== CMD32 @05BB  (callers: -)
+; ---- outguard command 0x32: SELF TEST
+05BB: 12 0f 9e  LCALL SELFTEST_UART_ECHO
+05BE: 12 0f da  LCALL ROM_CHECKSUM
+05C1: 78 ff     MOV R0,#FFh
+05C3: b8 ff 15  CJNE R0,#FFh,05DBh
+05C6: 78 00     MOV R0,#00h
+05C8: b8 00 10  CJNE R0,#00h,05DBh
+05CB: 78 7f     MOV R0,#7Fh
+L_05CD:  ; from 05D7
+05CD: 76 ff     MOV @R0,#FFh
+05CF: b6 ff 09  CJNE @R0,#FFh,05DBh
+05D2: 76 00     MOV @R0,#00h
+05D4: b6 00 04  CJNE @R0,#00h,05DBh
+05D7: d8 f4     DJNZ R0,05CDh
+05D9: 80 02     SJMP 05DDh
+L_05DB:  ; from 05C3 05C8 05CF 05D4
+05DB: d2 f1     SETB B.1
+L_05DD:  ; from 05D9
+05DD: 11 3c     ACALL HW_INIT
+05DF: e5 f0     MOV A,B
+05E1: 75 80 e7  MOV P0,#E7h
+05E4: 12 0c 39  LCALL TX_CMD_wait_ready
+05E7: 41 b8     AJMP CMD13
+
+; ======== CMD33 @05E9  (callers: -)
+; ---- outguard command 0x33: delay short
+05E9: 12 0c 62  LCALL GA_READ_BYTE
+05EC: e5 99     MOV A,SBUF
+05EE: f5 32     MOV 32h,A
+05F0: 12 0c ab  LCALL DELAY_short_32h
+05F3: c1 67     AJMP CMD_EXIT_popPSW_ACC_ret
+
+; ======== CMD34 @05F5  (callers: -)
+; ---- outguard command 0x34: delay ms
+05F5: 12 0c 62  LCALL GA_READ_BYTE
+05F8: e5 99     MOV A,SBUF
+05FA: f5 33     MOV 33h,A
+05FC: 12 0c c6  LCALL DELAY_ms_33h
+05FF: c1 67     AJMP CMD_EXIT_popPSW_ACC_ret
+
+; ======== CMD35 @0601  (callers: -)
+; ---- outguard command 0x35: delay long
+0601: 12 0c 59  LCALL RX_WORD_first_byte_wait
+0604: 85 99 32  MOV 32h,SBUF
+0607: 12 0c 62  LCALL GA_READ_BYTE
+060A: 85 99 33  MOV 33h,SBUF
+060D: 12 0c d1  LCALL DELAY_long_32h_33h
+0610: c1 67     AJMP CMD_EXIT_popPSW_ACC_ret
+
+; ======== CMD36 @0612  (callers: -)
+; ---- outguard command 0x36: input switch state E
+0612: c2 a0     CLR P2.0
+0614: d2 a1     SETB P2.1
+0616: c2 a2     CLR P2.2
+0618: c1 67     AJMP CMD_EXIT_popPSW_ACC_ret
+
+; ======== CMD37 @061A  (callers: -)
+; ---- outguard command 0x37: read P1.0 -> outguard
+061A: e4        CLR A
+061B: a2 90     MOV C,P1.0
+061D: 92 e0     MOV ACC.0,C
+061F: 75 80 e7  MOV P0,#E7h
+0622: 12 0c 39  LCALL TX_CMD_wait_ready
+0625: c1 67     AJMP CMD_EXIT_popPSW_ACC_ret
+
+; ======== CMD38 @0627  (callers: -)
+; ---- outguard command 0x38: relay settle pulse SR1
+0627: 75 33 05  MOV 33h,#05h
+062A: 12 0c c6  LCALL DELAY_ms_33h
+062D: 53 45 fd  ANL 45h,#FDh
+0630: 12 0d 82  LCALL SR1_DCBD_LATCH_45_4E
+0633: 75 33 04  MOV 33h,#04h
+0636: 12 0c c6  LCALL DELAY_ms_33h
+0639: c1 67     AJMP CMD_EXIT_popPSW_ACC_ret
+
+; ======== CMD39 @063B  (callers: -)
+; ---- outguard command 0x39: REV? -> 02
+063B: 74 02     MOV A,#02h
+063D: 75 80 e7  MOV P0,#E7h
+0640: 12 0c 39  LCALL TX_CMD_wait_ready
+0643: c1 67     AJMP CMD_EXIT_popPSW_ACC_ret
+
+; ======== CMD3A @0645  (callers: -)
+; ---- outguard command 0x3A: SR1 bits 4Dh set
+0645: 43 4d 66  ORL 4Dh,#66h
+0648: 53 4d 7f  ANL 4Dh,#7Fh
+064B: 12 0d 82  LCALL SR1_DCBD_LATCH_45_4E
+064E: c1 67     AJMP CMD_EXIT_popPSW_ACC_ret
+
+; ======== CMD3D @0650  (callers: -)
+; ---- outguard command 0x3D: set aux count 2B/2C
+0650: 12 0c 59  LCALL RX_WORD_first_byte_wait
+0653: 85 99 2b  MOV 2Bh,SBUF
+0656: 12 0c 62  LCALL GA_READ_BYTE
+0659: e5 99     MOV A,SBUF
+065B: f5 2c     MOV 2Ch,A
+065D: 45 2b     ORL A,2Bh
+065F: c2 3e     CLR 27h.6
+0661: 70 02     JNZ 0665h
+0663: d2 3e     SETB 27h.6
+L_0665:  ; from 0661
+0665: c1 67     AJMP CMD_EXIT_popPSW_ACC_ret
+CMD_EXIT_popPSW_ACC_ret:  ; from 0010 0018 00D7 0179 017F 018F 0195 01A3 01B8 01C3 023B 0245 024F 0263 0274 02D4 02EF 02FA 0303 030C 0315 031E 0339 0351 0365 037C 03BC 03DD 043E 0443 0456 04B0 04B8 04CB 04E7 04F7 0512 051F 0523 053B 0543 0547 0588 05B9 05F3 05FF 0610 0618 0625 0639 0643 064E 0665 08D7 0BF3
+0667: d0 d0     POP PSW
+0669: d0 e0     POP ACC
+066B: 22        RET
+ISR_exit_report_terminal:  ; from 00B8
+066C: d1 6f     ACALL SEND_TERMINAL_STATUS_08_09
+066E: 32        RETI
+
+; ======== SEND_TERMINAL_STATUS_08_09 @066F  (callers: 066C 0F27)
+066F: c0 e0     PUSH ACC
+0671: e5 21     MOV A,21h
+0673: 54 01     ANL A,#01h
+0675: 44 08     ORL A,#08h
+0677: 75 80 e8  MOV P0,#E8h
+067A: 12 0c 39  LCALL TX_CMD_wait_ready
+067D: d0 e0     POP ACC
+067F: 22        RET
+
+; ======== TRIGGER_EVENT_start_delay_counter @0680  (callers: 0096)
+0680: d2 95     SETB P1.5
+0682: d2 8c     SETB TR0
+0684: c2 3c     CLR 27h.4
+0686: 85 6c 8b  MOV TL1,6Ch
+0689: 85 6b 8d  MOV TH1,6Bh
+068C: 30 33 06  JNB 26h.3,0695h
+068F: 12 0d ae  LCALL SR3_LATCH_76_77
+0692: 12 0d 98  LCALL SR2_LATCH_7B_7C
+L_0695:  ; from 068C
+0695: 20 29 10  JB 25h.1,06A8h
+0698: 12 0e 6c  LCALL set_27h4
+069B: 85 7a 8a  MOV TL0,7Ah
+069E: 85 79 8c  MOV TH0,79h
+06A1: 85 78 31  MOV 31h,78h
+06A4: 05 31     INC 31h
+06A6: 80 12     SJMP 06BAh
+L_06A8:  ; from 0695
+06A8: 20 28 0d  JB 25h.0,06B8h
+06AB: 85 75 8a  MOV TL0,75h
+06AE: 85 74 8c  MOV TH0,74h
+06B1: 85 73 31  MOV 31h,73h
+06B4: 05 31     INC 31h
+06B6: 80 02     SJMP 06BAh
+L_06B8:  ; from 06A8
+06B8: c2 8c     CLR TR0
+L_06BA:  ; from 06A6 06B6
+06BA: 75 80 e2  MOV P0,#E2h
+06BD: c2 a3     CLR P2.3
+06BF: d2 a3     SETB P2.3
+06C1: 30 29 07  JNB 25h.1,06CBh
+06C4: c2 95     CLR P1.5
+06C6: 20 28 02  JB 25h.0,06CBh
+06C9: d2 95     SETB P1.5
+L_06CB:  ; from 06C1 06C6
+06CB: c2 3b     CLR 27h.3
+06CD: 30 3a 02  JNB 27h.2,06D2h
+06D0: d2 3b     SETB 27h.3
+L_06D2:  ; from 06CD
+06D2: c2 33     CLR 26h.3
+06D4: d2 26     SETB 24h.6
+06D6: c2 8d     CLR TF0
+06D8: 22        RET
+ISR_TIMER0_delay_timer_expired:  ; from 000B
+06D9: c0 e0     PUSH ACC
+06DB: 20 3b 0b  JB 27h.3,06E9h
+06DE: e5 31     MOV A,31h
+06E0: 70 2a     JNZ 070Ch
+06E2: c2 95     CLR P1.5
+06E4: 10 41 0c  JBC 28h.1,06F3h
+06E7: 80 0e     SJMP 06F7h
+L_06E9:  ; from 06DB
+06E9: c2 3b     CLR 27h.3
+06EB: 75 8a ff  MOV TL0,#FFh
+06EE: 75 8c ff  MOV TH0,#FFh
+06F1: 80 11     SJMP 0704h
+L_06F3:  ; from 06E4
+06F3: c2 93     CLR P1.3
+06F5: d2 93     SETB P1.3
+L_06F7:  ; from 06E7
+06F7: c2 3c     CLR 27h.4
+06F9: 85 75 8a  MOV TL0,75h
+06FC: 85 74 8c  MOV TH0,74h
+06FF: 85 73 31  MOV 31h,73h
+0702: 05 31     INC 31h
+L_0704:  ; from 06F1
+0704: 20 28 02  JB 25h.0,0709h
+0707: d2 95     SETB P1.5
+L_0709:  ; from 0704 070E
+0709: d0 e0     POP ACC
+070B: 32        RETI
+L_070C:  ; from 06E0
+070C: 05 31     INC 31h
+070E: 80 f9     SJMP 0709h
+ISR_INT1_OVERLOAD_PROTECT:  ; from 0013
+0710: c0 e0     PUSH ACC
+0712: c0 00     PUSH 00h
+0714: c0 80     PUSH P0
+0716: c0 33     PUSH 33h
+0718: c0 32     PUSH 32h
+071A: c0 30     PUSH 30h
+071C: 43 45 01  ORL 45h,#01h
+071F: 12 0d 82  LCALL SR1_DCBD_LATCH_45_4E
+0722: c2 a3     CLR P2.3
+0724: d2 a3     SETB P2.3
+0726: 53 4f bf  ANL 4Fh,#BFh
+0729: c0 a8     PUSH IE
+072B: c2 af     CLR EA
+072D: 75 80 e0  MOV P0,#E0h
+0730: 78 58     MOV R0,#58h
+0732: 75 30 0a  MOV 30h,#0Ah
+0735: 12 0c 9f  LCALL SHIFT_OUT_RAM_block
+0738: c2 a3     CLR P2.3
+073A: d2 a3     SETB P2.3
+073C: d0 a8     POP IE
+073E: 74 05     MOV A,#05h
+0740: 75 80 e8  MOV P0,#E8h
+0743: 12 0c 39  LCALL TX_CMD_wait_ready
+0746: 75 33 1d  MOV 33h,#1Dh
+0749: 12 0c c6  LCALL DELAY_ms_33h
+074C: 53 45 bf  ANL 45h,#BFh
+074F: 12 0d 82  LCALL SR1_DCBD_LATCH_45_4E
+0752: c2 a3     CLR P2.3
+0754: d2 a3     SETB P2.3
+0756: 12 0c c3  LCALL DELAY_2ms
+0759: 53 45 fe  ANL 45h,#FEh
+075C: 12 0d 82  LCALL SR1_DCBD_LATCH_45_4E
+075F: c2 a3     CLR P2.3
+0761: d2 a3     SETB P2.3
+0763: 12 0c c3  LCALL DELAY_2ms
+0766: d0 30     POP 30h
+0768: d0 32     POP 32h
+076A: d0 33     POP 33h
+076C: d0 80     POP P0
+076E: 43 80 e0  ORL P0,#E0h
+0771: d0 00     POP 00h
+0773: d0 e0     POP ACC
+0775: 32        RETI
+
+; ======== CMD15_reading_sequence @0776  (callers: -)
+; ---- outguard command 0x15: reading sequence
+0776: 12 00 05  LCALL rx_low_byte_bit0_to_C
+0779: 30 22 0f  JNB 24h.2,078Bh
+077C: 02 07 fa  LJMP 07FAh
+CMD1A_reading_sequence_swB:  ; from 0162
+077F: d2 3f     SETB 27h.7
+0781: 12 00 05  LCALL rx_low_byte_bit0_to_C
+0784: c2 92     CLR P1.2
+0786: d2 92     SETB P1.2
+0788: 12 0d 0b  LCALL INPUT_SW_B
+L_078B:  ; from 0779
+078B: c2 92     CLR P1.2
+078D: d2 92     SETB P1.2
+078F: c2 a6     CLR P2.6
+0791: d2 a5     SETB P2.5
+0793: d2 97     SETB P1.7
+0795: 30 34 0a  JNB 26h.4,07A2h
+0798: c2 a7     CLR P2.7
+079A: d2 a7     SETB P2.7
+079C: 12 0e 37  LCALL LEAVE_ISR_CONTINUE_FOREGROUND
+079F: 02 07 f8  LJMP 07F8h
+L_07A2:  ; from 0795
+07A2: c2 26     CLR 24h.6
+07A4: c2 92     CLR P1.2
+07A6: d2 97     SETB P1.7
+07A8: a2 24     MOV C,24h.4
+07AA: 92 92     MOV P1.2,C
+07AC: b3        CPL C
+07AD: 92 97     MOV P1.7,C
+07AF: 20 24 00  JB 24h.4,07B2h
+L_07B2:  ; from 07AF
+07B2: c2 94     CLR P1.4
+07B4: d2 94     SETB P1.4
+07B6: 12 0e 37  LCALL LEAVE_ISR_CONTINUE_FOREGROUND
+07B9: 30 24 2c  JNB 24h.4,07E8h
+L_07BC:  ; from 07BC 07D4 07E3
+07BC: 30 92 fd  JNB P1.2,07BCh
+07BF: c2 92     CLR P1.2
+07C1: d2 92     SETB P1.2
+07C3: 30 24 17  JNB 24h.4,07DDh
+07C6: d2 af     SETB EA
+L_07C8:  ; from 07CE
+07C8: 10 2f 0b  JBC 25h.7,07D6h
+07CB: 10 2e 02  JBC 25h.6,07D0h
+07CE: 80 f8     SJMP 07C8h
+L_07D0:  ; from 07CB
+07D0: c2 a7     CLR P2.7
+07D2: d2 a7     SETB P2.7
+07D4: 80 e6     SJMP 07BCh
+L_07D6:  ; from 07C8
+07D6: 30 21 04  JNB 24h.1,07DDh
+07D9: c2 a4     CLR P2.4
+07DB: d2 a4     SETB P2.4
+L_07DD:  ; from 07C3 07D6
+07DD: 10 26 11  JBC 24h.6,07F1h
+07E0: 12 0e 2c  LCALL PULSE_P1_7
+07E3: 20 24 d6  JB 24h.4,07BCh
+07E6: d2 97     SETB P1.7
+L_07E8:  ; from 07B9
+07E8: c2 92     CLR P1.2
+L_07EA:  ; from 07EA
+07EA: 30 26 fd  JNB 24h.6,07EAh
+07ED: c2 26     CLR 24h.6
+07EF: d2 97     SETB P1.7
+L_07F1:  ; from 07DD
+07F1: 30 20 04  JNB 24h.0,07F8h
+07F4: c2 a4     CLR P2.4
+07F6: d2 a4     SETB P2.4
+L_07F8:  ; from 079F 07F1 07F8
+07F8: 80 fe     SJMP 07F8h
+L_07FA:  ; from 077C
+07FA: c2 92     CLR P1.2
+07FC: d2 92     SETB P1.2
+07FE: 12 0d 0b  LCALL INPUT_SW_B
+0801: c2 a6     CLR P2.6
+0803: c2 a5     CLR P2.5
+0805: c2 26     CLR 24h.6
+0807: 12 0e 2c  LCALL PULSE_P1_7
+080A: 30 34 09  JNB 26h.4,0816h
+080D: c2 a7     CLR P2.7
+080F: d2 a7     SETB P2.7
+0811: 12 0e 37  LCALL LEAVE_ISR_CONTINUE_FOREGROUND
+0814: 80 1a     SJMP 0830h
+L_0816:  ; from 080A
+0816: c2 94     CLR P1.4
+0818: d2 94     SETB P1.4
+081A: c2 2f     CLR 25h.7
+081C: 75 81 07  MOV SP,#07h
+081F: 12 0e 46  LCALL RETI_only
+0822: 80 0c     SJMP 0830h
+0824: DB 12 0e 2c c2 94 d2 94
+L_082B:  ; from 0850
+082B: 12 0e 2c  LCALL PULSE_P1_7
+082E: d2 af     SETB EA
+L_0830:  ; from 0814 0822 0844
+0830: 12 08 60  LCALL ADC_HANDSHAKE_reading
+0833: 30 24 17  JNB 24h.4,084Dh
+0836: d2 af     SETB EA
+L_0838:  ; from 083E
+0838: 10 2f 0b  JBC 25h.7,0846h
+083B: 10 2e 02  JBC 25h.6,0840h
+083E: 80 f8     SJMP 0838h
+L_0840:  ; from 083B
+0840: c2 a7     CLR P2.7
+0842: d2 a7     SETB P2.7
+0844: 80 ea     SJMP 0830h
+L_0846:  ; from 0838
+0846: 30 21 04  JNB 24h.1,084Dh
+0849: c2 a4     CLR P2.4
+084B: d2 a4     SETB P2.4
+L_084D:  ; from 0833 0846
+084D: 20 34 0c  JB 26h.4,085Ch
+0850: 30 26 d8  JNB 24h.6,082Bh
+0853: c2 26     CLR 24h.6
+0855: 30 20 04  JNB 24h.0,085Ch
+0858: c2 a4     CLR P2.4
+085A: d2 a4     SETB P2.4
+L_085C:  ; from 084D 0855
+085C: d2 af     SETB EA
+L_085E:  ; from 085E
+085E: 80 fe     SJMP 085Eh
+
+; ======== ADC_HANDSHAKE_reading @0860  (callers: 0830 0B8F)
+0860: 30 92 fd  JNB P1.2,ADC_HANDSHAKE_reading
+0863: c2 92     CLR P1.2
+0865: d2 92     SETB P1.2
+L_0867:  ; from 0867
+0867: 20 91 fd  JB P1.1,0867h
+086A: 12 0c e8  LCALL INPUT_SW_A_if_set
+086D: d2 a6     SETB P2.6
+086F: d2 a5     SETB P2.5
+0871: c2 a7     CLR P2.7
+0873: d2 a7     SETB P2.7
+L_0875:  ; from 0875
+0875: 30 92 fd  JNB P1.2,0875h
+0878: c2 af     CLR EA
+L_087A:  ; from 087A
+087A: 20 91 fd  JB P1.1,087Ah
+087D: c2 92     CLR P1.2
+087F: d2 92     SETB P1.2
+0881: 12 0c e8  LCALL INPUT_SW_A_if_set
+0884: c2 a5     CLR P2.5
+0886: c2 a6     CLR P2.6
+0888: 22        RET
+CMD14_single_reading:  ; from 016B
+0889: e5 62     MOV A,62h
+088B: f5 40     MOV 40h,A
+088D: 54 c0     ANL A,#C0h
+088F: b4 80 06  CJNE A,#80h,0898h
+0892: 53 62 3f  ANL 62h,#3Fh
+0895: 12 0d 69  LCALL SR5_LATCH_59_64
+L_0898:  ; from 088F
+0898: c2 92     CLR P1.2
+089A: d2 92     SETB P1.2
+089C: 12 0c eb  LCALL INPUT_SW_A
+089F: d2 a5     SETB P2.5
+08A1: d2 a6     SETB P2.6
+08A3: c2 a7     CLR P2.7
+08A5: d2 a7     SETB P2.7
+L_08A7:  ; from 08A7
+08A7: 30 92 fd  JNB P1.2,08A7h
+L_08AA:  ; from 08AA
+08AA: 20 91 fd  JB P1.1,08AAh
+08AD: c2 92     CLR P1.2
+08AF: d2 92     SETB P1.2
+08B1: c2 a8     CLR EX0
+08B3: c0 3f     PUSH 3Fh
+08B5: c0 3e     PUSH 3Eh
+08B7: 85 2a 3f  MOV 3Fh,2Ah
+08BA: 85 29 3e  MOV 3Eh,29h
+08BD: d2 3f     SETB 27h.7
+08BF: 12 0c e8  LCALL INPUT_SW_A_if_set
+08C2: c2 a6     CLR P2.6
+08C4: d0 3e     POP 3Eh
+08C6: d0 3f     POP 3Fh
+08C8: d2 a8     SETB EX0
+08CA: e5 40     MOV A,40h
+08CC: 54 c0     ANL A,#C0h
+08CE: b4 80 06  CJNE A,#80h,08D7h
+08D1: 85 40 62  MOV 62h,40h
+08D4: 12 0d 69  LCALL SR5_LATCH_59_64
+L_08D7:  ; from 08CE
+08D7: 02 06 67  LJMP CMD_EXIT_popPSW_ACC_ret
+CMD19_FREQ_PERIOD_count:  ; from 015F
+08DA: 12 00 05  LCALL rx_low_byte_bit0_to_C
+08DD: 12 0e 37  LCALL LEAVE_ISR_CONTINUE_FOREGROUND
+08E0: 20 34 03  JB 26h.4,08E6h
+08E3: 12 0e 75  LCALL WAIT_ARM_AND_TRIGGER
+L_08E6:  ; from 08E0
+08E6: d2 95     SETB P1.5
+08E8: d2 96     SETB P1.6
+08EA: 12 0d 4c  LCALL SR4_LATCH_6D_72
+08ED: 12 0d 98  LCALL SR2_LATCH_7B_7C
+08F0: 12 0e 21  LCALL LOAD_T1_count
+08F3: 85 79 8c  MOV TH0,79h
+08F6: 85 7a 8a  MOV TL0,7Ah
+08F9: d2 8e     SETB TR1
+08FB: d2 8c     SETB TR0
+08FD: c2 ab     CLR ET1
+08FF: c2 94     CLR P1.4
+0901: 7a 00     MOV R2,#00h
+0903: 7b 00     MOV R3,#00h
+L_0905:  ; from 090E 0910
+0905: e5 8a     MOV A,TL0
+0907: b5 7a 0b  CJNE A,7Ah,0915h
+090A: a4        MUL AB
+090B: 84        DIV AB
+090C: a4        MUL AB
+090D: 84        DIV AB
+090E: db f5     DJNZ R3,0905h
+0910: da f3     DJNZ R2,0905h
+0912: 02 09 89  LJMP 0989h
+L_0915:  ; from 0907
+0915: c2 a7     CLR P2.7
+0917: d2 a7     SETB P2.7
+L_0919:  ; from 091B
+0919: e5 8c     MOV A,TH0
+091B: b4 0a fb  CJNE A,#0Ah,0919h
+091E: d2 94     SETB P1.4
+L_0920:  ; from 092F
+0920: 7a 1a     MOV R2,#1Ah
+0922: ab b0     MOV R3,P3
+L_0924:  ; from 0932
+0924: e5 8c     MOV A,TH0
+0926: b4 14 03  CJNE A,#14h,092Ch
+0929: 02 09 89  LJMP 0989h
+L_092C:  ; from 0926
+092C: e5 b0     MOV A,P3
+092E: 6b        XRL A,R3
+092F: 20 e4 ee  JB ACC.4,0920h
+0932: da f0     DJNZ R2,0924h
+0934: c2 8c     CLR TR0
+0936: c2 8e     CLR TR1
+0938: 75 80 eb  MOV P0,#EBh
+093B: c2 a3     CLR P2.3
+093D: d2 a3     SETB P2.3
+093F: 20 8f 47  JB TF1,0989h
+0942: c2 a8     CLR EX0
+0944: 75 80 f9  MOV P0,#F9h
+0947: 12 0c 5c  LCALL GA_STROBE_then_read
+094A: af 99     MOV R7,SBUF
+094C: 12 0c 62  LCALL GA_READ_BYTE
+094F: e5 99     MOV A,SBUF
+0951: 54 0f     ANL A,#0Fh
+0953: 75 80 e7  MOV P0,#E7h
+0956: 12 0c 4e  LCALL GA_SHIFT_BYTE_wait_ready
+0959: ef        MOV A,R7
+095A: 12 0c 3c  LCALL GA_WRITE_BYTE_strobe
+095D: e5 8c     MOV A,TH0
+095F: 75 80 e7  MOV P0,#E7h
+0962: 12 0c 4e  LCALL GA_SHIFT_BYTE_wait_ready
+0965: e5 8a     MOV A,TL0
+0967: 12 0c 3c  LCALL GA_WRITE_BYTE_strobe
+096A: 75 80 f8  MOV P0,#F8h
+096D: 12 0c 5c  LCALL GA_STROBE_then_read
+0970: e5 99     MOV A,SBUF
+0972: 75 80 e7  MOV P0,#E7h
+0975: 12 0c 39  LCALL TX_CMD_wait_ready
+0978: e5 8d     MOV A,TH1
+097A: 75 80 e7  MOV P0,#E7h
+097D: 12 0c 4e  LCALL GA_SHIFT_BYTE_wait_ready
+0980: e5 8b     MOV A,TL1
+0982: 12 0c 3c  LCALL GA_WRITE_BYTE_strobe
+0985: d2 a8     SETB EX0
+L_0987:  ; from 0987 09A4
+0987: 80 fe     SJMP 0987h
+L_0989:  ; from 0912 0929 093F
+0989: 75 80 eb  MOV P0,#EBh
+098C: c2 a3     CLR P2.3
+098E: d2 a3     SETB P2.3
+0990: 75 80 e4  MOV P0,#E4h
+0993: c2 a8     CLR EX0
+0995: 74 ff     MOV A,#FFh
+0997: 75 80 e7  MOV P0,#E7h
+099A: 12 0c 4e  LCALL GA_SHIFT_BYTE_wait_ready
+099D: 74 ff     MOV A,#FFh
+099F: 12 0c 3c  LCALL GA_WRITE_BYTE_strobe
+09A2: d2 a8     SETB EX0
+09A4: 80 e1     SJMP 0987h
+CMD18_SYNC_SUBSAMPLE_burst:  ; from 015C
+09A6: 12 00 05  LCALL rx_low_byte_bit0_to_C
+09A9: 75 80 ff  MOV P0,#FFh
+09AC: 12 0c 59  LCALL RX_WORD_first_byte_wait
+09AF: e5 99     MOV A,SBUF
+09B1: fa        MOV R2,A
+09B2: 12 0c 62  LCALL GA_READ_BYTE
+09B5: 85 99 43  MOV 43h,SBUF
+09B8: 60 02     JZ 09BCh
+09BA: 05 43     INC 43h
+L_09BC:  ; from 09B8
+09BC: c2 69     CLR 2Dh.1
+09BE: 12 0c 59  LCALL RX_WORD_first_byte_wait
+09C1: e5 99     MOV A,SBUF
+09C3: fb        MOV R3,A
+09C4: 12 0c 62  LCALL GA_READ_BYTE
+09C7: 85 99 44  MOV 44h,SBUF
+09CA: 60 04     JZ 09D0h
+09CC: 05 44     INC 44h
+09CE: 80 05     SJMP 09D5h
+L_09D0:  ; from 09CA
+09D0: b5 44 02  CJNE A,44h,09D5h
+09D3: d2 69     SETB 2Dh.1
+L_09D5:  ; from 09CE 09D0
+09D5: 12 0c 59  LCALL RX_WORD_first_byte_wait
+09D8: ac 99     MOV R4,SBUF
+09DA: 12 0c 62  LCALL GA_READ_BYTE
+09DD: e5 99     MOV A,SBUF
+09DF: fd        MOV R5,A
+09E0: c2 68     CLR 2Dh.0
+09E2: 4c        ORL A,R4
+09E3: 70 02     JNZ 09E7h
+09E5: d2 68     SETB 2Dh.0
+L_09E7:  ; from 09E3
+09E7: d2 a8     SETB EX0
+09E9: ec        MOV A,R4
+09EA: 54 f0     ANL A,#F0h
+09EC: cc        XCH A,R4
+09ED: 54 0f     ANL A,#0Fh
+09EF: fe        MOV R6,A
+09F0: d2 a5     SETB P2.5
+09F2: c2 a6     CLR P2.6
+09F4: d2 97     SETB P1.7
+09F6: c2 26     CLR 24h.6
+09F8: c2 32     CLR 26h.2
+09FA: 12 0e 37  LCALL LEAVE_ISR_CONTINUE_FOREGROUND
+09FD: 20 34 09  JB 26h.4,0A09h
+0A00: 12 0e 75  LCALL WAIT_ARM_AND_TRIGGER
+0A03: 75 32 01  MOV 32h,#01h
+0A06: 12 0c ab  LCALL DELAY_short_32h
+L_0A09:  ; from 09FD 0A36 0A38
+0A09: c2 92     CLR P1.2
+0A0B: d2 92     SETB P1.2
+0A0D: c2 94     CLR P1.4
+0A0F: d2 94     SETB P1.4
+0A11: c2 a8     CLR EX0
+0A13: 20 68 03  JB 2Dh.0,0A19h
+0A16: 12 0a 96  LCALL SUBSAMPLE_advance_delay_BCD
+L_0A19:  ; from 0A13
+0A19: d2 a8     SETB EX0
+0A1B: 85 2b 32  MOV 32h,2Bh
+0A1E: 85 2c 33  MOV 33h,2Ch
+0A21: 05 33     INC 33h
+0A23: 05 32     INC 32h
+0A25: 79 22     MOV R1,#22h
+L_0A27:  ; from 0A2D
+0A27: 20 92 05  JB P1.2,0A2Fh
+0A2A: 12 0a e5  LCALL SUBSAMPLE_timeout_check
+0A2D: 80 f8     SJMP 0A27h
+L_0A2F:  ; from 0A27 0A2F
+0A2F: 30 26 fd  JNB 24h.6,0A2Fh
+0A32: c2 26     CLR 24h.6
+0A34: d2 97     SETB P1.7
+0A36: da d1     DJNZ R2,0A09h
+0A38: d5 43 ce  DJNZ 43h,0A09h
+0A3B: 20 69 56  JB 2Dh.1,0A94h
+0A3E: c2 a8     CLR EX0
+0A40: 78 6d     MOV R0,#6Dh
+0A42: 79 03     MOV R1,#03h
+0A44: d3        SETB C
+L_0A45:  ; from 0A4A
+0A45: e6        MOV A,@R0
+0A46: 34 00     ADDC A,#00h
+0A48: f6        MOV @R0,A
+0A49: 18        DEC R0
+0A4A: d9 f9     DJNZ R1,0A45h
+0A4C: 12 0d d8  LCALL CHK_T1COUNT_zero
+0A4F: 12 0d 4c  LCALL SR4_LATCH_6D_72
+0A52: d2 a8     SETB EX0
+0A54: 75 80 ff  MOV P0,#FFh
+0A57: d2 8e     SETB TR1
+0A59: d2 96     SETB P1.6
+0A5B: 30 2a 04  JNB 25h.2,0A62h
+0A5E: c2 8e     CLR TR1
+0A60: c2 96     CLR P1.6
+L_0A62:  ; from 0A5B 0A8F 0A91
+0A62: c2 92     CLR P1.2
+0A64: d2 92     SETB P1.2
+0A66: c2 94     CLR P1.4
+0A68: d2 94     SETB P1.4
+0A6A: c2 a8     CLR EX0
+0A6C: 20 68 03  JB 2Dh.0,0A72h
+0A6F: 12 0a 96  LCALL SUBSAMPLE_advance_delay_BCD
+L_0A72:  ; from 0A6C
+0A72: d2 a8     SETB EX0
+0A74: 85 2b 32  MOV 32h,2Bh
+0A77: 85 2c 33  MOV 33h,2Ch
+0A7A: 05 33     INC 33h
+0A7C: 05 32     INC 32h
+0A7E: 79 22     MOV R1,#22h
+L_0A80:  ; from 0A86
+0A80: 20 92 05  JB P1.2,0A88h
+0A83: 12 0a e5  LCALL SUBSAMPLE_timeout_check
+0A86: 80 f8     SJMP 0A80h
+L_0A88:  ; from 0A80 0A88
+0A88: 30 26 fd  JNB 24h.6,0A88h
+0A8B: c2 26     CLR 24h.6
+0A8D: d2 97     SETB P1.7
+0A8F: db d1     DJNZ R3,0A62h
+0A91: d5 44 ce  DJNZ 44h,0A62h
+L_0A94:  ; from 0A3B 0A94
+0A94: 80 fe     SJMP 0A94h
+
+; ======== SUBSAMPLE_advance_delay_BCD @0A96  (callers: 0A16 0A6F)
+0A96: d2 33     SETB 26h.3
+0A98: e5 7c     MOV A,7Ch
+0A9A: 54 0f     ANL A,#0Fh
+0A9C: 2e        ADD A,R6
+0A9D: d4        DA A
+0A9E: ff        MOV R7,A
+0A9F: 54 0f     ANL A,#0Fh
+0AA1: cf        XCH A,R7
+0AA2: 54 f0     ANL A,#F0h
+0AA4: c3        CLR C
+0AA5: c5 7c     XCH A,7Ch
+0AA7: 95 7c     SUBB A,7Ch
+0AA9: c5 7c     XCH A,7Ch
+0AAB: e5 7b     MOV A,7Bh
+0AAD: 94 00     SUBB A,#00h
+0AAF: f5 7b     MOV 7Bh,A
+0AB1: e4        CLR A
+0AB2: 33        RLC A
+0AB3: f5 32     MOV 32h,A
+0AB5: c3        CLR C
+0AB6: e5 7c     MOV A,7Ch
+0AB8: 9c        SUBB A,R4
+0AB9: f5 7c     MOV 7Ch,A
+0ABB: e5 7b     MOV A,7Bh
+0ABD: 9d        SUBB A,R5
+0ABE: f5 7b     MOV 7Bh,A
+0AC0: e5 7a     MOV A,7Ah
+0AC2: 95 32     SUBB A,32h
+0AC4: f5 7a     MOV 7Ah,A
+0AC6: e5 79     MOV A,79h
+0AC8: 94 00     SUBB A,#00h
+0ACA: f5 79     MOV 79h,A
+0ACC: e5 78     MOV A,78h
+0ACE: 94 00     SUBB A,#00h
+0AD0: f5 78     MOV 78h,A
+0AD2: e5 7c     MOV A,7Ch
+0AD4: 54 f0     ANL A,#F0h
+0AD6: 4f        ORL A,R7
+0AD7: f5 7c     MOV 7Ch,A
+0AD9: e5 77     MOV A,77h
+0ADB: 54 f0     ANL A,#F0h
+0ADD: 4f        ORL A,R7
+0ADE: f5 77     MOV 77h,A
+0AE0: b1 c4     ACALL CHK_DELAYCOUNT_zero
+0AE2: d1 0c     ACALL CALC_flags_3A_3B
+0AE4: 22        RET
+
+; ======== SUBSAMPLE_timeout_check @0AE5  (callers: 0A2A 0A83)
+0AE5: 20 3e 15  JB 27h.6,0AFDh
+0AE8: 20 32 0b  JB 26h.2,0AF6h
+0AEB: d9 10     DJNZ R1,0AFDh
+0AED: d5 32 0d  DJNZ 32h,0AFDh
+0AF0: d5 33 0a  DJNZ 33h,0AFDh
+0AF3: d2 32     SETB 26h.2
+0AF5: 22        RET
+L_0AF6:  ; from 0AE8
+0AF6: c2 93     CLR P1.3
+0AF8: d2 93     SETB P1.3
+L_0AFA:  ; from 0AFA
+0AFA: 30 92 fd  JNB P1.2,0AFAh
+L_0AFD:  ; from 0AE5 0AEB 0AED 0AF0
+0AFD: 22        RET
+CMD16_sequence:  ; from 0159
+0AFE: c2 92     CLR P1.2
+0B00: d2 92     SETB P1.2
+0B02: 12 0d 0b  LCALL INPUT_SW_B
+0B05: c2 26     CLR 24h.6
+0B07: 71 84     ACALL set_P2_5
+0B09: 12 00 05  LCALL rx_low_byte_bit0_to_C
+0B0C: 71 a1     ACALL SR1_update_if_47_changed
+0B0E: 30 34 09  JNB 26h.4,0B1Ah
+0B11: c2 a7     CLR P2.7
+0B13: d2 a7     SETB P2.7
+0B15: 12 0e 37  LCALL LEAVE_ISR_CONTINUE_FOREGROUND
+0B18: 80 0a     SJMP 0B24h
+L_0B1A:  ; from 0B0E
+0B1A: 12 0e 2c  LCALL PULSE_P1_7
+0B1D: c2 94     CLR P1.4
+0B1F: d2 94     SETB P1.4
+0B21: 12 0e 37  LCALL LEAVE_ISR_CONTINUE_FOREGROUND
+L_0B24:  ; from 0B18 0B61 0B77
+0B24: 71 8c     ACALL WAIT_ADC_ready
+0B26: 30 25 20  JNB 24h.5,0B49h
+0B29: 53 47 c0  ANL 47h,#C0h
+0B2C: 12 0d 82  LCALL SR1_DCBD_LATCH_45_4E
+0B2F: 20 22 02  JB 24h.2,0B34h
+0B32: d2 a5     SETB P2.5
+L_0B34:  ; from 0B2F
+0B34: f1 67     ACALL DELAY_settle_41_42
+0B36: d2 af     SETB EA
+0B38: c2 a7     CLR P2.7
+0B3A: d2 a7     SETB P2.7
+0B3C: 71 8c     ACALL WAIT_ADC_ready
+0B3E: 85 40 47  MOV 47h,40h
+0B41: 12 0d 82  LCALL SR1_DCBD_LATCH_45_4E
+0B44: 20 26 02  JB 24h.6,0B49h
+0B47: f1 67     ACALL DELAY_settle_41_42
+L_0B49:  ; from 0B26 0B44
+0B49: 30 24 17  JNB 24h.4,0B63h
+0B4C: d2 af     SETB EA
+L_0B4E:  ; from 0B54
+0B4E: 10 2f 12  JBC 25h.7,0B63h
+0B51: 10 2e 02  JBC 25h.6,0B56h
+0B54: 80 f8     SJMP 0B4Eh
+L_0B56:  ; from 0B51
+0B56: 30 26 02  JNB 24h.6,0B5Bh
+0B59: f1 67     ACALL DELAY_settle_41_42
+L_0B5B:  ; from 0B56
+0B5B: 71 84     ACALL set_P2_5
+0B5D: c2 a7     CLR P2.7
+0B5F: d2 a7     SETB P2.7
+0B61: 80 c1     SJMP 0B24h
+L_0B63:  ; from 0B49 0B4E
+0B63: 20 34 1a  JB 26h.4,0B80h
+0B66: 30 21 04  JNB 24h.1,0B6Dh
+0B69: c2 a4     CLR P2.4
+0B6B: d2 a4     SETB P2.4
+L_0B6D:  ; from 0B66
+0B6D: 10 26 09  JBC 24h.6,0B79h
+0B70: 71 84     ACALL set_P2_5
+0B72: 12 0e 2c  LCALL PULSE_P1_7
+0B75: d2 af     SETB EA
+0B77: 61 24     AJMP 0B24h
+L_0B79:  ; from 0B6D
+0B79: 30 20 04  JNB 24h.0,0B80h
+0B7C: c2 a4     CLR P2.4
+0B7E: d2 a4     SETB P2.4
+L_0B80:  ; from 0B63 0B79
+0B80: d2 af     SETB EA
+L_0B82:  ; from 0B82
+0B82: 80 fe     SJMP 0B82h
+
+; ======== set_P2_5 @0B84  (callers: 0B07 0B5B 0B70 0BF1)
+0B84: a2 22     MOV C,24h.2
+
+; ======== SUB_0B86 @0B86  (callers: 0BB8)
+0B86: 72 25     ORL C,24h.5
+0B88: b3        CPL C
+0B89: 92 a5     MOV P2.5,C
+0B8B: 22        RET
+
+; ======== WAIT_ADC_ready @0B8C  (callers: 0B24 0B3C)
+0B8C: 30 22 05  JNB 24h.2,0B94h
+0B8F: 12 08 60  LCALL ADC_HANDSHAKE_reading
+0B92: 80 0c     SJMP 0BA0h
+L_0B94:  ; from 0B8C 0B94
+0B94: 30 92 fd  JNB P1.2,0B94h
+0B97: c2 af     CLR EA
+0B99: c2 92     CLR P1.2
+0B9B: d2 92     SETB P1.2
+L_0B9D:  ; from 0B9D
+0B9D: 20 91 fd  JB P1.1,0B9Dh
+L_0BA0:  ; from 0B92
+0BA0: 22        RET
+
+; ======== SR1_update_if_47_changed @0BA1  (callers: 0B0C 0BBF)
+0BA1: e5 47     MOV A,47h
+0BA3: 65 40     XRL A,40h
+0BA5: 60 08     JZ 0BAFh
+0BA7: 85 40 47  MOV 47h,40h
+0BAA: 12 0d 82  LCALL SR1_DCBD_LATCH_45_4E
+0BAD: f1 67     ACALL DELAY_settle_41_42
+L_0BAF:  ; from 0BA5
+0BAF: 22        RET
+CMD1C_sequence:  ; from 0168
+0BB0: c2 92     CLR P1.2
+0BB2: d2 92     SETB P1.2
+0BB4: 12 0c eb  LCALL INPUT_SW_A
+0BB7: c3        CLR C
+0BB8: 71 86     ACALL 0B86h
+0BBA: c2 26     CLR 24h.6
+0BBC: 12 0e 46  LCALL RETI_only
+0BBF: 71 a1     ACALL SR1_update_if_47_changed
+0BC1: c2 a7     CLR P2.7
+0BC3: d2 a7     SETB P2.7
+L_0BC5:  ; from 0BC5
+0BC5: 30 92 fd  JNB P1.2,0BC5h
+L_0BC8:  ; from 0BC8
+0BC8: 20 91 fd  JB P1.1,0BC8h
+0BCB: c2 92     CLR P1.2
+0BCD: d2 92     SETB P1.2
+0BCF: 30 25 1a  JNB 24h.5,0BECh
+0BD2: d2 a5     SETB P2.5
+0BD4: c2 26     CLR 24h.6
+0BD6: 53 47 c0  ANL 47h,#C0h
+0BD9: 12 0d 82  LCALL SR1_DCBD_LATCH_45_4E
+0BDC: f1 67     ACALL DELAY_settle_41_42
+0BDE: c2 a7     CLR P2.7
+0BE0: d2 a7     SETB P2.7
+L_0BE2:  ; from 0BE2
+0BE2: 30 92 fd  JNB P1.2,0BE2h
+L_0BE5:  ; from 0BE5
+0BE5: 20 91 fd  JB P1.1,0BE5h
+0BE8: c2 92     CLR P1.2
+0BEA: d2 92     SETB P1.2
+L_0BEC:  ; from 0BCF
+0BEC: d2 3f     SETB 27h.7
+0BEE: 12 0c e8  LCALL INPUT_SW_A_if_set
+0BF1: 71 84     ACALL set_P2_5
+0BF3: 02 06 67  LJMP CMD_EXIT_popPSW_ACC_ret
+CMD1B_repeat_sequence:  ; from 0165
+0BF6: 75 80 ff  MOV P0,#FFh
+0BF9: 12 0c 59  LCALL RX_WORD_first_byte_wait
+0BFC: 85 99 43  MOV 43h,SBUF
+0BFF: c2 26     CLR 24h.6
+0C01: c2 27     CLR 24h.7
+0C03: d2 a5     SETB P2.5
+0C05: c2 92     CLR P1.2
+0C07: d2 92     SETB P1.2
+0C09: d2 97     SETB P1.7
+0C0B: 12 0e 37  LCALL LEAVE_ISR_CONTINUE_FOREGROUND
+L_0C0E:  ; from 0C34
+0C0E: c2 94     CLR P1.4
+0C10: d2 94     SETB P1.4
+0C12: 12 0e 75  LCALL WAIT_ARM_AND_TRIGGER
+0C15: 75 80 e1  MOV P0,#E1h
+0C18: c2 a3     CLR P2.3
+0C1A: d2 a3     SETB P2.3
+0C1C: c2 93     CLR P1.3
+0C1E: d2 93     SETB P1.3
+L_0C20:  ; from 0C20
+0C20: 30 26 fd  JNB 24h.6,0C20h
+0C23: c2 26     CLR 24h.6
+0C25: d2 97     SETB P1.7
+0C27: 75 80 e1  MOV P0,#E1h
+0C2A: c2 a3     CLR P2.3
+0C2C: d2 a3     SETB P2.3
+0C2E: 85 43 32  MOV 32h,43h
+0C31: 12 0c ab  LCALL DELAY_short_32h
+0C34: 30 27 d7  JNB 24h.7,0C0Eh
+L_0C37:  ; from 0C37
+0C37: 80 fe     SJMP 0C37h
+
+; ======== TX_CMD_wait_ready @0C39  (callers: 0034 00D4 018C 0223 0259 02B5 0496 050B 05E4 0622 0640 067A 0743 0975 0EEA 0F0D 0FCC 0FD1)
+0C39: 30 86 fd  JNB P0.6,TX_CMD_wait_ready
+
+; ======== GA_WRITE_BYTE_strobe @0C3C  (callers: 095A 0967 0982 099F 0F93 0FBA)
+0C3C: c0 a8     PUSH IE
+0C3E: c2 af     CLR EA
+0C40: f5 99     MOV SBUF,A
+L_0C42:  ; from 0C42
+0C42: 30 99 fd  JNB TI,0C42h
+0C45: c2 99     CLR TI
+0C47: c2 a3     CLR P2.3
+0C49: d2 a3     SETB P2.3
+0C4B: d0 a8     POP IE
+0C4D: 22        RET
+
+; ======== GA_SHIFT_BYTE_wait_ready @0C4E  (callers: 0956 0962 097D 099A 0FB3)
+0C4E: 30 86 fd  JNB P0.6,GA_SHIFT_BYTE_wait_ready
+0C51: f5 99     MOV SBUF,A
+L_0C53:  ; from 0C53
+0C53: 30 99 fd  JNB TI,0C53h
+0C56: c2 99     CLR TI
+0C58: 22        RET
+
+; ======== RX_WORD_first_byte_wait @0C59  (callers: 00C7 0398 03A4 03E2 03EE 0423 04BF 04CD 056B 0571 058A 0596 0601 0650 09AC 09BE 09D5 0BF9 0FA3)
+0C59: 30 86 fd  JNB P0.6,RX_WORD_first_byte_wait
+
+; ======== GA_STROBE_then_read @0C5C  (callers: 0184 0947 096D 0F1E)
+0C5C: c2 af     CLR EA
+0C5E: c2 a3     CLR P2.3
+0C60: d2 a3     SETB P2.3
+
+; ======== GA_READ_BYTE @0C62  (callers: 009E 0197 01A5 039E 03E8 0429 04C5 04D3 0503 0525 0549 0577 0590 059C 05E9 05F5 0607 0656 094C 09B2 09C4 09DA 0DD1 0FA9)
+0C62: d2 9c     SETB REN
+L_0C64:  ; from 0C64
+0C64: 30 98 fd  JNB RI,0C64h
+0C67: c2 98     CLR RI
+0C69: c2 9c     CLR REN
+0C6B: d2 af     SETB EA
+0C6D: 22        RET
+
+; ======== RX_WORDS_DIRECT_to_RAM @0C6E  (callers: 026A 032A 0345 035B 036F 038B 03CB 040B)
+0C6E: 30 86 fd  JNB P0.6,RX_WORDS_DIRECT_to_RAM
+0C71: c2 af     CLR EA
+0C73: c2 a3     CLR P2.3
+0C75: d2 a3     SETB P2.3
+0C77: d2 9c     SETB REN
+0C79: 00        NOP
+0C7A: 80 0c     SJMP 0C88h
+L_0C7C:  ; from 0C7C 0C91
+0C7C: 30 86 fd  JNB P0.6,0C7Ch
+0C7F: c2 a3     CLR P2.3
+0C81: d2 a3     SETB P2.3
+0C83: c2 98     CLR RI
+0C85: a6 99     MOV @R0,SBUF
+0C87: 18        DEC R0
+L_0C88:  ; from 0C7A
+0C88: a4        MUL AB
+0C89: 83        MOVC A,@A+PC
+0C8A: c2 98     CLR RI
+0C8C: a6 99     MOV @R0,SBUF
+0C8E: 18        DEC R0
+0C8F: 00        NOP
+0C90: 00        NOP
+0C91: d5 30 e8  DJNZ 30h,0C7Ch
+0C94: 00        NOP
+0C95: 00        NOP
+0C96: a6 99     MOV @R0,SBUF
+0C98: c2 9c     CLR REN
+0C9A: c2 98     CLR RI
+0C9C: d2 af     SETB EA
+0C9E: 22        RET
+
+; ======== SHIFT_OUT_RAM_block @0C9F  (callers: 0735 0D5C 0D75 0D8E 0DA4 0DBA)
+0C9F: 86 99     MOV SBUF,@R0
+0CA1: 18        DEC R0
+L_0CA2:  ; from 0CA5
+0CA2: 10 99 02  JBC TI,0CA7h
+0CA5: 80 fb     SJMP 0CA2h
+L_0CA7:  ; from 0CA2
+0CA7: d5 30 f5  DJNZ 30h,SHIFT_OUT_RAM_block
+0CAA: 22        RET
+
+; ======== DELAY_short_32h @0CAB  (callers: 028E 05F0 0A06 0C31 0CBB 0CDC 0CF5 0D22)
+0CAB: d5 32 01  DJNZ 32h,0CAFh
+0CAE: 22        RET
+L_0CAF:  ; from 0CAB 0CB5
+0CAF: 00        NOP
+0CB0: 00        NOP
+0CB1: 00        NOP
+0CB2: 00        NOP
+0CB3: 00        NOP
+0CB4: 00        NOP
+0CB5: d5 32 f7  DJNZ 32h,0CAFh
+0CB8: 22        RET
+
+; ======== DELAY_33h_x_32h @0CB9  (callers: 0D05 0D33 0F70)
+0CB9: 05 33     INC 33h
+L_0CBB:  ; from 0CBF
+0CBB: 91 ab     ACALL DELAY_short_32h
+0CBD: 00        NOP
+0CBE: 00        NOP
+0CBF: d5 33 f9  DJNZ 33h,0CBBh
+0CC2: 22        RET
+
+; ======== DELAY_2ms @0CC3  (callers: 0451 04A9 0756 0763)
+0CC3: 75 33 02  MOV 33h,#02h
+
+; ======== DELAY_ms_33h @0CC6  (callers: 02C6 02DD 0469 047C 048C 05FC 062A 0636 0749)
+0CC6: 75 32 27  MOV 32h,#27h
+0CC9: 00        NOP
+L_0CCA:  ; from 0CCA
+0CCA: d5 32 fd  DJNZ 32h,0CCAh
+0CCD: d5 33 f6  DJNZ 33h,DELAY_ms_33h
+0CD0: 22        RET
+
+; ======== DELAY_long_32h_33h @0CD1  (callers: 01FE 060D 0F7B)
+0CD1: 05 33     INC 33h
+0CD3: 05 32     INC 32h
+0CD5: 80 0a     SJMP 0CE1h
+L_0CD7:  ; from 0CE1 0CE4
+0CD7: c0 32     PUSH 32h
+0CD9: 75 32 63  MOV 32h,#63h
+0CDC: 12 0c ab  LCALL DELAY_short_32h
+0CDF: d0 32     POP 32h
+L_0CE1:  ; from 0CD5
+0CE1: d5 32 f3  DJNZ 32h,0CD7h
+0CE4: d5 33 f0  DJNZ 33h,0CD7h
+0CE7: 22        RET
+
+; ======== INPUT_SW_A_if_set @0CE8  (callers: 086A 0881 08BF 0BEE)
+0CE8: 30 31 20  JNB 26h.1,INPUT_SW_B
+
+; ======== INPUT_SW_A @0CEB  (callers: 01D5 089C 0BB4)
+0CEB: 30 31 1c  JNB 26h.1,0D0Ah
+0CEE: c2 a8     CLR EX0
+0CF0: d2 a2     SETB P2.2
+0CF2: 75 32 01  MOV 32h,#01h
+0CF5: 12 0c ab  LCALL DELAY_short_32h
+0CF8: c2 31     CLR 26h.1
+0CFA: 00        NOP
+0CFB: 00        NOP
+0CFC: 00        NOP
+0CFD: d2 a1     SETB P2.1
+0CFF: 85 3f 33  MOV 33h,3Fh
+0D02: 85 3e 32  MOV 32h,3Eh
+0D05: 12 0c b9  LCALL DELAY_33h_x_32h
+0D08: d2 a8     SETB EX0
+L_0D0A:  ; from 0CEB
+0D0A: 22        RET
+
+; ======== INPUT_SW_B @0D0B  (callers: 0788 07FE 0B02)
+0D0B: 20 31 2a  JB 26h.1,0D38h
+0D0E: c2 a8     CLR EX0
+0D10: d2 a2     SETB P2.2
+0D12: c2 a1     CLR P2.1
+0D14: c0 a0     PUSH P2
+0D16: c2 a6     CLR P2.6
+0D18: 10 3f 02  JBC 27h.7,0D1Dh
+0D1B: d2 a6     SETB P2.6
+L_0D1D:  ; from 0D18
+0D1D: d2 a0     SETB P2.0
+0D1F: 75 32 01  MOV 32h,#01h
+0D22: 12 0c ab  LCALL DELAY_short_32h
+0D25: c2 a0     CLR P2.0
+0D27: d0 a0     POP P2
+0D29: d2 31     SETB 26h.1
+0D2B: c2 a2     CLR P2.2
+0D2D: 85 3f 33  MOV 33h,3Fh
+0D30: 85 3e 32  MOV 32h,3Eh
+0D33: 12 0c b9  LCALL DELAY_33h_x_32h
+0D36: d2 a8     SETB EX0
+L_0D38:  ; from 0D0B
+0D38: 22        RET
+
+; ======== GA_RESET_regC_pulse_WR @0D39  (callers: 027A 037E 03BE 0E51)
+0D39: 75 80 ec  MOV P0,#ECh
+0D3C: c2 a3     CLR P2.3
+0D3E: d2 a3     SETB P2.3
+0D40: 75 80 ff  MOV P0,#FFh
+0D43: c2 b6     CLR WR
+0D45: d2 b6     SETB WR
+0D47: d2 97     SETB P1.7
+0D49: c2 97     CLR P1.7
+0D4B: 22        RET
+
+; ======== SR4_LATCH_6D_72 @0D4C  (callers: 004C 08EA 0A4F)
+0D4C: c0 a8     PUSH IE
+0D4E: c2 af     CLR EA
+0D50: 75 80 e4  MOV P0,#E4h
+0D53: c2 a3     CLR P2.3
+0D55: d2 a3     SETB P2.3
+0D57: 78 72     MOV R0,#72h
+0D59: 75 30 06  MOV 30h,#06h
+0D5C: 12 0c 9f  LCALL SHIFT_OUT_RAM_block
+0D5F: c2 a3     CLR P2.3
+0D61: d2 a3     SETB P2.3
+0D63: d0 a8     POP IE
+0D65: 75 80 ff  MOV P0,#FFh
+0D68: 22        RET
+
+; ======== SR5_LATCH_59_64 @0D69  (callers: 01CB 0895 08D4)
+0D69: c0 a8     PUSH IE
+0D6B: c2 af     CLR EA
+0D6D: 75 80 e5  MOV P0,#E5h
+0D70: 78 64     MOV R0,#64h
+0D72: 75 30 0c  MOV 30h,#0Ch
+0D75: 12 0c 9f  LCALL SHIFT_OUT_RAM_block
+0D78: c2 a3     CLR P2.3
+0D7A: d2 a3     SETB P2.3
+0D7C: d0 a8     POP IE
+0D7E: 75 80 ff  MOV P0,#FFh
+0D81: 22        RET
+
+; ======== SR1_DCBD_LATCH_45_4E @0D82  (callers: 044A 045F 0472 0482 04A2 0630 064B 071F 074F 075C 0B2C 0B41 0BAA 0BD9)
+0D82: c0 a8     PUSH IE
+0D84: c2 af     CLR EA
+0D86: 75 80 e1  MOV P0,#E1h
+0D89: 78 4e     MOV R0,#4Eh
+0D8B: 75 30 0a  MOV 30h,#0Ah
+0D8E: 12 0c 9f  LCALL SHIFT_OUT_RAM_block
+0D91: c2 a3     CLR P2.3
+0D93: d2 a3     SETB P2.3
+0D95: d0 a8     POP IE
+0D97: 22        RET
+
+; ======== SR2_LATCH_7B_7C @0D98  (callers: 0692 08ED)
+0D98: c0 a8     PUSH IE
+0D9A: c2 af     CLR EA
+0D9C: 75 80 e2  MOV P0,#E2h
+0D9F: 78 7c     MOV R0,#7Ch
+0DA1: 75 30 02  MOV 30h,#02h
+0DA4: 12 0c 9f  LCALL SHIFT_OUT_RAM_block
+0DA7: c2 a3     CLR P2.3
+0DA9: d2 a3     SETB P2.3
+0DAB: d0 a8     POP IE
+0DAD: 22        RET
+
+; ======== SR3_LATCH_76_77 @0DAE  (callers: 068F)
+0DAE: c0 a8     PUSH IE
+0DB0: c2 af     CLR EA
+0DB2: 75 80 e3  MOV P0,#E3h
+0DB5: 78 77     MOV R0,#77h
+0DB7: 75 30 02  MOV 30h,#02h
+0DBA: 12 0c 9f  LCALL 0C9Fh
+0DBD: c2 a3     CLR P2.3
+0DBF: d2 a3     SETB P2.3
+0DC1: d0 a8     POP IE
+0DC3: 22        RET
+
+; ======== CHK_DELAYCOUNT_zero @0DC4  (callers: 03F4 0AE0)
+0DC4: c2 29     CLR 25h.1
+0DC6: e5 78     MOV A,78h
+0DC8: 45 79     ORL A,79h
+0DCA: 45 7a     ORL A,7Ah
+0DCC: 70 02     JNZ 0DD0h
+0DCE: d2 29     SETB 25h.1
+L_0DD0:  ; from 0DCC
+0DD0: 22        RET
+
+; ======== RX_BYTE_bit0_to_C @0DD1  (callers: 0005 04BA)
+0DD1: 12 0c 62  LCALL GA_READ_BYTE
+0DD4: e5 99     MOV A,SBUF
+0DD6: 13        RRC A
+0DD7: 22        RET
+
+; ======== CHK_T1COUNT_zero @0DD8  (callers: 0435 0A4C)
+0DD8: c2 2a     CLR 25h.2
+0DDA: e5 6b     MOV A,6Bh
+0DDC: 45 6c     ORL A,6Ch
+0DDE: 70 02     JNZ 0DE2h
+0DE0: d2 2a     SETB 25h.2
+L_0DE2:  ; from 0DDE
+0DE2: 22        RET
+
+; ======== LOAD_T0_first_or_interval @0DE3  (callers: 02A4 03B6 03D7)
+0DE3: 20 29 0e  JB 25h.1,0DF4h
+0DE6: 85 7a 8a  MOV TL0,7Ah
+0DE9: 85 79 8c  MOV TH0,79h
+0DEC: 85 78 31  MOV 31h,78h
+0DEF: 05 31     INC 31h
+0DF1: 02 0e 02  LJMP 0E02h
+L_0DF4:  ; from 0DE3
+0DF4: 20 28 0b  JB 25h.0,0E02h
+0DF7: 85 75 8a  MOV TL0,75h
+0DFA: 85 74 8c  MOV TH0,74h
+0DFD: 85 73 31  MOV 31h,73h
+0E00: 05 31     INC 31h
+L_0E02:  ; from 0DF1 0DF4
+0E02: d1 0c     ACALL CALC_flags_3A_3B
+0E04: 75 80 e2  MOV P0,#E2h
+0E07: c2 a3     CLR P2.3
+0E09: d2 a3     SETB P2.3
+0E0B: 22        RET
+
+; ======== CALC_flags_3A_3B @0E0C  (callers: 026F 0AE2 0E02)
+0E0C: c3        CLR C
+0E0D: 30 29 0c  JNB 25h.1,0E1Ch
+0E10: 20 28 09  JB 25h.0,0E1Ch
+0E13: e5 76     MOV A,76h
+0E15: 20 e7 04  JB ACC.7,0E1Ch
+0E18: e5 7b     MOV A,7Bh
+0E1A: a2 e7     MOV C,ACC.7
+L_0E1C:  ; from 0E0D 0E10 0E15
+0E1C: 92 3a     MOV 27h.2,C
+0E1E: 92 3b     MOV 27h.3,C
+0E20: 22        RET
+
+; ======== LOAD_T1_count @0E21  (callers: 02A7 0438 08F0)
+0E21: 85 6c 8b  MOV TL1,6Ch
+0E24: 85 6b 8d  MOV TH1,6Bh
+0E27: c2 8f     CLR TF1
+0E29: d2 ab     SETB ET1
+0E2B: 22        RET
+
+; ======== PULSE_P1_7 @0E2C  (callers: 07E0 0807 082B 0B1A 0B72)
+0E2C: a2 af     MOV C,EA
+0E2E: c2 af     CLR EA
+0E30: d2 97     SETB P1.7
+0E32: c2 97     CLR P1.7
+0E34: 92 af     MOV EA,C
+0E36: 22        RET
+
+; ======== LEAVE_ISR_CONTINUE_FOREGROUND @0E37  (callers: 01E3 02B8 079C 07B6 0811 08DD 09FA 0B15 0B21 0C0B)
+0E37: d0 33     POP 33h
+0E39: d0 32     POP 32h
+0E3B: 85 33 09  MOV 09h,33h
+0E3E: 85 32 08  MOV 08h,32h
+0E41: 75 81 09  MOV SP,#09h
+0E44: c2 2f     CLR 25h.7
+
+; ======== RETI_only @0E46  (callers: 081F 0BBC)
+0E46: 32        RETI
+
+; ======== START_COUNTERS @0E47  (callers: 02AD 03B9 03DA 043B)
+0E47: d2 95     SETB P1.5
+0E49: d2 96     SETB P1.6
+0E4B: d2 8c     SETB TR0
+0E4D: d2 8e     SETB TR1
+0E4F: c2 3c     CLR 27h.4
+0E51: 12 0d 39  LCALL GA_RESET_regC_pulse_WR
+0E54: 30 2a 04  JNB 25h.2,0E5Bh
+0E57: c2 8e     CLR TR1
+0E59: c2 96     CLR P1.6
+L_0E5B:  ; from 0E54
+0E5B: d1 6c     ACALL set_27h4
+0E5D: 30 29 0b  JNB 25h.1,0E6Bh
+0E60: c2 95     CLR P1.5
+0E62: 20 28 04  JB 25h.0,0E69h
+0E65: d2 95     SETB P1.5
+0E67: 80 02     SJMP 0E6Bh
+L_0E69:  ; from 0E62
+0E69: c2 8c     CLR TR0
+L_0E6B:  ; from 0E5D 0E67
+0E6B: 22        RET
+
+; ======== set_27h4 @0E6C  (callers: 0698 0E5B)
+0E6C: 30 40 05  JNB 28h.0,0E74h
+0E6F: 20 29 02  JB 25h.1,0E74h
+0E72: d2 3c     SETB 27h.4
+L_0E74:  ; from 0E6C 0E6F
+0E74: 22        RET
+
+; ======== WAIT_ARM_AND_TRIGGER @0E75  (callers: 08E3 0A00 0C12)
+0E75: 20 2b 4e  JB 25h.3,0EC6h
+0E78: c2 27     CLR 24h.7
+0E7A: 20 3d 0d  JB 27h.5,0E8Ah
+0E7D: c2 15     CLR 22h.5
+0E7F: 30 1e 0b  JNB 23h.6,0E8Dh
+0E82: d2 15     SETB 22h.5
+0E84: f1 8c     ACALL GA_WRITE_CTRL_reg09_from_22h
+L_0E86:  ; from 0E8A
+0E86: d1 f6     ACALL WAIT_EXT_EVENT_poll_GA
+0E88: 80 08     SJMP 0E92h
+L_0E8A:  ; from 0E7A
+0E8A: 20 1e f9  JB 23h.6,0E86h
+L_0E8D:  ; from 0E7F
+0E8D: 30 1d 02  JNB 23h.5,0E92h
+0E90: f1 44     ACALL WAIT_SW_ARM_25h5
+L_0E92:  ; from 0E88 0E8D
+0E92: d2 2b     SETB 25h.3
+0E94: 20 35 1e  JB 26h.5,0EB5h
+0E97: c0 3a     PUSH 3Ah
+0E99: c0 3b     PUSH 3Bh
+0E9B: c0 3c     PUSH 3Ch
+0E9D: c0 3d     PUSH 3Dh
+L_0E9F:  ; from 0EA1 0EA4 0EA7 0EAA
+0E9F: a4        MUL AB
+0EA0: 93        MOVC A,@A+DPTR
+0EA1: d5 3a fb  DJNZ 3Ah,0E9Fh
+0EA4: d5 3b f8  DJNZ 3Bh,0E9Fh
+0EA7: d5 3c f5  DJNZ 3Ch,0E9Fh
+0EAA: d5 3d f2  DJNZ 3Dh,0E9Fh
+0EAD: d0 3d     POP 3Dh
+0EAF: d0 3c     POP 3Ch
+0EB1: d0 3b     POP 3Bh
+0EB3: d0 3a     POP 3Ah
+L_0EB5:  ; from 0E94
+0EB5: 30 1a 0e  JNB 23h.2,0EC6h
+0EB8: 20 15 04  JB 22h.5,0EBFh
+0EBB: d2 15     SETB 22h.5
+0EBD: f1 8c     ACALL GA_WRITE_CTRL_reg09_from_22h
+L_0EBF:  ; from 0EB8
+0EBF: 20 36 04  JB 26h.6,0EC6h
+0EC2: c2 a8     CLR EX0
+0EC4: c2 2c     CLR 25h.4
+L_0EC6:  ; from 0E75 0EB5 0EBF
+0EC6: d5 34 08  DJNZ 34h,0ED1h
+0EC9: d5 35 05  DJNZ 35h,0ED1h
+0ECC: d5 36 02  DJNZ 36h,0ED1h
+0ECF: d2 27     SETB 24h.7
+L_0ED1:  ; from 0EC6 0EC9 0ECC
+0ED1: 20 18 0c  JB 23h.0,0EE0h
+0ED4: 30 1a 04  JNB 23h.2,0EDBh
+0ED7: d1 f6     ACALL WAIT_EXT_EVENT_poll_GA
+0ED9: 80 05     SJMP 0EE0h
+L_0EDB:  ; from 0ED4
+0EDB: 30 19 02  JNB 23h.1,0EE0h
+0EDE: f1 44     ACALL WAIT_SW_ARM_25h5
+L_0EE0:  ; from 0ED1 0ED9 0EDB
+0EE0: 30 27 10  JNB 24h.7,0EF3h
+0EE3: c2 a8     CLR EX0
+0EE5: 74 07     MOV A,#07h
+0EE7: 75 80 e8  MOV P0,#E8h
+0EEA: 12 0c 39  LCALL TX_CMD_wait_ready
+0EED: d2 a8     SETB EX0
+0EEF: c2 2b     CLR 25h.3
+0EF1: f1 5d     ACALL RELOAD_TRIG_COUNT
+L_0EF3:  ; from 0EE0
+0EF3: d2 a8     SETB EX0
+0EF5: 22        RET
+
+; ======== WAIT_EXT_EVENT_poll_GA @0EF6  (callers: 0E86 0ED7)
+0EF6: c2 a8     CLR EX0
+0EF8: 30 2c 1b  JNB 25h.4,0F16h
+0EFB: c2 2c     CLR 25h.4
+0EFD: 20 36 37  JB 26h.6,0F37h
+0F00: 20 38 11  JB 27h.0,0F14h
+0F03: 30 2b 0e  JNB 25h.3,0F14h
+0F06: c2 a8     CLR EX0
+0F08: 74 04     MOV A,#04h
+0F0A: 75 80 e8  MOV P0,#E8h
+0F0D: 12 0c 39  LCALL TX_CMD_wait_ready
+0F10: d2 a8     SETB EX0
+0F12: d2 38     SETB 27h.0
+L_0F14:  ; from 0F00 0F03
+0F14: f1 3c     ACALL set_ctl_bit5
+L_0F16:  ; from 0EF8 0F2D 0F35
+0F16: c2 a8     CLR EX0
+L_0F18:  ; from 0F18
+0F18: 20 b2 fd  JB INT0,0F18h
+0F1B: 75 80 fa  MOV P0,#FAh
+0F1E: 12 0c 5c  LCALL GA_STROBE_then_read
+0F21: 85 99 21  MOV 21h,SBUF
+0F24: 30 0a 03  JNB 21h.2,0F2Ah
+0F27: 12 06 6f  LCALL SEND_TERMINAL_STATUS_08_09
+L_0F2A:  ; from 0F24
+0F2A: 20 0d 0a  JB 21h.5,0F37h
+0F2D: 30 86 e6  JNB P0.6,0F16h
+0F30: d2 a8     SETB EX0
+0F32: 12 00 c0  LCALL CMD_DISPATCH
+0F35: 80 df     SJMP 0F16h
+L_0F37:  ; from 0EFD 0F2A
+0F37: f1 3c     ACALL set_ctl_bit5
+0F39: d2 a8     SETB EX0
+0F3B: 22        RET
+
+; ======== set_ctl_bit5 @0F3C  (callers: 025E 0F14 0F37)
+0F3C: 20 15 04  JB 22h.5,0F43h
+0F3F: d2 15     SETB 22h.5
+0F41: f1 8c     ACALL GA_WRITE_CTRL_reg09_from_22h
+L_0F43:  ; from 0F3C
+0F43: 22        RET
+
+; ======== WAIT_SW_ARM_25h5 @0F44  (callers: 0E90 0EDE)
+0F44: 30 2d fd  JNB 25h.5,WAIT_SW_ARM_25h5
+0F47: c2 2d     CLR 25h.5
+0F49: 22        RET
+
+; ======== EXTOUT_pulse @0F4A  (callers: 0440)
+0F4A: 30 21 04  JNB 24h.1,0F51h
+0F4D: c2 a4     CLR P2.4
+0F4F: d2 a4     SETB P2.4
+L_0F51:  ; from 0F4A
+0F51: 10 27 01  JBC 24h.7,0F55h
+0F54: 22        RET
+L_0F55:  ; from 0F51
+0F55: 30 20 04  JNB 24h.0,0F5Ch
+0F58: c2 a4     CLR P2.4
+0F5A: d2 a4     SETB P2.4
+L_0F5C:  ; from 0F55
+0F5C: 22        RET
+
+; ======== RELOAD_TRIG_COUNT @0F5D  (callers: 02AA 0585 0EF1)
+0F5D: 85 37 34  MOV 34h,37h
+0F60: 85 38 35  MOV 35h,38h
+0F63: 85 39 36  MOV 36h,39h
+0F66: 22        RET
+
+; ======== DELAY_settle_41_42 @0F67  (callers: 0B34 0B47 0B59 0BAD 0BDC)
+0F67: 20 37 0b  JB 26h.7,0F75h
+0F6A: 85 41 33  MOV 33h,41h
+0F6D: 85 42 32  MOV 32h,42h
+0F70: 12 0c b9  LCALL DELAY_33h_x_32h
+0F73: 80 09     SJMP 0F7Eh
+L_0F75:  ; from 0F67
+0F75: 85 41 33  MOV 33h,41h
+0F78: 85 42 32  MOV 32h,42h
+0F7B: 12 0c d1  LCALL DELAY_long_32h_33h
+L_0F7E:  ; from 0F73
+0F7E: 22        RET
+
+; ======== PREP_DJNZ_COUNTER @0F7F  (callers: 0582 05B6)
+0F7F: e6        MOV A,@R0
+0F80: 08        INC R0
+0F81: 60 01     JZ 0F84h
+0F83: 06        INC @R0
+L_0F84:  ; from 0F81
+0F84: d5 30 f8  DJNZ 30h,PREP_DJNZ_COUNTER
+0F87: b6 00 01  CJNE @R0,#00h,0F8Bh
+0F8A: 06        INC @R0
+L_0F8B:  ; from 0F87
+0F8B: 22        RET
+
+; ======== GA_WRITE_CTRL_reg09_from_22h @0F8C  (callers: 002C 00AC 01B3 01BE 01D0 0228 02FE 0307 0310 0319 0E84 0EBD 0F41)
+0F8C: c2 a8     CLR EX0
+0F8E: e5 22     MOV A,22h
+0F90: 75 80 e9  MOV P0,#E9h
+0F93: 12 0c 3c  LCALL GA_WRITE_BYTE_strobe
+0F96: 75 80 fa  MOV P0,#FAh
+0F99: c2 a3     CLR P2.3
+0F9B: d2 a3     SETB P2.3
+0F9D: 22        RET
+
+; ======== SELFTEST_UART_ECHO @0F9E  (callers: 05BB)
+0F9E: c2 d5     CLR F0
+0FA0: 75 80 ff  MOV P0,#FFh
+0FA3: 12 0c 59  LCALL RX_WORD_first_byte_wait
+0FA6: 85 99 f0  MOV B,SBUF
+0FA9: 12 0c 62  LCALL GA_READ_BYTE
+0FAC: e5 99     MOV A,SBUF
+0FAE: c2 a8     CLR EX0
+0FB0: 75 80 e7  MOV P0,#E7h
+0FB3: 12 0c 4e  LCALL GA_SHIFT_BYTE_wait_ready
+0FB6: 60 1e     JZ 0FD6h
+L_0FB8:  ; from 0FD8
+0FB8: e5 f0     MOV A,B
+0FBA: 12 0c 3c  LCALL GA_WRITE_BYTE_strobe
+0FBD: d2 a8     SETB EX0
+0FBF: b4 ff dc  CJNE A,#FFh,SELFTEST_UART_ECHO
+0FC2: 30 d5 d9  JNB F0,SELFTEST_UART_ECHO
+0FC5: c2 a8     CLR EX0
+0FC7: 74 aa     MOV A,#AAh
+0FC9: 75 80 e8  MOV P0,#E8h
+0FCC: 12 0c 39  LCALL TX_CMD_wait_ready
+0FCF: 74 55     MOV A,#55h
+0FD1: 91 39     ACALL TX_CMD_wait_ready
+0FD3: d2 a8     SETB EX0
+0FD5: 22        RET
+L_0FD6:  ; from 0FB6
+0FD6: d2 d5     SETB F0
+0FD8: 80 de     SJMP 0FB8h
+
+; ======== ROM_CHECKSUM @0FDA  (callers: 05BE)
+0FDA: 7a 0f     MOV R2,#0Fh
+0FDC: 7b fc     MOV R3,#FCh
+0FDE: 0a        INC R2
+0FDF: 75 f0 00  MOV B,#00h
+0FE2: 90 00 00  MOV DPTR,#0000h
+L_0FE5:  ; from 0FEC 0FEE
+0FE5: e4        CLR A
+0FE6: 93        MOVC A,@A+DPTR
+0FE7: 25 f0     ADD A,B
+0FE9: f5 f0     MOV B,A
+0FEB: a3        INC DPTR
+0FEC: db f7     DJNZ R3,0FE5h
+0FEE: da f5     DJNZ R2,0FE5h
+0FF0: 75 f0 00  MOV B,#00h
+0FF3: b4 ff 01  CJNE A,#FFh,0FF7h
+0FF6: 22        RET
+L_0FF7:  ; from 0FF3
+0FF7: 75 f0 01  MOV B,#01h
+0FFA: 22        RET
+0FFB: DB 75 ff ff ff ff
