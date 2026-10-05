@@ -2,7 +2,7 @@
 // HP3458A_InguardRamPtrProtos handles). Most helpers pass everything through RAM globals, SFRs and bits, so they get
 // void f(void); this also removes Ghidra's wrong guesses (e.g. "undefined1 ISR(undefined1 param_1)") and the
 // "Unknown calling convention" warning. Register-passing helpers get explicit storage:
-//   A in: TX_CMD_wait_ready, GA_WRITE_BYTE_strobe, GA_SHIFT_BYTE_wait_ready
+//   A in: GA_WRITE_wait_ready, GA_WRITE_BYTE_strobe, GA_SHIFT_BYTE_wait_ready
 //   R4/R5/R6 in: SUBSAMPLE_DELAY_ADD_STEP_10ns     B out: CALC_ROM_CHECKSUM
 // RX_BYTE_bit0_to_C returns its result in the carry flag, which the 8051 language only models as PSW bit 7,
 // so it stays void with a comment. Functions whose signature you set yourself are skipped. Safe to run more than once.
@@ -111,7 +111,7 @@ public class HP3458A_InguardProtos extends GhidraScript {
         {"0BA1", "SR1_update_if_47_changed", "void", "", "", ""},
         {"0BB0", "CMD1C_OCOMP_ZERO_PAIR_body", "void", "", "", ""},
         {"0BF6", "CMD1B_ACCAL_PAIR_BURST_body", "void", "", "", ""},
-        {"0C39", "TX_CMD_wait_ready", "void", "", "msg:byte:ACC", "Wait for BFSTAT (P0.6), then write A to the gate-array register selected in P0 (TX command message when P0 = 0xE8)."},
+        {"0C39", "GA_WRITE_wait_ready", "void", "", "msg:byte:ACC", "Wait for BFSTAT (P0.6), then write A to the gate-array register selected in P0 (0xE8 = TX command message, 0xE7 = TX data word)."},
         {"0C3C", "GA_WRITE_BYTE_strobe", "void", "", "value:byte:ACC", "Shift A out to the gate array and strobe IGSTB (P2.3); interrupts off during the transfer."},
         {"0C4E", "GA_SHIFT_BYTE_wait_ready", "void", "", "value:byte:ACC", "Wait for BFSTAT, then shift A out without a strobe (first byte of a 16-bit TX data word)."},
         {"0C59", "RX_WORD_first_byte_wait", "void", "", "", ""},

@@ -56,7 +56,7 @@ MAIN_init:  ; from 0000
 002C: 12 0f 8c  LCALL GA_WRITE_CTRL_reg09_from_22h
 002F: 74 01     MOV A,#01h
 0031: 75 80 e8  MOV P0,#E8h
-0034: 12 0c 39  LCALL TX_CMD_wait_ready
+0034: 12 0c 39  LCALL GA_WRITE_wait_ready
 0037: 75 a8 8f  MOV IE,#8Fh
 L_003A:  ; from 003A
 003A: 80 fe     SJMP 003Ah
@@ -135,7 +135,7 @@ L_00BF:  ; from 00BA
 L_00CF:  ; from 00D9
 00CF: 74 0a     MOV A,#0Ah
 00D1: 75 80 e8  MOV P0,#E8h
-00D4: 12 0c 39  LCALL TX_CMD_wait_ready
+00D4: 12 0c 39  LCALL GA_WRITE_wait_ready
 00D7: c1 67     AJMP CMD_EXIT_popPSW_ACC_ret
 L_00D9:  ; from 00CC
 00D9: 50 f4     JNC 00CFh
@@ -201,7 +201,7 @@ L_0179:  ; from 0175
 0184: 12 0c 5c  LCALL GA_STROBE_then_read
 0187: e5 99     MOV A,SBUF
 0189: 75 80 e7  MOV P0,#E7h
-018C: 12 0c 39  LCALL TX_CMD_wait_ready
+018C: 12 0c 39  LCALL GA_WRITE_wait_ready
 018F: c1 67     AJMP CMD_EXIT_popPSW_ACC_ret
 
 ; ======== CMD05 @0191  (callers: -)
@@ -283,7 +283,7 @@ L_0215:  ; from 0215
 L_021E:  ; from 0207 0231
 021E: e5 f0     MOV A,B
 0220: 75 80 e7  MOV P0,#E7h
-0223: 12 0c 39  LCALL TX_CMD_wait_ready
+0223: 12 0c 39  LCALL GA_WRITE_wait_ready
 0226: d2 17     SETB 22h.7
 0228: 12 0f 8c  LCALL GA_WRITE_CTRL_reg09_from_22h
 022B: d2 a8     SETB EX0
@@ -322,7 +322,7 @@ L_022F:  ; from 01F1 0201 0204 020D 0218 021B
 0252: a2 2c     MOV C,25h.4
 0254: 92 e0     MOV ACC.0,C
 0256: 75 80 e7  MOV P0,#E7h
-0259: 12 0c 39  LCALL TX_CMD_wait_ready
+0259: 12 0c 39  LCALL GA_WRITE_wait_ready
 025C: c2 2c     CLR 25h.4
 025E: 12 0f 3c  LCALL set_ctl_bit5
 0261: d2 a8     SETB EX0
@@ -365,7 +365,7 @@ L_022F:  ; from 01F1 0201 0204 020D 0218 021B
 02AD: 12 0e 47  LCALL START_COUNTERS
 02B0: 74 02     MOV A,#02h
 02B2: 75 80 e8  MOV P0,#E8h
-02B5: 12 0c 39  LCALL TX_CMD_wait_ready
+02B5: 12 0c 39  LCALL GA_WRITE_wait_ready
 
 ; ======== CMD13 @02B8  (callers: -)
 ; ---- outguard command 0x13: idle (leave ISR)
@@ -624,7 +624,7 @@ L_03B6:  ; from 03B2
 L_0491:  ; from 046C
 0491: 74 05     MOV A,#05h
 0493: 75 80 e8  MOV P0,#E8h
-0496: 12 0c 39  LCALL TX_CMD_wait_ready
+0496: 12 0c 39  LCALL GA_WRITE_wait_ready
 L_0499:  ; from 048F
 0499: 53 45 fe  ANL 45h,#FEh
 049C: 53 4d 7f  ANL 4Dh,#7Fh
@@ -689,7 +689,7 @@ L_0500:  ; from 050E 051B
 0503: 12 0c 62  LCALL GA_READ_BYTE
 0506: e5 99     MOV A,SBUF
 0508: 75 80 e7  MOV P0,#E7h
-050B: 12 0c 39  LCALL TX_CMD_wait_ready
+050B: 12 0c 39  LCALL GA_WRITE_wait_ready
 050E: da f0     DJNZ R2,0500h
 0510: d0 02     POP 02h
 0512: c1 67     AJMP CMD_EXIT_popPSW_ACC_ret
@@ -811,7 +811,7 @@ L_05DD:  ; from 05D9
 05DD: 11 3c     ACALL HW_INIT
 05DF: e5 f0     MOV A,B
 05E1: 75 80 e7  MOV P0,#E7h
-05E4: 12 0c 39  LCALL TX_CMD_wait_ready
+05E4: 12 0c 39  LCALL GA_WRITE_wait_ready
 05E7: 41 b8     AJMP CMD13
 
 ; ======== CMD33 @05E9  (callers: -)
@@ -852,7 +852,7 @@ L_05DD:  ; from 05D9
 061B: a2 90     MOV C,P1.0
 061D: 92 e0     MOV ACC.0,C
 061F: 75 80 e7  MOV P0,#E7h
-0622: 12 0c 39  LCALL TX_CMD_wait_ready
+0622: 12 0c 39  LCALL GA_WRITE_wait_ready
 0625: c1 67     AJMP CMD_EXIT_popPSW_ACC_ret
 
 ; ======== CMD38 @0627  (callers: -)
@@ -869,7 +869,7 @@ L_05DD:  ; from 05D9
 ; ---- outguard command 0x39: REV? -> 02
 063B: 74 02     MOV A,#02h
 063D: 75 80 e7  MOV P0,#E7h
-0640: 12 0c 39  LCALL TX_CMD_wait_ready
+0640: 12 0c 39  LCALL GA_WRITE_wait_ready
 0643: c1 67     AJMP CMD_EXIT_popPSW_ACC_ret
 
 ; ======== CMD3A @0645  (callers: -)
@@ -906,7 +906,7 @@ ISR_exit_report_terminal:  ; from 00B8
 0673: 54 01     ANL A,#01h
 0675: 44 08     ORL A,#08h
 0677: 75 80 e8  MOV P0,#E8h
-067A: 12 0c 39  LCALL TX_CMD_wait_ready
+067A: 12 0c 39  LCALL GA_WRITE_wait_ready
 067D: d0 e0     POP ACC
 067F: 22        RET
 
@@ -1007,7 +1007,7 @@ ISR_INT1_OVERLOAD_PROTECT:  ; from 0013
 073C: d0 a8     POP IE
 073E: 74 05     MOV A,#05h
 0740: 75 80 e8  MOV P0,#E8h
-0743: 12 0c 39  LCALL TX_CMD_wait_ready
+0743: 12 0c 39  LCALL GA_WRITE_wait_ready
 0746: 75 33 1d  MOV 33h,#1Dh
 0749: 12 0c c6  LCALL DELAY_ms_33h
 074C: 53 45 bf  ANL 45h,#BFh
@@ -1287,7 +1287,7 @@ L_092C:  ; from 0926
 096D: 12 0c 5c  LCALL GA_STROBE_then_read
 0970: e5 99     MOV A,SBUF
 0972: 75 80 e7  MOV P0,#E7h
-0975: 12 0c 39  LCALL TX_CMD_wait_ready
+0975: 12 0c 39  LCALL GA_WRITE_wait_ready
 0978: e5 8d     MOV A,TH1
 097A: 75 80 e7  MOV P0,#E7h
 097D: 12 0c 4e  LCALL GA_SHIFT_BYTE_wait_ready
@@ -1666,8 +1666,8 @@ L_0C20:  ; from 0C20
 L_0C37:  ; from 0C37
 0C37: 80 fe     SJMP 0C37h
 
-; ======== TX_CMD_wait_ready @0C39  (callers: 0034 00D4 018C 0223 0259 02B5 0496 050B 05E4 0622 0640 067A 0743 0975 0EEA 0F0D 0FCC 0FD1)
-0C39: 30 86 fd  JNB P0.6,TX_CMD_wait_ready
+; ======== GA_WRITE_wait_ready @0C39  (callers: 0034 00D4 018C 0223 0259 02B5 0496 050B 05E4 0622 0640 067A 0743 0975 0EEA 0F0D 0FCC 0FD1)
+0C39: 30 86 fd  JNB P0.6,GA_WRITE_wait_ready
 
 ; ======== GA_WRITE_BYTE_strobe @0C3C  (callers: 095A 0967 0982 099F 0F93 0FBA)
 0C3C: c0 a8     PUSH IE
@@ -2089,7 +2089,7 @@ L_0EE0:  ; from 0ED1 0ED9 0EDB
 0EE3: c2 a8     CLR EX0
 0EE5: 74 07     MOV A,#07h
 0EE7: 75 80 e8  MOV P0,#E8h
-0EEA: 12 0c 39  LCALL TX_CMD_wait_ready
+0EEA: 12 0c 39  LCALL GA_WRITE_wait_ready
 0EED: d2 a8     SETB EX0
 0EEF: c2 2b     CLR 25h.3
 0EF1: f1 5d     ACALL RELOAD_TRIG_COUNT
@@ -2107,7 +2107,7 @@ L_0EF3:  ; from 0EE0
 0F06: c2 a8     CLR EX0
 0F08: 74 04     MOV A,#04h
 0F0A: 75 80 e8  MOV P0,#E8h
-0F0D: 12 0c 39  LCALL TX_CMD_wait_ready
+0F0D: 12 0c 39  LCALL GA_WRITE_wait_ready
 0F10: d2 a8     SETB EX0
 0F12: d2 38     SETB 27h.0
 L_0F14:  ; from 0F00 0F03
@@ -2219,9 +2219,9 @@ L_0FB8:  ; from 0FD8
 0FC5: c2 a8     CLR EX0
 0FC7: 74 aa     MOV A,#AAh
 0FC9: 75 80 e8  MOV P0,#E8h
-0FCC: 12 0c 39  LCALL TX_CMD_wait_ready
+0FCC: 12 0c 39  LCALL GA_WRITE_wait_ready
 0FCF: 74 55     MOV A,#55h
-0FD1: 91 39     ACALL TX_CMD_wait_ready
+0FD1: 91 39     ACALL GA_WRITE_wait_ready
 0FD3: d2 a8     SETB EX0
 0FD5: 22        RET
 L_0FD6:  ; from 0FB6

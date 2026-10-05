@@ -103,7 +103,7 @@ public class HP3458A_InguardNames extends GhidraScript {
         {"0BA1", "SR1_update_if_47_changed", ""},
         {"0BB0", "CMD1C_OCOMP_ZERO_PAIR_body", ""},
         {"0BF6", "CMD1B_ACCAL_PAIR_BURST_body", ""},
-        {"0C39", "TX_CMD_wait_ready", ""},
+        {"0C39", "GA_WRITE_wait_ready", ""},
         {"0C3C", "GA_WRITE_BYTE_strobe", ""},
         {"0C4E", "GA_SHIFT_BYTE_wait_ready", ""},
         {"0C59", "RX_WORD_first_byte_wait", ""},
