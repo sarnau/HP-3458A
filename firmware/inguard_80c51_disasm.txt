@@ -9,7 +9,8 @@
 ;   Read F (P0=FF) = UART RX word, write 7 = UART TX data word, write 8 = UART TX command (interrupt) msg,
 ;   write 9 = control reg (shadow 22h), read A = status reg (-> 21h), read C/D = readback, read 8/9 = counters,
 ;   E0..E6 = latch shift register n, F0..F6 = "direct mode" (UART word -> shift reg n + CPU copy)
-;   Timer0/Timer1 = 16-bit EXTERNAL EVENT COUNTERS (TMOD=55h) on C0MIN/C1MIN, T0 extended with 31h
+;   Timer0/Timer1 = 16-bit EXTERNAL EVENT COUNTERS (TMOD=55h). T0 <- C0MIN = GA 12-bit 10 MHz timebase carry
+;   (one tick per 409.6 us, DELAY/TIMER, extended with 31h); T1 <- C1MIN = GA 8-bit reading-counter carry (NRDGS/256)
 ;   Input amp JFETs on A1 (via P2 connector, LM339 U11): P2.0 = PC precharge (Q10), P2.1 = HZ zero connect (Q11),
 ;   P2.2 = XHC HI connect, active low (Q12). P2.4 XEXOR=EXT OUT, P2.5 SEND, P2.6 HOLD, P2.7 XETRG,
 ;   P1.0 LEVEL, P1.1 ADBSY, P1.2 INCMP, P1.3 UPTRG, P1.4 ENTRG, P1.5/6 XCOT0/1, P1.7 NRFT, INT1 = XD_OVLD_F
@@ -27,7 +28,7 @@
 000A: 22        RET
 
 ; ======== VEC_TIMER0 @000B  (callers: -)
-000B: 02 06 d9  LJMP ISR_TIMER0_delay_timer_expired
+000B: 02 06 d9  LJMP ISR_TIMER0_DELAY_TIMER_expired
 
 ; ======== CMD04 @000E  (callers: -)
 ; ---- outguard command 0x04: TARM SGL software arm (25h.5)
@@ -42,7 +43,7 @@
 0016: d2 a5     SETB P2.5
 0018: 02 06 67  LJMP CMD_EXIT_popPSW_ACC_ret
 
-; ======== VEC_TIMER1_pulse_P1_6 @001B  (callers: -)
+; ======== VEC_TIMER1_NRDGS_done_pulse_XCOT1 @001B  (callers: -)
 001B: c2 96     CLR P1.6
 001D: d2 96     SETB P1.6
 001F: 32        RETI
@@ -158,7 +159,7 @@ L_00D9:  ; from 00CC
 015C: 02 09 a6  LJMP CMD18_SYNC_SUBSAMPLE_burst
 
 ; ======== CMD19 @015F  (callers: -)
-; ---- outguard command 0x19: line-frequency / sync period measure (DETECT_LFREQ)
+; ---- outguard command 0x19: line-frequency measure: send GA reg9, T0, GA reg8, T1
 015F: 02 08 da  LJMP CMD19_LFREQ_measure
 
 ; ======== CMD1A @0162  (callers: -)
@@ -493,7 +494,7 @@ L_02BB:  ; from 02BB
 037C: c1 67     AJMP CMD_EXIT_popPSW_ACC_ret
 
 ; ======== CMD23 @037E  (callers: -)
-; ---- outguard command 0x23: load SR3 + TIMER count
+; ---- outguard command 0x23: TIMER: SR3 first period + -ticks(409.6us) -> 73-75
 037E: 12 0d 39  LCALL GA_RESET_regC_pulse_WR
 0381: c2 8c     CLR TR0
 0383: 75 80 f3  MOV P0,#F3h
@@ -522,7 +523,7 @@ L_03B6:  ; from 03B2
 03BC: c1 67     AJMP CMD_EXIT_popPSW_ACC_ret
 
 ; ======== CMD24 @03BE  (callers: -)
-; ---- outguard command 0x24: load SR2 + DELAY count
+; ---- outguard command 0x24: DELAY: SR2 first period + -ticks(409.6us) -> 78-7A
 03BE: 12 0d 39  LCALL GA_RESET_regC_pulse_WR
 03C1: c2 8c     CLR TR0
 03C3: 75 80 f2  MOV P0,#F2h
@@ -549,7 +550,7 @@ L_03B6:  ; from 03B2
 03F7: 22        RET
 
 ; ======== CMD25 @03F8  (callers: -)
-; ---- outguard command 0x25: load SR4 + T1 count
+; ---- outguard command 0x25: NRDGS: SR4 (GA 8-bit rdg counter) + T1 = -(N>>8)
 03F8: d2 96     SETB P1.6
 03FA: c2 8c     CLR TR0
 03FC: 75 80 e4  MOV P0,#E4h
@@ -952,7 +953,7 @@ L_06D2:  ; from 06CD
 06D4: d2 26     SETB 24h.6
 06D6: c2 8d     CLR TF0
 06D8: 22        RET
-ISR_TIMER0_delay_timer_expired:  ; from 000B
+ISR_TIMER0_DELAY_TIMER_expired:  ; from 000B
 06D9: c0 e0     PUSH ACC
 06DB: 20 3b 0b  JB 27h.3,06E9h
 06DE: e5 31     MOV A,31h

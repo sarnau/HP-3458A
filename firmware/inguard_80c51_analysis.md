@@ -35,7 +35,7 @@ The 80C51 has no external bus (EA tied high, ALE/PSEN not connected). Everything
 | INT0 P3.2 | `XINTR` ← U210 | gate-array interrupt |
 | INT1 P3.3 | `XD_OVLD_F` ← A1 overload detector (U10A via P3(6)/P2(6)) | **input overload** interrupt (high priority, `IP=04`) |
 | RESET | `UPRST` ← U210 | the gate array resets the CPU |
-| T0 P3.4 / T1 P3.5 | `C0MIN` / `C1MIN` ← U210 | `TMOD=55h`: **external event counters**. T0 is extended to 24+8 bits with RAM 31h. |
+| T0 P3.4 / T1 P3.5 | `C0MIN` / `C1MIN` ← U210 | `TMOD=55h`: **external event counters** of two gate-array carries (see §2a). T0 counts **409.6 µs timebase ticks**, T1 counts **readings / 256**. |
 | P1.0 | `LEVEL` ← AC board (P1(12)) | AC level-trigger comparator, returned by cmd 0x37 |
 | P1.1 | `ADBSY` ← U210 (TP220) | **A/D busy** (`JB P1.1,$` waits) |
 | P1.2 | `INCMP`/`XCINCMP` ↔ U210 via R223 1 kΩ | ADC handshake: pulsed low as a strobe, read as the integrator-compare/done input |
@@ -54,6 +54,30 @@ The 80C51 has no external bus (EA tied high, ALE/PSEN not connected). Everything
 
 On A1 ("SENTRY INPUT SIGNAL CONDITIONING", sheet 4 of 5) U11 is an LM339 used as a level shifter (inputs vs +2 V, open-collector
 outputs to the −21 V JFET gate drive). Power-up state (`HW_INIT`: P2=0xBE) is PC off, HZ on, HC off, so the input amp sits on zero.
+
+### 2a. What T0 and T1 count
+
+`C0MIN`/`C1MIN` are internal gate-array signals, so the schematic only shows the pins. The meaning comes from how the 68000 builds the
+values it loads (opcodes 0x23/0x24/0x25) and how it converts them back (`CMD_TIMER?` @0x2059A, `CMD_DELAY?` @0x20734,
+`DETECT_LFREQ` @0x2F10E).
+
+**T0 ← `C0MIN` = carry of a 12-bit timebase in the gate array, clocked by `CK10` (10 MHz). One pulse every 4096 × 100 ns = 409.6 µs.**
+* A time value `t` (in 10 ns units) is split as `t = count × 40960 + d`. The partial period `d` goes into SR2 (DELAY) or SR3 (TIMER)
+  as `(~(d/10) << 4) | (d % 10)`: a 12-bit inverted 100 ns preload plus a 10 ns digit for the time interpolator.
+  `−count` goes into 78–7A (DELAY) or 73–75 (TIMER), and the 80C51 loads it into TL0/TH0 + RAM 31h (24 bits).
+* `CMD_TIMER?` reverses this: `(count × 40960 + d) × 1e-8 s`. The power-on default `count=2441, d=16630` → 100,000,000 × 10 ns =
+  **1.000 s**, which is the documented TIMER default.
+* Use in the firmware: a trigger (`NRDGOUT`/P0.5 in the INT0 ISR) loads the DELAY count. When it expires, the Timer0 ISR pulses `UPTRG` and
+  reloads the TIMER count for the following readings. 25h.1/25h.0 flag DELAY/TIMER = 0 (counter not used).
+
+**T1 ← `C1MIN` = carry of an 8-bit reading counter in the gate array. One pulse every 256 readings.**
+* `0x29048(N, …)` (called from `CMD_NRDGS`) puts `~N & 0xFF` into SR4 (the gate-array counter) and `−(N >> 8)` into T1 (6B/6C).
+  Together that is a 24-bit reading count, which matches the 3458A NRDGS limit of 16,777,215 = 2²⁴−1.
+* When T1 overflows, the Timer1 ISR pulses `XCOT1` (P1.6) to tell the gate array the burst is complete. With `N >> 8 == 0`
+  (25h.2), T1 is not started and XCOT1 is held low, so presumably the gate array's own 8-bit counter ends the burst (inferred).
+
+**Opcode 0x19 (line frequency)** uses the same two carries. The 8-bit counter counts line-sync cycles, and the 68000 computes
+`period = (T0 × 4096 + GA reg 9) × 100 ns / (T1 × 256 + GA reg 8)`, falling back to 60 Hz if the reply is FFFF.
 
 ### Input-amp switching (autozero / precharge)
 
@@ -101,9 +125,9 @@ straight into the shift registers while the processor keeps a copy.
 |---|---|---|---|---|
 | SR0 | 4F–58 | 80 | cmd 0x20 | `SET_ACBD_*` – **AC converter board (A2)** |
 | SR1 | 45–4E | 80 | cmd 0x1F | `SET_DCBD_*` – **DC/ohms front end (A1)**, relays. Modified locally by 0x27/0x28/0x38/0x3A and by the INT1 overload ISR. |
-| SR2 | 7B–7C | 16 | cmd 0x24 / 0x0F | trigger delay / timebase (the SYNC-subsample loop adjusts it in BCD) |
-| SR3 | 76–77 | 16 | cmd 0x23 | timer timebase |
-| SR4 | 6D–72 | 48 | cmd 0x25 | trigger/sample-count config (6Eh.1 → flag 28h.0) |
+| SR2 | 7B–7C | 16 | cmd 0x24 / 0x0F | DELAY first-period prescaler: `(~(d/10)) << 4 \| d%10` (100 ns clocks + 10 ns digit). The SYNC-subsample loop steps it in BCD. |
+| SR3 | 76–77 | 16 | cmd 0x23 | TIMER first-period prescaler, same format |
+| SR4 | 6D–72 | 48 | cmd 0x25 | GA 8-bit reading counter (low byte of NRDGS) + trigger/count mode bits (6Eh.1 → flag 28h.0) |
 | SR5 | 59–64 | 96 | cmd 0x21 | `ADMEM_SEND_*` – ADC slope/sequence memory |
 | SR6 | 65–6A | 48 | cmd 0x22 | `ADCAL_SEND_*` – ADC calibration |
 
@@ -128,9 +152,8 @@ That totals 384 bits. The journal says "five shift registers containing 460 bits
   and wait for the next command.
 * **Cycle-exact padding**: `MUL AB` / `DIV AB` / `MOVC` act as 4- and 2-cycle NOPs in the shift loops and
   switch sequences (e.g. 0C88, 02CB, 0E9F).
-* `ISR_TIMER0` @06D9: when the 24-bit event count runs out it fires the trigger pulse P1.3 (if one was deferred) and
-  reloads the **interval** count (73–75). The **first** count comes from 78–7A. In 3458A terms this looks like
-  **DELAY → first reading, then TIMER interval**, both counted in gate-array timebase ticks (inferred).
+* `ISR_TIMER0` @06D9: when the 409.6 µs tick count runs out it fires the trigger pulse P1.3 (if one was deferred) and
+  reloads the **TIMER** count (73–75). The first count after a trigger is the **DELAY** (78–7A). See §2a.
 * `ISR_INT1_OVERLOAD_PROTECT` @0710: forces bits in the SR1 (DC board) shadow, re-shifts SR0/SR1 with relay
   settle delays, and sends command message **0x05** (outguard: `CALRAM_INCREMENT_DESTRUCTIVE_EVENTS`, the
   input-protection relay sequence described in the journal).
@@ -181,7 +204,7 @@ Semantics marked † are inferred from code behaviour and/or the name of the 680
 | 0A/0B/0C/29/36 | | input-amp switch states: 0A = HI, 0B = zero, 0C = precharge, 29 = all open, 36 = HI+zero (see §2) |
 | 0D | 0016 | SETB P2.5 |
 | 0E | 0251 | reply flag 25h.4 as data (`CMD_MSIZE?`) |
-| 0F | 0265 | load SR2 + delay count without restarting |
+| 0F | 0265 | DELAY reload without restarting the counters (`0x29232`, used while a sequence runs) |
 | 10 | 0276 | **measurement init/abort**: reset GA, reload counters, reply `02` (`ISOLATOR_CHECK`) |
 | 11 / 12 | 02BD/02D6 | cycle-timed HI/precharge sequences, then `XETRG` (see §2) |
 | 13 | 02B8 | leave ISR / idle |
@@ -190,7 +213,7 @@ Semantics marked † are inferred from code behaviour and/or the name of the 680
 | 16 | 0AFE | **OCOMP ohms sequence** (OHM/OHMF with OCOMP ON): when 24h.5 is set, each result is a reading pair. It clears the current-source bits in SR1 byte 47h (`ANL 47h,#C0`), re-latches, waits the settle time 41/42 (cmd 0x2A), takes the second reading, then restores 47h. |
 | 17 | 02F1 | strobe GA reg 0D, clear busy flag |
 | 18 | 09A6 | **SYNC subsampling burst**: two nested sample loops. Each sample advances the SR2 delay by a BCD/binary increment (`SUBSAMPLE_advance_delay_BCD` @0A96), matching the journal's AC digital subsampling. |
-| 19 | 08DA | **line-frequency / sync-period measurement**: sent by `DETECT_LFREQ` and `CMD_SYNCPARM` (not by FREQ/PER). Checks that the T0 input toggles, counts input cycles (T0) against a reference (T1) plus GA counters 8/9, sends 4 data words (FFFF = no signal). |
+| 19 | 08DA | **line-frequency / sync-period measurement**: sent by `DETECT_LFREQ` (`0x0119`) and `CMD_SYNCPARM`, not by FREQ/PER. Runs both counters for a ~1 s window (until TH0 = 0x0A, i.e. 2560 × 409.6 µs) and sends 4 words: GA reg 9 (12-bit prescaler), T0, GA reg 8 (8-bit cycle counter), T1. FFFF = no signal; the 68000 then assumes 60 Hz. |
 | 1B | 0BF6 | **AC-cal paired-reading burst**: repeats {arm, wait trigger, latch SR1, trigger, wait reading, latch SR1, delay(param)} until the count is done. Sent only by AC autocal/test (`ACAL_ACV_RATIO_1`, `TEST_ACV_etc` via 0x3B1C2) as `0x1B, time/500`, bracketed by 0x1E/0x1D. `ISOLATOR_0002ba6c` reads N pairs and accumulates Σ(A−B). |
 | 1C | 0BB0 | **one-shot OCOMP zero pair** (slot `$1214BE` for OHM/OHMF with OCOMP ON and AZERO not ON): reading with the source on, then source off (47h&C0), settle, second reading. For OHMF the result is kept in `$14E8`, otherwise it goes to `ADCAL_SEND`. |
 | 1D/1E, 3B/3C | | control reg bit 2 / bit 1 on/off |
@@ -198,9 +221,9 @@ Semantics marked † are inferred from code behaviour and/or the name of the 680
 | **20** | 033B | **load SR0 (AC board)**, 5 words |
 | **21** | 0367 | **load SR5 (ADMEM)**, 6 words |
 | **22** | 0353 | **load SR6 (ADCAL)**, 3 words |
-| 23 | 037E | load SR3 + 24-bit **interval** count (73–75) |
-| 24 | 03BE | load SR2 + 24-bit **first/delay** count (78–7A) |
-| 25 | 03F8 | load SR4 + 16-bit T1 count (6B/6C) |
+| 23 | 037E | **TIMER**: SR3 = first partial period, 73–75 = −(number of 409.6 µs ticks) (`0x292D0`, from `CMD_TIMER`/`CMD_DELAY`) |
+| 24 | 03BE | **DELAY**: SR2 = first partial period, 78–7A = −ticks (`0x291B0`, from `CMD_DELAY`, `CMD_APER`, `CMD_NPLC`, `CMD_RES`). Also `CMD_SWEEP` via `0x2935E`/`0x293BE`. |
+| 25 | 03F8 | **NRDGS**: SR4 (incl. GA 8-bit reading counter = ~N low byte, and trigger-mode bits) + T1 = −(N>>8) (`0x29048` from `CMD_NRDGS`, then `0x2943E`) |
 | 26 | 0440 | EXTOUT pulse(s) per 24h config |
 | 27 / 28 | 0445/0458 | DC relay drive release / protected relay sequence (checks INT1 and reports 05 on overload) |
 | 2A | 04BA | settle flag + settle time 41/42 |
@@ -266,12 +289,11 @@ For codes >5 the zero slot is always set to 0x14, but it is only sent when `$147
 | 3A–3D | 32-bit trigger delay |
 | 45–58 | SR1/SR0 shadows (DC / AC boards) |
 | 59–6A | SR5/SR6 shadows (ADMEM / ADCAL) |
-| 6B/6C | Timer1 count |
+| 6B/6C | Timer1 preload = −(NRDGS >> 8) |
 | 6D–72 | SR4 shadow |
-| 73–75 / 76–77 | interval count / SR3 |
-| 78–7A / 7B–7C | first/delay count / SR2 |
+| 73–75 / 76–77 | TIMER tick count / SR3 (TIMER first period) |
+| 78–7A / 7B–7C | DELAY tick count / SR2 (DELAY first period) |
 
 ## 8. Open points
 
-* T0/T1 count sources (which gate-array clocks or events drive pins T0/T1) are inferred from usage only.
 * 0x18 is confirmed as part of the sampling read paths (`MEAS_read_scale_float`, `READING_FAST_INT_PATH`), but the exact subsample timing units are still open.
